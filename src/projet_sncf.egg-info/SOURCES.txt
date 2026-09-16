@@ -1,0 +1,6 @@
+pyproject.toml
+src/projet_sncf.egg-info/PKG-INFO
+src/projet_sncf.egg-info/SOURCES.txt
+src/projet_sncf.egg-info/dependency_links.txt
+src/projet_sncf.egg-info/requires.txt
+src/projet_sncf.egg-info/top_level.txt

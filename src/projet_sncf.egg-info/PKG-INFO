@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: projet_sncf
+Version: 0.1.0
+Summary: Projet commun sncf
+Requires-Python: >=3.11
+Requires-Dist: numpy>=2.4.6
+Requires-Dist: pytest>=9.1.1
+Requires-Dist: streamlit>=1.63.0
