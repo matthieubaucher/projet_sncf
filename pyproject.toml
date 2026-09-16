@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "projet_sncf"
+version = "0.1.0"
+description = "Projet commun sncf"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.4.6",
+    "pytest>=9.1.1",
+    "streamlit>=1.63.0",
+]
+
+[tool.setuptools.packages]
+find = { where = ["src"] }
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
