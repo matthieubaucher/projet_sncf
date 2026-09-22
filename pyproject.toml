@@ -18,3 +18,8 @@ find = { where = ["src"] }
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.uv.workspace]
+members = [
+    "poc/analyse_matthieu",
+]
