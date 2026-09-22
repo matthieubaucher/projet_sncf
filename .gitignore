@@ -1,3 +1,4 @@
 .env
 __pycache__
 tests/__pycache__
+data/regularite-mensuelle-tgv-aqst.csv
