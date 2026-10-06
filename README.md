@@ -9,7 +9,7 @@ https://share.streamlit.io/matthieubaucher/projet_sncf/develop/src/projet_sncf/s
 Pour déployer c'est ici : 
 
 [![Deploy to Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](
-https://github.com/matthieubaucher/projet_sncf/blob/develop/src/projet_sncf/streamlit_app.py
+https://share.streamlit.io/deploy?repository=https://github.com/matthieubaucher/projet_sncf&branch=develop&mainFile=src/projet_sncf/streamlit_app.py
 )
 
 
