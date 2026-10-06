@@ -1,4 +1,4 @@
-from projet_sncf.main import fibo
+from projet_sncf.streamlit_app import fibo
 
 def test_fibbo_base():
     assert fibo(1)==1, "erreur base on veut 1 pour 1"
