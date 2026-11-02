@@ -1,0 +1,17 @@
+1) Ceci pour résumer en moins se 10 lignes notre analyse actuelle pour chacun d'entre nous
+
+Analyse Matthieu : 
+- Il n'est pas possible de dégager une tendance temporelle ou saisonnière utile pour faire de la prévision du pourcentage de retard
+- Tendance avérée sur le long terme d'une augmentation du pourcentage de retards (p-value<0.05)
+- Pas de tendance pour l'annulation
+- Possibilité de combiner des colonnes dans une regression linéaire pour prédire les colonnes retards (en pourcent). utilisation des colonnes causes, temps, temperature
+- On améliore grandement la prévision avec un NLP a condition d'avoir un L2 correct 
+- L'ajout dune colonne trajet en one-hot améliore les performances du NLP sur les lignes peu fréquentées mais les dégrades sur les lignes fréquentées
+- la normalisation des entrées dégradre les performances du NLP sauf pour la prévision du retard moyen (reste à étudier pourquoi)
+
+2) Ici on met ce que l'on pense pouvoir faire pour la suite (boite à idée)
+
+Idées Matthieu : 
+- on doit pouvoir calculer une assurance voyageur pour chaque ligne
+- peut-on prévoir la tendance des colonnes ayant servit au NLP ? si oui on peut affiner notre calcul d'assurance et en prévoir une dans le future
+- on regroupe les lignes fontionnant pareil ?
