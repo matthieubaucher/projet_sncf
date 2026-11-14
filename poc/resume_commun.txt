@@ -1,0 +1,109 @@
+1) Ceci pour résumer en moins se 10 lignes notre analyse actuelle pour chacun d'entre nous
+
+Analyse Matthieu : 
+- Il n'est pas possible de dégager une tendance temporelle ou saisonnière utile pour faire de la prévision du pourcentage de retard
+- Tendance avérée sur le long terme d'une augmentation du pourcentage de retards (p-value<0.05)
+- Pas de tendance pour l'annulation
+- Possibilité de combiner des colonnes dans une regression linéaire pour prédire les colonnes retards (en pourcent). utilisation des colonnes causes, temps, temperature
+- On améliore grandement la prévision avec un NLP a condition d'avoir un L2 correct 
+- L'ajout dune colonne trajet en one-hot améliore les performances du NLP sur les lignes peu fréquentées mais les dégrades sur les lignes fréquentées
+- la normalisation des entrées dégradre les performances du NLP sauf pour la prévision du retard moyen (reste à étudier pourquoi)
+
+2) Ici on met ce que l'on pense pouvoir faire pour la suite (boite à idée)
+
+Idées Matthieu : 
+- on doit pouvoir calculer une assurance voyageur pour chaque ligne
+- peut-on prévoir la tendance des colonnes ayant servit au NLP ? si oui on peut affiner notre calcul d'assurance et en prévoir une dans le future
+- on regroupe les lignes fontionnant pareil ?
+
+3) Ici ce que l'on compte faire concretement 
+
+=> séparation du projet en n tiers :
+
+* streamlit
+
+ -> Page principale (donne aussi accès aux différents theme développé dans des pages secondaires)
+
+   - Main.py
+   - liaison à risques qui affiche la carte de france avec les lignes (Machoudi)
+   - lien theme prévision (Matthieu)
+   - lien theme cout par train (Machoudi)
+ 
+ -> Pages secondaires : chacun fait sa partie dans sa propre page en développant son thème
+
+   - theme Matthieu : prévision du retard > 30 mn et des annulations suivant les pourcentages de causes de retard
+    Prevision_retard.py
+    Partie 1 : 
+     L'utilisateur sélectionne une ligne dans une liste déroulante et appuie sur le bouton simulation ; apparait alors une interface permettant
+     de donner les ratios de cause, et la date, et un boxplot qui contient le résultat du calcul pour 1000 trajet fictifs sur cette lignes avec
+     des variations gaussiennes autour des valeurs de l'utilisateur : cela donne la sensibilité du model autour de son choix (montecarlo) 
+    Partie 2 :
+     L'utilisateur sélectionne une ensemble de lignes (ou toutes ?) et lance la création du graph t-sne. on lance derrière un scénario de 1000 
+     profils de trajets tirés au hasard (les ratios de cause et la date) (note : certains n'ont jamais été rencontrés sur certaines lignes ce 
+     qui est intéressant) : chaque modèle a alors son vecteur de 1000 qui le représente et le t-sne affiche un point coloré le représentant.
+     On s'attend a pouvoir visualiser la proximité des lignes sélectionnées et voir apparaitre des clusters.
+
+   - theme Machoudi : 
+        Prix : une hypothèse de coût par train annulé ou en retard permettrait de passer du score à un montant.
+        
+* API (accès publiques à nos fonctionnalités pour streamlit)
+  
+  -> Retard_prevision_API.py (Matthieu)
+    - retrain
+    - simulation_scenario_utilisateur
+    - clusterise 
+
+* Business (un répertoire avec toutes les Bu, les modèles de chaque page primaires/secondaires, ils définissent les points d'entrées)
+
+ -> Prevision_de_retard.py : les différentes actions utilisateur pour la page de prévision (Matthieu)  
+
+  - Dans le sous repertoire service
+  - Classe stateless donnant acces aux fonctionnalité pour le thème "prévision de retard"
+  - méthode simulation :
+    Fait 1000 modifications des entrées utilisateur pour avoir les 1000 vecteurs de paramètre
+    Va chercher le dataframe de Data  
+    Utilisation de Previsionneur.py (avec ces data, et les vecteurs de paramètre) : méthode get_inferance_retard
+    on renvoir un vecteur [1000] affichable dans une boxplot
+  - méthode clusterise :
+    Va chercher le dataframe de Data  
+    créer 1000 scénari possibles en base via shuffle
+    Utilisation de Previsionneur.py (avec ces data, et les vecteurs de parametre) : méthode get_inferance_retard
+    utiliser l'algo TSNE
+    on renvoie la matrice [1000, 2] affichable coté streamlit
+
+ -> Modele_prevision_retard_manager.py (Matthieu) 
+
+  - dans le sous repertoire modele
+  - Classe Stockant (pour tous les clients) les modèles déjà calculés dans une liste
+  - méthode get_modele_retard : mémofonction (sauf demande explicite de réentrainement)
+     Créé, si inexistant, un Modele_retard ; renvoie celui stocké sinon
+     renvoie le modèle (l'objet)
+  - méthode get_inferance_retard : prend une liste de scenario 
+     Appele get_modele_retard
+     Applique les scenarios en utilisant prédict sur le modèle
+     renvoi les résultats du modèle (y)
+
+ -> Modele_prevision_retard.py (Matthieu)
+
+  - dans le sous repertoire modele
+  - classe contenant le MLP
+  - méthode train
+  - méthode predict      
+
+* Utils (un répertoire commun d'algo)
+  
+  - à voir si on le met : pour le moment on laisse de coté
+
+
+* Database
+
+ -> récupération du dataframe nettoyé
+   - dataloader.py : donne la méthode pour récupérer le dataframe
+   - récupération du dataframe brut 
+   - clean des données (doublons de l'été 2025, valeurs négatives ...) (Amy)
+   - ajout de nouvelles colonnes : (prix par liaison, définition d'une liaison, saison, ...)  (Machoudi, Matthieu, ...)
+   - méthode pour renvoyer un dataframe propre et complet
+
+* data
+ 
+ -> contient un csv miniature pour effectuer quelques tests d'intégration
