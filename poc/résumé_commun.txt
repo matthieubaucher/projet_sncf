@@ -15,3 +15,32 @@ Idées Matthieu :
 - on doit pouvoir calculer une assurance voyageur pour chaque ligne
 - peut-on prévoir la tendance des colonnes ayant servit au NLP ? si oui on peut affiner notre calcul d'assurance et en prévoir une dans le future
 - on regroupe les lignes fontionnant pareil ?
+
+3) Ici ce que l'on compte faire concretement 
+
+=> séparation du projet en n tiers :
+
+* streamlit
+ -> page principale qui affiche la carte de france avec les lignes et qui donne accès aux différents theme développé dans des pages secondaires
+ -> pages secondaires : chacun fait sa partie dans sa propre page en développant son thème
+   - theme Matthieu : prévision du retard > 30 mn et des annulations suivant les pourcentages de causes de retard
+    Partie 1 : 
+     L'utilisateur sélectionne une ligne dans une liste déroulante et appuie sur le bouton simulation ; apparait alors une interface permettant
+     de donner les ratios de cause, et la date, et un boxplot qui contient le résultat du calcul pour 1000 trajet fictifs sur cette lignes avec
+     des variations gaussiennes autour des valeurs de l'utilisateur : cela donne la sensibilité du model autour de son choix (montecarlo) 
+    Partie 2 :
+     L'utilisateur sélec
+
+* Business
+ -> points d'entrées
+
+* Tech
+ -> algo / modèles
+
+* Data
+ -> récupération du dataframe nettoyé
+   - partie pour récupérer les donnees du csv
+   - clean des données 
+   
+    
+
