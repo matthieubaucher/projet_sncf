@@ -24,15 +24,15 @@ Idées Matthieu :
 
  -> Page principale (donne aussi accès aux différents theme développé dans des pages secondaires)
 
-   - Main.py
-   - liaison à risques qui affiche la carte de france avec les lignes (Machoudi)
-   - lien theme prévision (Matthieu)
-   - lien theme cout par train (Machoudi)
+   - main.py (directement sur le répertoire principal)
+   - Liaison à risques qui affiche la carte de france avec les lignes (Machoudi)
+   - Lien theme prévision (Matthieu)
+   - Lien theme cout par train (Machoudi)
  
- -> Pages secondaires : chacun fait sa partie dans sa propre page en développant son thème
+ -> Pages secondaires : chacun fait sa partie dans sa propre page en développant son thème ; sous répertoire "pages"
 
-   - theme Matthieu : prévision du retard > 30 mn et des annulations suivant les pourcentages de causes de retard
-    Prevision_retard.py
+   - Theme Matthieu : prévision du retard > 30 mn et des annulations suivant les pourcentages de causes de retard
+    prevision_retard.py
     Partie 1 : 
      L'utilisateur sélectionne une ligne dans une liste déroulante et appuie sur le bouton simulation ; apparait alors une interface permettant
      de donner les ratios de cause, et la date, et un boxplot qui contient le résultat du calcul pour 1000 trajet fictifs sur cette lignes avec
@@ -43,7 +43,7 @@ Idées Matthieu :
      qui est intéressant) : chaque modèle a alors son vecteur de 1000 qui le représente et le t-sne affiche un point coloré le représentant.
      On s'attend a pouvoir visualiser la proximité des lignes sélectionnées et voir apparaitre des clusters.
 
-   - theme Machoudi : 
+   - Theme Machoudi : 
         Prix : une hypothèse de coût par train annulé ou en retard permettrait de passer du score à un montant.
         
 * API (accès publiques à nos fonctionnalités pour streamlit)
@@ -63,7 +63,7 @@ Idées Matthieu :
     Fait 1000 modifications des entrées utilisateur pour avoir les 1000 vecteurs de paramètre
     Va chercher le dataframe de Data  
     Utilisation de Previsionneur.py (avec ces data, et les vecteurs de paramètre) : méthode get_inferance_retard
-    on renvoir un vecteur [1000] affichable dans une boxplot
+    on renvoie un vecteur [1000] affichable dans une boxplot
   - méthode clusterise :
     Va chercher le dataframe de Data  
     créer 1000 scénari possibles en base via shuffle
@@ -71,9 +71,9 @@ Idées Matthieu :
     utiliser l'algo TSNE
     on renvoie la matrice [1000, 2] affichable coté streamlit
 
- -> Modele_prevision_retard_manager.py (Matthieu) 
+ -> modele_prevision_retard_manager.py (Matthieu) 
 
-  - dans le sous repertoire modele
+  - Dans le sous repertoire modele
   - Classe Stockant (pour tous les clients) les modèles déjà calculés dans une liste
   - méthode get_modele_retard : mémofonction (sauf demande explicite de réentrainement)
      Créé, si inexistant, un Modele_retard ; renvoie celui stocké sinon
@@ -104,6 +104,8 @@ Idées Matthieu :
    - ajout de nouvelles colonnes : (prix par liaison, définition d'une liaison, saison, ...)  (Machoudi, Matthieu, ...)
    - méthode pour renvoyer un dataframe propre et complet
 
-* data
+* data (à coté de src)
  
- -> contient un csv miniature pour effectuer quelques tests d'intégration
+ -> contient le csv 
+  - il n'est pas si gros : je préfère ne pas le mettre dans le gitignore
+  - on peut effectuer quelques tests d'intégration grace a lui
