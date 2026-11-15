@@ -95,13 +95,12 @@ Dans un premier temps je pense que se serait bien de discuter de ce que nous vou
   - Classe stateless donnant acces aux fonctionnalité pour le thème "prévision de retard"
   - méthode simulation :
     Fait 1000 modifications des entrées utilisateur pour avoir les 1000 vecteurs de paramètre
-    Va chercher le dataframe de Data  
-    Utilisation de Previsionneur.py (avec ces data, et les vecteurs de paramètre) : méthode get_inferance_retard
+    Utilisation de modele_prevision_retard_manager.py (avec ces data, et les vecteurs de paramètre) : méthode get_inferance_retard
     on renvoie un vecteur [1000] affichable dans une boxplot
   - méthode clusterise :
     Va chercher le dataframe de Data  
     créer 1000 scénari possibles en base via shuffle
-    Utilisation de Previsionneur.py (avec ces data, et les vecteurs de parametre) : méthode get_inferance_retard
+    Utilisation de modele_prevision_retard_manager.py (avec ces data, et les vecteurs de parametre) : méthode get_inferance_retard
     utiliser l'algo TSNE
     on renvoie la matrice [1000, 2] affichable coté streamlit
 
