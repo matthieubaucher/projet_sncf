@@ -1,0 +1,9 @@
+2026-11-15 17:13:10 | INFO     | utils.nettoyage | Début du nettoyage : 12544 lignes, 26 colonnes
+2026-11-15 17:13:10 | INFO     | utils.nettoyage | Colonnes commentaires supprimées : 3
+2026-11-15 17:13:10 | INFO     | utils.nettoyage | Lignes sans circulation prévue supprimées : 73
+2026-11-15 17:13:10 | INFO     | utils.nettoyage | Cases « > 30 min » remplacées par NaN : 354
+2026-11-15 17:13:10 | INFO     | utils.nettoyage | Cases « Retard moyen des trains en retard à l'arrivée » remplacées par NaN : 2
+2026-11-15 17:13:10 | INFO     | utils.nettoyage | Cases « Retard moyen trains en retard > 15 (si liaison concurrencée par vol) » remplacées par NaN : 8
+2026-11-15 17:13:10 | INFO     | utils.nettoyage | Cases « Retard moyen de tous les trains au départ » remplacées par NaN : 170
+2026-11-15 17:13:10 | INFO     | utils.nettoyage | Cases « Retard moyen de tous les trains à l'arrivée » remplacées par NaN : 121
+2026-11-15 17:13:10 | INFO     | utils.nettoyage | Fin du nettoyage : 12471 lignes gardées, 655 cases mises à NaN
