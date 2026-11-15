@@ -9,12 +9,46 @@ Analyse Matthieu :
 - L'ajout dune colonne trajet en one-hot améliore les performances du NLP sur les lignes peu fréquentées mais les dégrades sur les lignes fréquentées
 - la normalisation des entrées dégradre les performances du NLP sauf pour la prévision du retard moyen (reste à étudier pourquoi)
 
+Analyse Aristide :
+- Les courbes d'annulation des trains que j'ai regardé semble présenter des paterns identiques (est ce une coincidence pour les lignes considéré ou y a t'il un patern mensuel?)
+- A part des pics d'annulation ou de retard sur certaines années qui semble commun à certain mois quelque soit les lignes, il n' y a de tendance linéaire clair de 2018 à 2025 (anulations et retards)
+- Plus le nombre de train prévu sur une ligne est elevé plus le nombre de train en retard sur cette ligne augmente
+- Cette precedente augmentation n'est pas homoscedastique, la variance augmente avec le nombre de train prévu
+
+
 2) Ici on met ce que l'on pense pouvoir faire pour la suite (boite à idée)
 
 Idées Matthieu : 
 - on doit pouvoir calculer une assurance voyageur pour chaque ligne
 - peut-on prévoir la tendance des colonnes ayant servit au NLP ? si oui on peut affiner notre calcul d'assurance et en prévoir une dans le future
 - on regroupe les lignes fontionnant pareil ?
+
+Idées Aristide :
+respectons les régles du clean code surtout celles que le prof à insister à nous voir mettre en place:
+- Il faut faire une architecture logicielle du produit claire (quelles sont les classes necessaires, comment on les ranges(arborescence))
+- chaque code .py doit avoir un fichier de test unitaire
+- la personne qui livre du code doit livrer les test qui vont avec (idem pour les modifications de fichier existant)
+- Si necessaires discuter de ce qui doit etre mis en place vu au chapitre 3 du cours (logging des evenements, documentation du code, test de coverage)
+- n'oublions pas que le projet devra a minima avoir ça:
+         - Code source Python bien structuré
+         - Documentation générée avec Sphinx
+         - Fichiers de logs
+         - Tests unitaires vérifiant le bon fonctionnement de l'application
+         - Le pipeline CI/CD
+         - Le lien vers votre webapp Streamlit déployée
+  et que nous serons évaluer sur:
+         - la qualité du code
+         - le respect des bonnes pratiques
+         - la couverture de tests
+         - la documentation
+         - la qualité visuelle de la webapp (graphiques, pertinence des insights, etc.)
+         - bon fonctionnement de l'application.
+Ce projet sert à evaluer notre maniere de structurer le projet et a montrer que nous avons compris et mis en pratiques
+les bonnes methodes de production logicielle
+
+Dans un premier temps je pense que se serait bien de discuter de ce que nous voulons montrer sur streamlit a partir de nos observations,
+
+
 
 3) Ici ce que l'on compte faire concretement 
 
