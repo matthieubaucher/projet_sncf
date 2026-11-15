@@ -24,3 +24,13 @@ pythonpath = ["src"]
 members = [
     "poc/analyse_matthieu",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.coverage.run]
+source = ["src"]  # uniquement ce répertoire est verifier en couverture
+branch = true

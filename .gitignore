@@ -1,4 +1,7 @@
 .env
 __pycache__
 tests/__pycache__
-
+.coverage
+htmlcov/
+coverage.xml
+*.egg-info/
