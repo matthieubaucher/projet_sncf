@@ -309,3 +309,6 @@ def nettoyer(data):
         rapport["cases_mises_a_nan"],
     )
     return df.reset_index(drop=True), rapport
+
+
+

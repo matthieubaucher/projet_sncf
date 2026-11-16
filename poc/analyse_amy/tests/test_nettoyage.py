@@ -196,3 +196,17 @@ def test_configurer_journal_n_ecrit_pas_en_double(tmp_path):
     chemin = configurer_journal(dossier=tmp_path)
     logging.getLogger("test").info("message unique")
     assert chemin.read_text(encoding="utf-8").count("message unique") == 1
+
+
+
+def test_configurer_journal_affiche_aussi_a_l_ecran(tmp_path, capsys):
+    chemin = configurer_journal(dossier=tmp_path, afficher=True)
+    logging.getLogger("test").info("message visible")
+    assert "message visible" in capsys.readouterr().err
+    assert "message visible" in chemin.read_text(encoding="utf-8")
+    # nettoyage : retirer les gestionnaires ajoutés, pour ne pas gêner les autres tests
+    racine = logging.getLogger()
+    for gestionnaire in list(racine.handlers):
+        if getattr(gestionnaire, "_journal_sncf", False):
+            racine.removeHandler(gestionnaire)
+            gestionnaire.close()
