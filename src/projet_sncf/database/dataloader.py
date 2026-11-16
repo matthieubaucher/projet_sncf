@@ -7,7 +7,7 @@ DATA_PATH = (
     / "regularite-mensuelle-tgv-aqst.csv"
 )
 
-
+ORIGINE_DU_TEMPS = pd.Timestamp("2018-01-01")
 
 def get_dataframe():
     df = get_initial_dataframe()
@@ -34,16 +34,16 @@ def clean(df):
 
     return df_clean
 
+
+def get_temps(annee, mois):
+    return (annee - ORIGINE_DU_TEMPS.year) * 12 + (mois - ORIGINE_DU_TEMPS.month)   
+
 # ajoute certaines nouvelles colonnes utiles pour nos analyses
 def add_usefull_column(df):
     df_augmented = df.copy()
 
     # Ajout du Temps
-    origine = pd.Timestamp("2018-01-01")
-    df_augmented["Temps"] = (
-        (df_augmented["Date"].dt.year - origine.year) * 12
-        + (df_augmented["Date"].dt.month - origine.month)
-    )
+    df_augmented["Temps"] = get_temps(df_augmented["Date"].dt.year, df_augmented["Date"].dt.month)
     df_augmented["Temps"].astype("int16")
 
     # Ajout des mois
@@ -73,3 +73,15 @@ def add_usefull_column(df):
     df_augmented["prct annulation"] = df_augmented["Nombre de trains annulés"] / df_augmented[col_nb_circ]    
 
     return df_augmented
+
+def get_axes():
+    df = get_dataframe()
+    axes = (
+        df[["Gare de départ", "Gare d'arrivée"]]
+        .drop_duplicates()
+        .apply(sorted, axis=1, result_type="expand")
+        .drop_duplicates()
+    )
+    return list(axes.itertuples(index=False, name=None))
+
+
