@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+pytest.importorskip("sklearn")
+
 from utils.prevision import (
     COL_ANNULES,
     COL_PREVUES,

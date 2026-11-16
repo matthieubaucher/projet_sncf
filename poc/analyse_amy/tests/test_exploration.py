@@ -1,12 +1,15 @@
 """Tests unitaires des modules ``utils.exploration`` et ``utils.graphiques``."""
 
-import matplotlib
+import pandas as pd
+import pytest
+
+matplotlib = pytest.importorskip("matplotlib")
+pytest.importorskip("seaborn")
+pytest.importorskip("sklearn")
 
 matplotlib.use("Agg")  
-
 import matplotlib.pyplot as plt  
-import pandas as pd  
-import pytest  
+
 from utils.exploration import ( 
     CAUSES,
     circulations_par_annee,
