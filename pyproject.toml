@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.4.6",
     "pytest>=9.1.1",
+    "scikit-learn>=1.9.1",
     "streamlit>=1.63.0",
 ]
 
@@ -23,3 +24,13 @@ pythonpath = ["src"]
 members = [
     "poc/analyse_matthieu",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.coverage.run]
+source = ["src"]  # uniquement ce répertoire est verifier en couverture
+branch = true

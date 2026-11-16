@@ -1,0 +1,38 @@
+name: Code Coverage
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  code-quality: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Installer uv
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+
+      - name: Installer les dépendances
+        run: uv sync --locked --all-extras --dev
+
+      - name: Lancer les tests avec couverture
+        run: uv run pytest --cov=. --cov-report=xml --cov-branch
+
+      - name: Upload couverture
+        if: github.event_name != 'pull_request' ||
+            github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-code-coverage@v1
+        with:
+          file: coverage.xml
+          language: Python
+          label: code-coverage/pytest
