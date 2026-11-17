@@ -10,9 +10,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+# Si scikit-learn manque (par exemple dans la CI), ces tests sont ignorés au lieu d'échouer.
 pytest.importorskip("sklearn")
 
-from utils.prevision import (
+from utils.prevision import (  # noqa: E402
     COL_ANNULES,
     COL_PREVUES,
     COL_RETARDS,
@@ -22,6 +23,7 @@ from utils.prevision import (
     chercher_resultat,
     controler_comptages,
     creer_modele,
+    decoupage_temporel,
     decouper_train_test,
     detecter_mois_choc,
     entrainer_et_predire,
@@ -29,6 +31,7 @@ from utils.prevision import (
     exporter_predictions,
     importance_variables,
     mesurer,
+    optimiser_foret,
     part_perturbee_selon_seuil,
     preparer_donnees,
     preparer_matrices,
@@ -252,6 +255,38 @@ def test_sensibilite_seuils(df_pred, table):
     resultat = sensibilite_seuils(df_pred, train, test, X_train, X_test, pd.DatetimeIndex([]), [0.15, 0.25])
     assert resultat.index.tolist() == ["15%", "25%"]
     assert resultat.shape[1] == 8
+
+
+# --- réglages de la forêt -------------------------------------------------------------
+
+def test_decoupage_temporel_apprend_toujours_sur_le_passe(table):
+    _, train, _ = decouper_train_test(table, "2024-01-01")
+    dates = train["Date"].reset_index(drop=True)
+    decoupages = decoupage_temporel(dates, n_decoupages=3)
+    assert len(decoupages) == 3
+    for apprentissage, evaluation in decoupages:
+        assert dates[apprentissage].max() < dates[evaluation].min()
+        # un mois n'est jamais coupé en deux
+        assert not set(dates[apprentissage]) & set(dates[evaluation])
+
+
+def test_decoupage_temporel_pas_assez_de_mois():
+    dates = pd.Series(pd.to_datetime(["2024-01-01", "2024-02-01"]))
+    with pytest.raises(ValueError, match="au moins"):
+        decoupage_temporel(dates, n_decoupages=2)
+
+
+def test_optimiser_foret(table, caplog):
+    _, train, test = decouper_train_test(table, "2024-01-01")
+    X_train, y_train, _, _, _ = preparer_matrices(train, test)
+    grille = {"max_depth": [None, 3], "min_samples_leaf": [1]}
+    with caplog.at_level(logging.INFO, logger="utils.prevision"):
+        recherche, resultats = optimiser_foret(X_train, y_train, train["Date"], grille=grille, n_decoupages=2)
+    assert len(resultats) == 2
+    assert resultats["F1 moyen"].is_monotonic_decreasing
+    assert recherche.best_params_ == resultats.loc[0, ["max_depth", "min_samples_leaf"]].to_dict()
+    assert hasattr(recherche.best_estimator_, "predict_proba")
+    assert "Meilleurs réglages" in caplog.text
 
 
 # --- prévision du mois suivant ------------------------------------------------------
