@@ -38,3 +38,8 @@ CAUSE_COLUMNS = {
     "Prct retard pour cause gestion en gare et réutilisation de matériel": "Gestion en gare",
     "Prct retard pour cause prise en compte voyageurs (affluence, gestions PSH, correspondances)": "Prise en compte des voyageurs",
 }
+
+# Confidence levels and tiers
+CONFIDENCE_ENOUGH = "suffisante"
+CONFIDENCE_LOW = "peu fiable"
+TIER_LABELS = ["moins fiable", "intermédiaire", "plus fiable"]
