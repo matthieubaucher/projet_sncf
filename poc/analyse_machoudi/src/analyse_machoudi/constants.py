@@ -43,3 +43,17 @@ CAUSE_COLUMNS = {
 CONFIDENCE_ENOUGH = "suffisante"
 CONFIDENCE_LOW = "peu fiable"
 TIER_LABELS = ["moins fiable", "intermédiaire", "plus fiable"]
+
+# Columns of the final table
+FINAL_COLUMNS = [
+    "mois",
+    "confiance",
+    "score",
+    "tiers",
+    "taux_annulation",
+    "taux_retard",
+    "pires_mois_tous",
+    "pires_mois_hors_chocs",
+    "saisonnalite",
+    "cause_dominante",
+]
