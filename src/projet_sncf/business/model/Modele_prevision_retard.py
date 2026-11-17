@@ -1,6 +1,5 @@
-import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
 
 class ModelePrevisionRetard:
 
@@ -16,27 +15,27 @@ class ModelePrevisionRetard:
         X_train = df[self.colonnes_X]
         y_train = df[self.colonne_Y]
 
-        best_score = -999
+        param_grid = {
+            "max_depth": [3, 4],
+            "n_estimators": [100, 150],
+            "min_samples_leaf": [2, 3],
+            "max_features": [2, 3],
+        }
 
-        for max_depth in [3,4]: 
-          for n_estimators in [100,150]: 
-            for min_samples_leaf in [2,3]:
-              for max_features in [2,3]:    
-                model = RandomForestRegressor(
-                    min_samples_leaf=min_samples_leaf,
-                    n_estimators = n_estimators,
-                    max_depth = max_depth,
-                    max_features=max_features,
-                    random_state=42,
-                    n_jobs=-1
-                )
-                scores = cross_val_score(model, X_train, y_train, cv=5, scoring="r2", n_jobs=-1)
-                score = np.mean(scores)
-                if score > best_score:
-                    best_score = score
-                    self.model = model        
+        grid_search = GridSearchCV(
+            estimator=RandomForestRegressor(
+                random_state=42,
+                n_jobs=-1
+            ),
+            param_grid=param_grid,
+            cv=5,
+            scoring="r2",
+            n_jobs=-1
+        )
 
-        self.model.fit(X_train, y_train)
+        grid_search.fit(X_train, y_train)
+
+        self.model = grid_search.best_estimator_
 
 
     def predict(self, X):
