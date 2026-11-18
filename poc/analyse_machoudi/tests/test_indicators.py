@@ -106,6 +106,42 @@ def test_filter_drops_zero_scheduled_and_negative_counts():
     assert len(filter_valid_rows(df)) == 1
 
 
+def test_filter_drops_rows_with_a_missing_count():
+    """Check that a missing count removes the whole row.
+
+    Returns:
+        None: Passes if only the complete row remains out of four (a missing
+        scheduled, cancelled or delayed count is dropped).
+    """
+    df = make_rows(
+        [
+            ("A", "B", "National", "2024-01", 100, 0, 10),
+            ("A", "B", "National", "2024-02", None, 0, 10),
+            ("A", "B", "National", "2024-03", 100, None, 10),
+            ("A", "B", "National", "2024-04", 100, 0, None),
+        ]
+    )
+    assert len(filter_valid_rows(df)) == 1
+
+
+def test_missing_count_does_not_bias_the_rates():
+    """Check the rates of a liaison with one incomplete month.
+
+    Returns:
+        None: Passes if the incomplete month counts for nothing, neither in the
+        scheduled trains nor in the delayed trains.
+    """
+    df = make_rows(
+        [
+            ("A", "B", "National", "2024-01", 100, 0, 10),
+            ("A", "B", "National", "2024-02", 100, 0, None),
+        ]
+    )
+    result = compute_indicators(df).loc[("A", "B", "National")]
+    assert result["prevues"] == 100
+    assert result["taux_perturbation"] == pytest.approx(0.10)
+
+
 def test_filter_does_not_modify_the_input():
     """Check that the filter works on a copy.
 

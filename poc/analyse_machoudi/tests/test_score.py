@@ -10,7 +10,7 @@ from analyse_machoudi.constants import (
     CONFIDENCE_LOW,
     TIER_LABELS,
 )
-from analyse_machoudi.score import compute_score, dominant_cause
+from analyse_machoudi.score import compute_score, compute_tier_bounds, dominant_cause
 
 
 def make_table(months, rates):
@@ -74,6 +74,19 @@ def test_unreliable_liaisons_do_not_set_the_tier_bounds():
     result = compute_score(extended)
     assert result.loc[base.index, "tiers"].tolist() == result_base["tiers"].tolist()
     assert result.loc["short", "tiers"] == TIER_LABELS[0]
+
+
+def test_tier_bounds_are_the_terciles_of_the_scores():
+    """Check the bounds between the tiers.
+
+    Returns:
+        None: Passes if the bounds of the scores 0 to 90 are 30 and 60, and NaN for
+        an empty series.
+    """
+    lower, upper = compute_tier_bounds(pd.Series(range(0, 100, 10)))
+    assert lower == pytest.approx(30.0)
+    assert upper == pytest.approx(60.0)
+    assert np.isnan(compute_tier_bounds(pd.Series([], dtype=float))[0])
 
 
 def test_tiers_are_nan_without_any_reliable_liaison():
