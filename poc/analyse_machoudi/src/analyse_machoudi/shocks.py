@@ -55,13 +55,37 @@ def compute_national_rates(df: pd.DataFrame) -> pd.DataFrame:
     return monthly
 
 
+def compute_shock_threshold(monthly: pd.DataFrame, sigma: float = SHOCK_SIGMA) -> float:
+    """Compute the disruption rate above which a month is a national shock.
+
+    The threshold is ``median + sigma * s``, where ``s`` is the median absolute
+    deviation multiplied by 1.4826.
+
+    Args:
+        monthly (pd.DataFrame): Output of ``compute_national_rates``.
+        sigma (float): Number of robust standard deviations above the median.
+
+    Returns:
+        float: The threshold on ``taux_perturbation``.
+
+    Raises:
+        KeyError: If ``taux_perturbation`` is missing.
+    """
+    if "taux_perturbation" not in monthly.columns:
+        raise KeyError("Colonnes manquantes : ['taux_perturbation']")
+    rate = monthly["taux_perturbation"]
+    median = rate.median()
+    spread = MAD_TO_SIGMA * (rate - median).abs().median()
+    return median + sigma * spread
+
+
 def detect_shock_months(
     monthly: pd.DataFrame, sigma: float = SHOCK_SIGMA
 ) -> pd.DatetimeIndex:
     """Return the months whose national disruption rate is abnormally high.
 
-    A month is a shock when its rate is strictly above ``median + sigma * s``, where
-    ``s`` is the median absolute deviation multiplied by 1.4826.
+    A month is a shock when its rate is strictly above the threshold of
+    ``compute_shock_threshold``.
 
     Args:
         monthly (pd.DataFrame): Output of ``compute_national_rates``.
@@ -73,12 +97,8 @@ def detect_shock_months(
     Raises:
         KeyError: If ``taux_perturbation`` is missing.
     """
-    if "taux_perturbation" not in monthly.columns:
-        raise KeyError("Colonnes manquantes : ['taux_perturbation']")
+    threshold = compute_shock_threshold(monthly, sigma)
     rate = monthly["taux_perturbation"]
-    median = rate.median()
-    spread = MAD_TO_SIGMA * (rate - median).abs().median()
-    threshold = median + sigma * spread
     shocks = rate.index[rate > threshold]
     logger.info(
         "Seuil de choc : %.3f, %d mois sur %d", threshold, len(shocks), len(rate)

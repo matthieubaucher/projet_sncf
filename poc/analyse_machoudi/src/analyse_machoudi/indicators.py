@@ -5,7 +5,6 @@ never on averages of monthly rates.
 """
 
 import logging
-
 import pandas as pd
 
 from analyse_machoudi.constants import (
@@ -36,7 +35,7 @@ def _check_columns(df: pd.DataFrame, columns: list[str]) -> None:
 
 
 def filter_valid_rows(df: pd.DataFrame) -> pd.DataFrame:
-    """Drop rows with no scheduled train or with a negative count.
+    """Drop rows with no scheduled train, a negative count or a missing count.
 
     Args:
         df (pd.DataFrame): Monthly data, one row per liaison and per month.
@@ -49,7 +48,11 @@ def filter_valid_rows(df: pd.DataFrame) -> pd.DataFrame:
     """
     counts = [COL_SCHEDULED, COL_CANCELLED, COL_DELAYED]
     _check_columns(df, counts)
-    invalid = (df[COL_SCHEDULED] == 0) | (df[counts] < 0).any(axis=1)
+    invalid = (
+        (df[COL_SCHEDULED] == 0)
+        | (df[counts] < 0).any(axis=1)
+        | df[counts].isna().any(axis=1)
+    )
     logger.info("Lignes écartées : %d sur %d", invalid.sum(), len(df))
     return df.loc[~invalid].copy()
 

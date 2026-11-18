@@ -9,7 +9,11 @@ from analyse_machoudi.constants import (
     COL_DELAYED,
     COL_SCHEDULED,
 )
-from analyse_machoudi.shocks import compute_national_rates, detect_shock_months
+from analyse_machoudi.shocks import (
+    compute_national_rates,
+    compute_shock_threshold,
+    detect_shock_months,
+)
 
 
 def make_months(delayed, scheduled=1000):
@@ -101,6 +105,24 @@ def test_larger_sigma_keeps_fewer_months():
         make_months([100, 110, 90, 105, 95, 100, 108, 92, 100, 102, 500, 98])
     )
     assert len(detect_shock_months(monthly, sigma=100)) == 0
+
+
+def test_threshold_separates_shock_months_from_the_others():
+    """Check the threshold against the rates of the series.
+
+    Returns:
+        None: Passes if only the extreme month is above the threshold, and if the
+        threshold is the median plus 3 times 1.4826 times the MAD.
+    """
+    monthly = compute_national_rates(
+        make_months([100, 110, 90, 105, 95, 100, 108, 92, 100, 102, 500, 98])
+    )
+    threshold = compute_shock_threshold(monthly)
+    rate = monthly["taux_perturbation"]
+    median = rate.median()
+    expected = median + 3 * 1.4826 * (rate - median).abs().median()
+    assert threshold == pytest.approx(expected)
+    assert list(rate.index[rate > threshold]) == [pd.Timestamp("2024-11-01")]
 
 
 def test_missing_date_column_raises_key_error():

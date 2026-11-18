@@ -28,6 +28,20 @@ def dominant_cause(profile: pd.DataFrame) -> pd.Series:
     return profile.dropna(how="all").idxmax(axis=1).rename("cause_dominante")
 
 
+def compute_tier_bounds(scores: pd.Series) -> tuple[float, float]:
+    """Compute the bounds between the three tiers of the score.
+
+    Args:
+        scores (pd.Series): Scores of the reference liaisons (enough months).
+
+    Returns:
+        tuple[float, float]: The 1/3 and 2/3 quantiles of ``scores``. NaN if
+        ``scores`` is empty.
+    """
+    lower, upper = scores.quantile([1 / 3, 2 / 3])
+    return lower, upper
+
+
 def compute_score(table: pd.DataFrame, min_months: int = MIN_MONTHS) -> pd.DataFrame:
     """Add the score, the confidence level and the tier to a table of liaisons.
 
@@ -51,7 +65,7 @@ def compute_score(table: pd.DataFrame, min_months: int = MIN_MONTHS) -> pd.DataF
     enough = result["mois"] >= min_months
     result["confiance"] = np.where(enough, CONFIDENCE_ENOUGH, CONFIDENCE_LOW)
 
-    lower, upper = result.loc[enough, "score"].quantile([1 / 3, 2 / 3])
+    lower, upper = compute_tier_bounds(result.loc[enough, "score"])
     tier = np.select(
         [result["score"] <= lower, result["score"] <= upper],
         TIER_LABELS[:2],
