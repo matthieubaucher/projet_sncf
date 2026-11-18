@@ -21,6 +21,7 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
+from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -50,6 +51,9 @@ VARIABLES = [
 
 #: Noms des modèles que :func:`creer_modele` sait construire.
 MODELES = ("logistique", "boosting", "foret")
+
+
+GRILLE_FORET = {"max_depth": [None, 5, 10], "min_samples_leaf": [1, 5, 20, 50]}
 
 
 # ---------------------------------------------------------------------------
@@ -358,6 +362,76 @@ def entrainer_et_predire(modele, X_train, y_train, X_test, seuil_proba=0.5):
     prediction = (proba > seuil_proba).astype(int)
     logger.info("%s entraîné sur %d lignes", type(modele).__name__, len(X_train))
     return modele, proba, prediction
+
+
+def decoupage_temporel(dates, n_decoupages=5):
+    """Prépare une validation croisée qui respecte l'ordre du temps.
+
+    Les mois sont rangés dans l'ordre, puis découpés en blocs : à chaque tour, le modèle apprend
+    sur tous les mois jusqu'à une date et il est évalué sur les mois qui suivent. Le découpage se
+    fait par **mois entiers** : toutes les liaisons d'un même mois sont du même côté.
+
+    Args:
+        dates (pandas.Series): Date de chaque ligne de l'apprentissage.
+        n_decoupages (int): Nombre de tours. Par défaut 5.
+
+    Returns:
+        list[tuple[numpy.ndarray, numpy.ndarray]]: Pour chaque tour, les positions des lignes
+        d'apprentissage et celles des lignes d'évaluation.
+
+    Raises:
+        ValueError: S'il y a moins de mois que ``n_decoupages + 1``.
+
+    Example:
+        >>> import pandas as pd
+        >>> dates = pd.Series(pd.to_datetime(["2024-01-01", "2024-01-01", "2024-02-01", "2024-03-01"]))
+        >>> [(a.tolist(), e.tolist()) for a, e in decoupage_temporel(dates, n_decoupages=2)]
+        [([0, 1], [2]), ([0, 1, 2], [3])]
+    """
+    dates = pd.Series(dates).reset_index(drop=True)
+    mois = np.sort(dates.unique())
+    if len(mois) < n_decoupages + 1:
+        raise ValueError(f"Il faut au moins {n_decoupages + 1} mois, il y en a {len(mois)}")
+    decoupages = []
+    for i_apprentissage, i_evaluation in TimeSeriesSplit(n_splits=n_decoupages).split(mois):
+        decoupages.append((
+            np.flatnonzero(dates.isin(mois[i_apprentissage])),
+            np.flatnonzero(dates.isin(mois[i_evaluation])),
+        ))
+    return decoupages
+
+
+def optimiser_foret(X_train, y_train, dates, grille=None, n_decoupages=5):
+    """Cherche les meilleurs réglages de la forêt aléatoire par validation croisée temporelle.
+
+    Chaque combinaison de :data:`GRILLE_FORET` est évaluée sur les découpages de
+    :func:`decoupage_temporel`, avec le F1 macro, la mesure utilisée pour comparer les modèles.
+    On n'utilise que l'apprentissage : la période de test reste intacte pour l'évaluation finale.
+
+    Args:
+        X_train (pandas.DataFrame): Variables de l'apprentissage.
+        y_train (pandas.Series): Cible de l'apprentissage.
+        dates (pandas.Series): Date de chaque ligne de l'apprentissage.
+        grille (dict | None): Réglages à essayer. Par défaut :data:`GRILLE_FORET`.
+        n_decoupages (int): Nombre de tours de validation croisée. Par défaut 5.
+
+    Returns:
+        tuple: ``(recherche, resultats)`` : la recherche entraînée (``recherche.best_params_``
+        donne les meilleurs réglages, ``recherche.best_estimator_`` le modèle réentraîné sur tout
+        l'apprentissage) et un tableau des réglages essayés, du meilleur au moins bon, avec le
+        F1 moyen et son écart-type d'un découpage à l'autre.
+    """
+    grille = GRILLE_FORET if grille is None else grille
+    recherche = GridSearchCV(
+        creer_modele("foret"), grille, cv=decoupage_temporel(dates, n_decoupages), scoring="f1_macro"
+    )
+    recherche.fit(X_train, y_train)
+    resultats = pd.DataFrame(recherche.cv_results_["params"], dtype=object)  # garde None et les entiers
+    resultats["F1 moyen"] = recherche.cv_results_["mean_test_score"]
+    resultats["écart-type"] = recherche.cv_results_["std_test_score"]
+    resultats = resultats.sort_values("F1 moyen", ascending=False).reset_index(drop=True)
+    logger.info("Meilleurs réglages de la forêt : %s (F1 moyen %.3f)", recherche.best_params_, recherche.best_score_)
+    return recherche, resultats
 
 
 def regle_mois_dernier(df, seuil=SEUIL_PERTURBATION):
