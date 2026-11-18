@@ -5,9 +5,7 @@ import pandas as pd
 from projet_sncf.business.service.Prevision_de_retard import simulation
 from projet_sncf.business.service.Prevision_de_retard import clusterise
 
-
-
-@patch("projet_sncf.business.service.Prevision_de_retard.get_inferance")
+@patch("projet_sncf.business.model.Modele_prevision_retard_manager.ModelManager.get_inferance")
 def test_simulation(mock_get_inferance):
     # Given
     parameters = pd.Series([10.0, 20.0, 30.0])
@@ -48,7 +46,7 @@ def test_simulation(mock_get_inferance):
     assert ecart_moyen < 5
 
 
-@patch("projet_sncf.business.service.Prevision_de_retard.get_inferance")
+@patch("projet_sncf.business.model.Modele_prevision_retard_manager.ModelManager.get_inferance")
 @patch("projet_sncf.business.service.Prevision_de_retard.get_dataframe")
 def test_clusterise(mock_get_dataframe, mock_get_inferance):
     # Given
