@@ -19,7 +19,7 @@ dependencies = [
 find = { where = ["src"] }
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src", "src/projet_sncf/utils"]
 
 [tool.uv.workspace]
 members = [
