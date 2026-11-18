@@ -10,7 +10,7 @@ L'assureur choisit le mois :
   comparé à ce qui s'est réellement passé.
 
 Les prévisions sont produites par le notebook ``poc/analyse_amy/notebooks/prevision.ipynb``
-(dossier ``resultats/``) ; l'historique vient de
+(fichiers copiés dans ``data/predictions/``) ; l'historique vient de
 :func:`projet_sncf.database.dataloader.get_dataframe`.
 
 Lancer la page seule, depuis la racine du projet :
@@ -24,7 +24,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 RACINE = Path(__file__).resolve().parents[3]
-DOSSIER_RESULTATS = RACINE / "poc" / "analyse_amy" / "resultats"
+DOSSIER_RESULTATS = RACINE / "data" / "predictions"
 
 CLE_LIAISON = ["Gare de départ", "Gare d'arrivée", "Service"]
 SEUIL_PERTURBATION = 0.20
