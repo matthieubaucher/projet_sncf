@@ -13,6 +13,7 @@ colonnes_X = ["Temps", "Saison", "Nombre de circulations prévues", "Prct retard
 def compute_score(depart, arrivee, cible):
     df = get_dataframe()
     df = df[(df["Gare de départ"]==depart) & (df["Gare d'arrivée"]==arrivee) | (df["Gare de départ"]==arrivee) & (df["Gare d'arrivée"]==depart)]
+    df = df.dropna(subset=colonnes_X + [cible])  # lignes où la cible ou une variable est vide
     modele = ModelePrevisionRetard(depart, arrivee, colonnes_X, colonne_Y=cible)
     df_train, df_test = train_test_split(
         df,
@@ -27,14 +28,14 @@ def compute_score(depart, arrivee, cible):
 
 tests = [
         ("PARIS LYON", "NICE VILLE", "prct Nombre trains en retard > 30min", -0.13),
-        ("PARIS LYON", "NICE VILLE", "prct annulation", 0.45), 
+        ("PARIS LYON", "NICE VILLE", "prct annulation", 0.38), 
         ("PARIS LYON", "NICE VILLE", "Retard moyen de tous les trains à l'arrivée", 0.19),
 
         ("PARIS MONTPARNASSE", "RENNES", "prct Nombre trains en retard > 30min", 0.11),
-        ("PARIS MONTPARNASSE", "RENNES", "prct annulation", 0.53),
-        ("PARIS MONTPARNASSE", "RENNES", "Retard moyen de tous les trains à l'arrivée", 0.16),
+        ("PARIS MONTPARNASSE", "RENNES", "prct annulation", 0.39),
+        ("PARIS MONTPARNASSE", "RENNES", "Retard moyen de tous les trains à l'arrivée", 0.07),
 
-        ("PARIS NORD", "LILLE", "prct Nombre trains en retard > 30min", 0.28),  
+        ("PARIS NORD", "LILLE", "prct Nombre trains en retard > 30min", -0.30),  
         ("PARIS NORD", "LILLE", "prct annulation", 0.13),
         ("PARIS NORD", "LILLE", "Retard moyen de tous les trains à l'arrivée", 0.23)
     ]
@@ -54,4 +55,3 @@ if __name__ == "__main__":
         score += score_local
 
     print("score final = ",score)
-

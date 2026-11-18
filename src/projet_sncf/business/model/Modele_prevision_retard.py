@@ -12,6 +12,9 @@ class ModelePrevisionRetard:
  
 
     def train(self, df):
+        # Le nettoyage garde les valeurs impossibles en NaN : on écarte les lignes
+        # où les variables ou la cible de ce modèle sont vides.
+        df = df.dropna(subset=self.colonnes_X + [self.colonne_Y])
         X_train = df[self.colonnes_X]
         y_train = df[self.colonne_Y]
 
