@@ -4,7 +4,7 @@
 import pandas as pd
 import pytest
 
-from projet_sncf.business.map_sncf import (
+from projet_sncf.business.map.map_sncf import (
     CONFIDENCE_LOW,
     MODE_EACH_DIRECTION,
     MODE_WORST_DIRECTION,
