@@ -27,8 +27,11 @@ def clusterise(axes, cible):
         créé 1000 scénari possibles en base via shuffle
         Utilisation du previsionneur (avec ces data, et les vecteurs de parametre) : méthode get_inferance_retard
         utiliser l'algo TSNE
-        on renvoie la matrice [1000, 2] affichable coté streamlit
+        on renvoie la matrice [len(axes), 2] affichable coté streamlit
     """
+    perplexity = min(len(axes)//2,5)
+    if perplexity<=1:
+        raise ValueError("Trop peu d'axes pour effectuer la projection t-SNE.")
     df = get_dataframe()
     X = df.sample(n=1000)
     Y = []
@@ -38,7 +41,7 @@ def clusterise(axes, cible):
     Y = np.array(Y)        
     tsne = TSNE(
         n_components=2,
-        perplexity=5,
+        perplexity=perplexity,
         random_state=42
     )
     Y_2d = tsne.fit_transform(Y)

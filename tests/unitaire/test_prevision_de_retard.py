@@ -79,3 +79,16 @@ def test_clusterise(mock_get_dataframe, mock_get_inferance):
     print(result)
     assert result.shape == (len(axes), 2)
     assert np.isfinite(result).all()    
+
+
+def test_clusterise_pas_assez_d_axes():
+    # Given
+    axes = [("PARIS", "NICE")] # only one axe
+
+    # When
+    try:
+        clusterise(axes, cible="prct annulation")
+        assert("erreur non détectée")
+    except ValueError as e:
+        # Then
+        assert str(e) == "Trop peu d'axes pour effectuer la projection t-SNE."

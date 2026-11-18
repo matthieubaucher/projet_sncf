@@ -9,6 +9,8 @@ src/projet_sncf.egg-info/dependency_links.txt
 src/projet_sncf.egg-info/requires.txt
 src/projet_sncf.egg-info/top_level.txt
 src/projet_sncf/business/model/Modele_prevision_retard.py
+src/projet_sncf/business/model/Modele_prevision_retard_manager.py
+src/projet_sncf/business/service/Prevision_de_retard.py
 src/projet_sncf/database/dataloader.py
 src/projet_sncf/pages/prediction_retard.py
 tests/test_main.py
