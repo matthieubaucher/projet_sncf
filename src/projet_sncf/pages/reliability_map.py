@@ -8,7 +8,7 @@ import pandas as pd
 import pydeck as pdk
 import streamlit as st
 
-from projet_sncf.business.map_sncf import (
+from projet_sncf.business.map.map_sncf import (
     CONFIDENCE_LOW,
     MODE_EACH_DIRECTION,
     MODE_WORST_DIRECTION,
@@ -35,11 +35,11 @@ DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "map"
 SCORES_FILE = DATA_DIR / "scores_liaisons.csv"
 STATIONS_FILE = DATA_DIR / "stations_coordonnees.csv"
 NETWORK_FILE = DATA_DIR / "reseau_ferre_simplifie.json"
-ROUTES_FILE = DATA_DIR / "trajets_liaisons.json"  # optional
+ROUTES_FILE = DATA_DIR / "trajets_liaisons.json"
 
 TIERS = [TIER_MORE, TIER_MIDDLE, TIER_LESS]
 ALL_STATIONS = "Toutes les gares"
-DEFAULT_INDEMNITY = 30.0  # euros
+DEFAULT_INDEMNITY = 30.0
 NETWORK_WIDTH = 1.5
 LABEL_SIZE = 14
 LABEL_OUTLINE = 5
