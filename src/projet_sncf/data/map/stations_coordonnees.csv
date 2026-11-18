@@ -1,0 +1,59 @@
+gare;latitude;longitude;source;nom_reference
+AIX EN PROVENCE TGV;43.455237;5.317534;gares-voyageurs;Aix-en-Provence TGV
+ANGERS SAINT LAUD;47.464647;-0.55682;gares-voyageurs;Angers Saint-Laud
+ANGOULEME;45.653572;0.164608;gares-voyageurs;Angoulême
+ANNECY;45.901965;6.121835;gares-voyageurs;Annecy
+ARRAS;50.286673;2.781942;gares-voyageurs;Arras
+AVIGNON TGV;43.921586;4.786079;gares-voyageurs;Avignon TGV
+BARCELONA;41.3791;2.1403;manuel;
+BELLEGARDE (AIN);46.109425;5.823483;gares-voyageurs;Bellegarde-sur-Valserine
+BESANCON FRANCHE COMTE TGV;47.307361058531725;5.953195095062256;gares-voyageurs;Besançon Franche-Comté TGV
+BORDEAUX ST JEAN;44.825873;-0.556697;gares-voyageurs;Bordeaux Saint-Jean
+BREST;48.38811;-4.478903;gares-voyageurs;Brest
+CHAMBERY CHALLES LES EAUX;45.571302;5.919547;gares-voyageurs;Chambéry - Challes-les-Eaux
+DIJON VILLE;47.32337;5.027208;gares-voyageurs;Dijon
+DOUAI;50.371677;3.089986;gares-voyageurs;Douai
+DUNKERQUE;51.03047;2.368961;gares-voyageurs;Dunkerque
+FRANCFORT;50.1071;8.6628;manuel;
+GENEVE;46.2102;6.1424;manuel;
+GRENOBLE;45.191493;5.714584;gares-voyageurs;Grenoble
+LA ROCHELLE VILLE;46.15269;-1.145305;gares-voyageurs;La Rochelle
+LAUSANNE;46.517;6.6293;manuel;
+LAVAL;48.076206;-0.760907;gares-voyageurs;Laval
+LE CREUSOT MONTCEAU MONTCHANIN;46.765343;4.499513;gares-voyageurs;Le Creusot - Montceau-les-Mines - Montchanin TGV
+LE MANS;47.995689;0.192578;gares-voyageurs;Le Mans
+LILLE;50.636577;3.06987;gares-voyageurs;Lille Flandres
+LYON PART DIEU;45.760559;4.859355;gares-voyageurs;Lyon Part Dieu
+MACON LOCHE;46.282884;4.778876;gares-voyageurs;Mâcon Loché TGV
+MADRID;40.4065;-3.6892;manuel;
+MARNE LA VALLEE;48.869856;2.78272;gares-voyageurs;Marne-la-Vallée Chessy
+MARSEILLE ST CHARLES;43.302666;5.380407;gares-voyageurs;Marseille Saint-Charles
+METZ;49.109545;6.176593;gares-voyageurs;Metz
+MONTPELLIER;43.604738;3.880674;gares-voyageurs;Montpellier Saint-Roch
+MULHOUSE VILLE;47.742224;7.342396;gares-voyageurs;Mulhouse
+NANCY;48.689861;6.174583;gares-voyageurs;Nancy
+NANTES;47.216148;-1.542356;gares-voyageurs;Nantes
+NICE VILLE;43.704556;7.261904;gares-voyageurs;Nice
+NIMES;43.832291;4.365845;gares-voyageurs;Nîmes
+PARIS EST;48.876742;2.358424;gares-voyageurs;Paris Est
+PARIS LYON;48.844888;2.37352;gares-voyageurs;Paris Gare de Lyon
+PARIS MONTPARNASSE;48.841172;2.320514;gares-voyageurs;Paris Montparnasse
+PARIS NORD;48.880185;2.355151;gares-voyageurs;Paris Gare du Nord
+PARIS VAUGIRARD;48.841172;2.320514;gares-voyageurs;Paris Montparnasse
+PERPIGNAN;42.696292;2.879779;gares-voyageurs;Perpignan
+POITIERS;46.582275;0.333241;gares-voyageurs;Poitiers
+QUIMPER;47.994455;-4.092103;gares-voyageurs;Quimper
+REIMS;49.258978;4.024435;gares-voyageurs;Reims
+RENNES;48.103517;-1.672744;gares-voyageurs;Rennes
+SAINT ETIENNE CHATEAUCREUX;45.443366;4.399722;gares-voyageurs;Saint-Étienne Châteaucreux
+ST MALO;48.646859;-2.004158;gares-voyageurs;Saint-Malo
+ST PIERRE DES CORPS;47.386099;0.72355;gares-voyageurs;Saint-Pierre-des-Corps
+STRASBOURG;48.584967;7.734584;gares-voyageurs;Strasbourg
+STUTTGART;48.784;9.1816;manuel;
+TOULON;43.12837;5.929293;gares-voyageurs;Toulon
+TOULOUSE MATABIAU;43.611206;1.453616;gares-voyageurs;Toulouse Matabiau
+TOURCOING;50.71683;3.16804;gares-voyageurs;Tourcoing
+TOURS;47.389781;0.693703;gares-voyageurs;Tours
+VALENCE ALIXAN TGV;44.991545;4.978703;gares-voyageurs;Valence TGV Rhône-Alpes Sud
+VANNES;47.665169;-2.75245;gares-voyageurs;Vannes
+ZURICH;47.3779;8.5403;manuel;
