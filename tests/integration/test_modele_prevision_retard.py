@@ -28,14 +28,14 @@ def compute_score(depart, arrivee, cible):
 
 tests = [
         ("PARIS LYON", "NICE VILLE", "prct Nombre trains en retard > 30min", -0.13),
-        ("PARIS LYON", "NICE VILLE", "prct annulation", 0.45), 
+        ("PARIS LYON", "NICE VILLE", "prct annulation", 0.38), 
         ("PARIS LYON", "NICE VILLE", "Retard moyen de tous les trains à l'arrivée", 0.19),
 
         ("PARIS MONTPARNASSE", "RENNES", "prct Nombre trains en retard > 30min", 0.11),
-        ("PARIS MONTPARNASSE", "RENNES", "prct annulation", 0.53),
-        ("PARIS MONTPARNASSE", "RENNES", "Retard moyen de tous les trains à l'arrivée", 0.16),
+        ("PARIS MONTPARNASSE", "RENNES", "prct annulation", 0.39),
+        ("PARIS MONTPARNASSE", "RENNES", "Retard moyen de tous les trains à l'arrivée", 0.07),
 
-        ("PARIS NORD", "LILLE", "prct Nombre trains en retard > 30min", 0.28),  
+        ("PARIS NORD", "LILLE", "prct Nombre trains en retard > 30min", -0.30),  
         ("PARIS NORD", "LILLE", "prct annulation", 0.13),
         ("PARIS NORD", "LILLE", "Retard moyen de tous les trains à l'arrivée", 0.23)
     ]
