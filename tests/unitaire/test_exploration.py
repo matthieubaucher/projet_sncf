@@ -10,14 +10,14 @@ pytest.importorskip("sklearn")
 matplotlib.use("Agg")  # pas de fenêtre : graphiques tracés en mémoire
 import matplotlib.pyplot as plt  # noqa: E402
 
-from utils.exploration import (  # noqa: E402
+from projet_sncf.business.prevision.exploration import (  # noqa: E402
     CAUSES,
     circulations_par_annee,
     comparer_periodes,
     moyennes_par_periode,
     retards_par_cause,
 )
-from utils.graphiques import (  # noqa: E402
+from projet_sncf.utils.graphiques import (  # noqa: E402
     tracer_avant_apres,
     tracer_barres,
     tracer_evolution,
