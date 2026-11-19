@@ -1,6 +1,6 @@
 
 from projet_sncf.database.dataloader import get_dataframe
-from projet_sncf.business.model.Modele_prevision_retard_manager import get_inferance
+from projet_sncf.business.model.Modele_prevision_retard_manager import get_modele_manager
 import pandas as pd
 import numpy as np
 from sklearn.manifold import TSNE
@@ -17,7 +17,7 @@ def simulation(parameters, axe, cible):
     for _ in range(1000):
         values.append([perturbe(parameter) for parameter in parameters])
     X = pd.DataFrame(values, columns=parameters.index)
-    Y = get_inferance(X, axe, cible)
+    Y = get_modele_manager().get_inferance(X, axe, cible)
     return Y
 
 
@@ -36,7 +36,7 @@ def clusterise(axes, cible):
     X = df.sample(n=1000)
     Y = []
     for axe in axes:
-        y = get_inferance(X, axe, cible)
+        y = get_modele_manager().get_inferance(X, axe, cible)
         Y += [y]
     Y = np.array(Y)        
     tsne = TSNE(
