@@ -39,3 +39,14 @@ dev = [
 [tool.coverage.run]
 source = ["src"]  # uniquement ce répertoire est verifier en couverture
 branch = true
+
+[tool.ruff]
+line-length = 79  # limite de PEP 8
+src = ["src", "poc/analyse_amy"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N"]  # pycodestyle, pyflakes, imports, nommage
+
+[tool.ruff.lint.pep8-naming]
+# X_train, X_test : convention de scikit-learn pour une matrice de variables
+extend-ignore-names = ["X", "X_*"]
