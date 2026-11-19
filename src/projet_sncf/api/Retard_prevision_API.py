@@ -1,9 +1,26 @@
 import numpy as np
+from projet_sncf.database import dataloader as dl
+from projet_sncf.business.service.Prevision_de_retard import simulation
 
-def simulation_scenario_utilisateur(parameters, axe, cible):
-    dummy_array = np.array([np.random.rand() for _ in range(0,50)])
-    return dummy_array
+def simulation_scenario_utilisateur(parameters:dict, axe:str, cible:str):
+    if cible not in get_cibles():
+        raise ValueError("Cible non disponible pour la simulation")
 
+    print(axe, "  ", get_axes())
+    if axe not in get_axes():
+        raise ValueError("Axe non disponible pour la simulation")
+
+    # traduction en temps suivant l'origine définie dans la base    
+    temps = parameters["Temps"]
+    parameters["Temps"] = dl.get_temps(temps//12, temps%12+1)
+    
+    return simulation(parameters, axe, cible)
+
+def get_axes():
+    """
+        axes disponibles pour la simulation
+    """
+    return dl.get_axes()
 
 def get_cibles():
     """
@@ -19,3 +36,4 @@ def get_parameters():
            "Prct retard pour cause gestion trafic", "Prct retard pour cause matériel roulant", 
            "Prct retard pour cause gestion en gare et réutilisation de matériel", 
            "Prct retard pour cause prise en compte voyageurs (affluence, gestions PSH, correspondances)"]
+

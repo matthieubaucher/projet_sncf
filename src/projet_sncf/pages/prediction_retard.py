@@ -1,7 +1,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
-from projet_sncf.database import dataloader as dl
 from projet_sncf.api import Retard_prevision_API as retard_api
 
 st.markdown("""
@@ -31,7 +30,7 @@ st.set_page_config(
 
 @st.cache_data
 def get_axes():
-    return dl.get_axes()
+    return retard_api.get_axes()
 
 def normalise_prct():
     if "parameters" not in st.session_state:
@@ -96,14 +95,14 @@ with center:
             with col2:
                 mois = st.selectbox(
                     "Mois",
-                    range(1, 13),
+                    range(0, 12),
                     index=1,
                     key="temps_mois",
                     format_func=lambda m: [
                         "Janvier", "Février", "Mars", "Avril","Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
                     ][m - 1]
                 )
-            st.session_state["Temps"] = dl.get_temps(annee, mois)
+            st.session_state["Temps"] = 12 * annee + mois
         else:
             st.number_input(
                 parameter,
