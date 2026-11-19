@@ -7,7 +7,7 @@ never on averages of monthly rates.
 import logging
 import pandas as pd
 
-from analyse_machoudi.constants import (
+from projet_sncf.business.analysis.constants import (
     CAUSE_COLUMNS,
     COL_CANCELLED,
     COL_DATE,

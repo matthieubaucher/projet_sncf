@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from analyse_machoudi.constants import (
+from projet_sncf.business.analysis.constants import (
     CAUSE_COLUMNS,
     COL_ARRIVAL,
     COL_CANCELLED,
@@ -13,7 +13,7 @@ from analyse_machoudi.constants import (
     COL_SCHEDULED,
     COL_SERVICE,
 )
-from analyse_machoudi.indicators import (
+from projet_sncf.business.analysis.indicators import (
     compute_cause_profile,
     compute_indicators,
     filter_valid_rows,

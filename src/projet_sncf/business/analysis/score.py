@@ -4,13 +4,13 @@ import logging
 import numpy as np
 import pandas as pd
 
-from analyse_machoudi.constants import (
+from projet_sncf.business.analysis.constants import (
     CONFIDENCE_ENOUGH,
     CONFIDENCE_LOW,
     MIN_MONTHS,
     TIER_LABELS,
 )
-from analyse_machoudi.indicators import _check_columns
+from projet_sncf.business.analysis.indicators import _check_columns
 
 logger = logging.getLogger(__name__)
 

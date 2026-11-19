@@ -1,13 +1,13 @@
 """Build the table of coordinates of the stations used by the map.
 
 Usage, from poc/analyse_machoudi/:
-    uv run python -m analyse_machoudi.build_station_coordinates <gares_voyageurs.csv> <dataset.csv> <output.csv>
+    uv run python -m projet_sncf.utils.build_station_coordinates <gares_voyageurs.csv> <dataset.csv> <output.csv>
 """
 
 import sys
 import pandas as pd
 
-from analyse_machoudi.stations import match_stations
+from projet_sncf.utils.stations import match_stations
 
 
 def main(reference_path: str, dataset_path: str, output_path: str) -> None:

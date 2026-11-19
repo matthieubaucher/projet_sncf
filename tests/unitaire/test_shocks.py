@@ -3,13 +3,13 @@
 import pandas as pd
 import pytest
 
-from analyse_machoudi.constants import (
+from projet_sncf.business.analysis.constants import (
     COL_CANCELLED,
     COL_DATE,
     COL_DELAYED,
     COL_SCHEDULED,
 )
-from analyse_machoudi.shocks import (
+from projet_sncf.business.analysis.shocks import (
     compute_national_rates,
     compute_shock_threshold,
     detect_shock_months,

@@ -3,7 +3,7 @@
 import logging
 import pandas as pd
 
-from analyse_machoudi.constants import (
+from projet_sncf.business.analysis.constants import (
     COL_CANCELLED,
     COL_DATE,
     COL_DELAYED,
@@ -11,7 +11,7 @@ from analyse_machoudi.constants import (
     MAD_TO_SIGMA,
     SHOCK_SIGMA,
 )
-from analyse_machoudi.indicators import filter_valid_rows
+from projet_sncf.business.analysis.indicators import filter_valid_rows
 
 logger = logging.getLogger(__name__)
 

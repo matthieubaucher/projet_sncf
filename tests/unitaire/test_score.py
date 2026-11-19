@@ -4,13 +4,13 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from analyse_machoudi.constants import (
+from projet_sncf.business.analysis.constants import (
     CAUSE_COLUMNS,
     CONFIDENCE_ENOUGH,
     CONFIDENCE_LOW,
     TIER_LABELS,
 )
-from analyse_machoudi.score import compute_score, compute_tier_bounds, dominant_cause
+from projet_sncf.business.analysis.score import compute_score, compute_tier_bounds, dominant_cause
 
 
 def make_table(months, rates):

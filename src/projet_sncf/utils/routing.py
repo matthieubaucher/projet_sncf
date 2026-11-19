@@ -9,7 +9,7 @@ import sys
 from dataclasses import dataclass, field
 import pandas as pd
 
-from analyse_machoudi.rail_network import (
+from projet_sncf.utils.rail_network import (
     COL_SHAPE,
     COL_STATUS,
     LATITUDE_RANGE,

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from analyse_machoudi.stations import match_stations, normalize_name, parse_position
+from projet_sncf.utils.stations import match_stations, normalize_name, parse_position
 
 
 def make_reference():

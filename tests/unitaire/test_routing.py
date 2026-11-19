@@ -5,7 +5,7 @@ import json
 import pandas as pd
 import pytest
 
-from analyse_machoudi.routing import (
+from projet_sncf.utils.routing import (
     build_graph,
     build_routes,
     distance_km,

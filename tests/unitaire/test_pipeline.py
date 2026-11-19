@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from analyse_machoudi.constants import (
+from projet_sncf.business.analysis.constants import (
     CAUSE_COLUMNS,
     COL_ARRIVAL,
     COL_CANCELLED,
@@ -18,7 +18,7 @@ from analyse_machoudi.constants import (
     FINAL_COLUMNS,
     LIAISON_KEY,
 )
-from analyse_machoudi.pipeline import build_reliability_table
+from projet_sncf.business.analysis.pipeline import build_reliability_table
 
 SHOCK_DATE = "2023-06"
 

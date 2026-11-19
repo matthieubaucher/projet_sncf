@@ -1,6 +1,6 @@
 import logging
 
-from analyse_machoudi.constants import LOG_FORMAT, LOG_LEVEL
+from projet_sncf.business.analysis.constants import LOG_FORMAT, LOG_LEVEL
 
 
 def setup_logging(level: str = LOG_LEVEL) -> None:
