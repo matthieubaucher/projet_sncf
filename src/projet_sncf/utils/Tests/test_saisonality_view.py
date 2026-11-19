@@ -4,7 +4,6 @@ import pytest
 import pandas as pd
 import matplotlib.figure
 
-from month_variations import filter_route
 from saisonality_view import (
     plot_heatmap_cancelations,
     plot_heatmap_annulations,
