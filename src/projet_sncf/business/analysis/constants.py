@@ -11,6 +11,10 @@ DEFAULT_PATTERN = "regularite*.csv"
 LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 LOG_LEVEL = "INFO"
 
+# Période de l'analyse (les mois suivants ne sont pas utilisés)
+ANALYSIS_START = "2018-01"
+ANALYSIS_END = "2026-06"
+
 # Method parameters
 MIN_MONTHS = 24
 WORST_MONTHS_SHARE = 0.10
