@@ -1,6 +1,5 @@
 import streamlit as st
 import matplotlib.pyplot as plt
-import seaborn as sns
 from projet_sncf.database import dataloader as dl
 from projet_sncf.api import Retard_prevision_API as retard_api
 
@@ -34,7 +33,7 @@ def get_axes():
     return dl.get_axes()
 
 
-st.header("Clustering des modeles prenant en paramètres les causes de retards")
+st.header("Clustering des modèles prenant en paramètres les causes de retards")
 
 st.write("""
 Choisissez les axes et ensuite la cible des modèles et nous faisons le clustering !
