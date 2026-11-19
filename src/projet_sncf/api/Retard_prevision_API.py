@@ -16,6 +16,16 @@ def simulation_scenario_utilisateur(parameters:dict, axe:str, cible:str):
     
     return simulation(parameters, axe, cible)
 
+def clusterise_ligne_et_axe(axes, cible):
+    dummy_array= np.array([
+        [ 0.12,  1.45], [-0.87,  0.32],
+        [ 1.91, -0.54], [ 0.75,  2.18],
+        [-1.43, -0.92], [ 2.34,  0.17],
+        [-0.21,  1.03], [ 1.12, -1.76],
+        [-2.01,  0.84], [ 0.48, -0.37],
+    ])
+    return dummy_array
+
 def get_axes():
     """
         axes disponibles pour la simulation
