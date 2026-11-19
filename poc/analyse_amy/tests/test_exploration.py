@@ -1,4 +1,4 @@
-"""Tests unitaires des modules ``utils.exploration`` et ``utils.graphiques``."""
+from collections.abc import Iterator
 
 import pandas as pd
 import pytest
@@ -7,17 +7,17 @@ matplotlib = pytest.importorskip("matplotlib")
 pytest.importorskip("seaborn")
 pytest.importorskip("sklearn")
 
-matplotlib.use("Agg")  
-import matplotlib.pyplot as plt  
+matplotlib.use("Agg")  # pas de fenêtre : graphiques tracés en mémoire
+import matplotlib.pyplot as plt  # noqa: E402
 
-from utils.exploration import ( 
+from utils.exploration import (  # noqa: E402
     CAUSES,
     circulations_par_annee,
     comparer_periodes,
     moyennes_par_periode,
     retards_par_cause,
 )
-from utils.graphiques import (  
+from utils.graphiques import (  # noqa: E402
     tracer_avant_apres,
     tracer_barres,
     tracer_evolution,
@@ -26,67 +26,87 @@ from utils.graphiques import (
 
 
 @pytest.fixture
-def donnees():
-    """Trois mois : mars et juin 2024 avec des trains, juin 2025 sans circulation."""
-    df = pd.DataFrame({
-        "Date": ["2024-03", "2024-06", "2025-06"],
-        "Nombre de circulations prévues": [100, 200, 0],
-        "Nombre de trains en retard à l'arrivée": [10, 40, 0],
-    })
+def donnees() -> pd.DataFrame:
+    """Mars et juin 2024 avec des trains, juin 2025 sans circulation."""
+    df = pd.DataFrame(
+        {
+            "Date": ["2024-03", "2024-06", "2025-06"],
+            "Nombre de circulations prévues": [100, 200, 0],
+            "Nombre de trains en retard à l'arrivée": [10, 40, 0],
+        }
+    )
     for i, cause in enumerate(CAUSES):
         df[cause] = [50.0, 50.0, 0.0] if i < 2 else [0.0, 0.0, 0.0]
     return df
 
 
 @pytest.fixture(autouse=True)
-def fermer_figures():
+def fermer_figures() -> Iterator[None]:
     yield
     plt.close("all")
 
 
-# --- exploration -----------------------------------------------------------------
+# --- exploration
+# -----------------------------------------------------------------
 
-def test_moyennes_par_periode():
-    df = pd.DataFrame({"Date": ["2024-01", "2024-02", "2025-01"], "r": [80.0, 90.0, 100.0]})
+
+def test_moyennes_par_periode() -> None:
+    df = pd.DataFrame(
+        {"Date": ["2024-01", "2024-02", "2025-01"], "r": [80.0, 90.0, 100.0]}
+    )
     par_annee, par_mois = moyennes_par_periode(df, ["r"])
     assert par_annee["Année"].tolist() == [2024, 2025]
     assert par_mois["Mois"].tolist() == [1, 2]
 
 
-def test_circulations_par_annee(donnees):
+def test_circulations_par_annee(donnees: pd.DataFrame) -> None:
     resultat = circulations_par_annee(donnees)
     assert resultat.to_dict() == {"2024": 300, "2025": 0}
     assert resultat.index.name == "Année"
 
 
-def test_retards_par_cause(donnees):
+def test_retards_par_cause(donnees: pd.DataFrame) -> None:
     resultat = retards_par_cause(donnees)
-    assert resultat.index.tolist() == [3, 6]  # juin 2025 ignoré : aucun train prévu
+    assert resultat.index.tolist() == [
+        3,
+        6,
+    ]  # juin 2025 ignoré : aucun train prévu
     assert list(resultat.columns) == list(CAUSES.values())
-    # mars : 10 retards dont 50 % « externes », pour 100 trains prévus -> 5 pour 100 trains
+    # mars : 10 retards dont 50 % « externes », pour 100 trains prévus -> 5
+    # pour 100 trains
     assert resultat.loc[3, "externes"] == pytest.approx(5.0)
     assert resultat.loc[6, "externes"] == pytest.approx(10.0)
     assert resultat.loc[6, "matériel roulant"] == 0
 
 
-def test_comparer_periodes(donnees):
-    rapport = comparer_periodes(retards_par_cause(donnees), mois_etudies=(6,), mois_reference=(3,))
+def test_comparer_periodes(donnees: pd.DataFrame) -> None:
+    rapport = comparer_periodes(
+        retards_par_cause(donnees), mois_etudies=(6,), mois_reference=(3,)
+    )
     assert rapport["externes"] == pytest.approx(2.0)
     assert rapport.is_monotonic_increasing or rapport.isna().any()
 
 
-# --- graphiques --------------------------------------------------------------------
+# --- graphiques
+# --------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("horizontal", [False, True])
-def test_tracer_barres(horizontal):
-    fig = tracer_barres(pd.Series([1, 2], index=["a", "b"]), "Titre", horizontal=horizontal,
-                        ligne_reference=1, ylim=(0, 3))
+def test_tracer_barres(horizontal: bool) -> None:
+    fig = tracer_barres(
+        pd.Series([1, 2], index=["a", "b"]),
+        "Titre",
+        horizontal=horizontal,
+        ligne_reference=1,
+        ylim=(0, 3),
+    )
     ax = fig.axes[0]
     assert ax.get_title() == "Titre"
     assert len(ax.patches) == 2
-    assert len(ax.lines) == 1  
+    assert len(ax.lines) == 1
 
-def test_tracer_evolution():
+
+def test_tracer_evolution() -> None:
     par_annee = pd.DataFrame({"Année": [2024, 2025], "a": [1, 2], "b": [3, 4]})
     par_mois = pd.DataFrame({"Mois": [1, 2], "a": [1, 2], "b": [3, 4]})
     fig = tracer_evolution(par_annee, par_mois, ["a", "b"])
@@ -94,13 +114,16 @@ def test_tracer_evolution():
     assert all(len(ax.lines) == 2 for ax in fig.axes)
 
 
-def test_tracer_matrices_confusion():
+def test_tracer_matrices_confusion() -> None:
     fig = tracer_matrices_confusion([0, 1, 1, 0], [0, 1, 0, 0], "Exemple")
     assert fig._suptitle.get_text() == "Exemple"
-    assert [ax.get_title() for ax in fig.axes] == ["Nombre de mois", "Part de chaque réalité"]
+    assert [ax.get_title() for ax in fig.axes] == [
+        "Nombre de mois",
+        "Part de chaque réalité",
+    ]
 
 
-def test_tracer_avant_apres():
+def test_tracer_avant_apres() -> None:
     avant = pd.DataFrame({"x": [1.0, -5.0, 3.0], "y": [2.0, 2.0, 2.0]})
     apres = pd.DataFrame({"x": [1.0, None, 3.0], "y": [2.0, 2.0, 2.0]})
     fig = tracer_avant_apres(avant, apres, ["x", "y"], "Avant / après")
