@@ -29,10 +29,10 @@ from projet_sncf.business.map.map_sncf import (
     station_points,
     summary_metrics,
 )
+from projet_sncf.business.analysis.reliability import get_reliability_table
 
 # Constants
 DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "map"
-SCORES_FILE = DATA_DIR / "scores_liaisons.csv"
 STATIONS_FILE = DATA_DIR / "stations_coordonnees.csv"
 NETWORK_FILE = DATA_DIR / "reseau_ferre_simplifie.json"
 ROUTES_FILE = DATA_DIR / "trajets_liaisons.json"
@@ -99,7 +99,7 @@ TOOLTIP = {
 @st.cache_data
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame, list, dict]:
     """Read the data files."""
-    scores = pd.read_csv(SCORES_FILE)
+    scores = get_reliability_table()
     stations = pd.read_csv(STATIONS_FILE, sep=";")
     with open(NETWORK_FILE, encoding="utf-8") as file:
         network = json.load(file)
@@ -321,9 +321,7 @@ def main() -> None:
     with st.expander("Méthode et limites"):
         st.markdown(METHOD_TEXT)
 
-    missing = [
-        f.name for f in (SCORES_FILE, STATIONS_FILE, NETWORK_FILE) if not f.exists()
-    ]
+    missing = [f.name for f in (STATIONS_FILE, NETWORK_FILE) if not f.exists()]
     if missing:
         st.error(f"Fichiers manquants dans {DATA_DIR} : {', '.join(missing)}")
         st.stop()

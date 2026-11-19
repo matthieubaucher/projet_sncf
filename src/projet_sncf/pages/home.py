@@ -9,12 +9,9 @@ import streamlit as st
 
 from projet_sncf.business.map.home_kpis import TIERS, home_metrics, tier_counts
 from projet_sncf.business.map.map_sncf import TIER_COLORS
+from projet_sncf.business.analysis.reliability import get_reliability_table
 
 # Constants
-SCORES_FILE = (
-    Path(__file__).resolve().parents[3] / "data" / "map" / "scores_liaisons.csv"
-)
-
 INTRO_TEXT = (
     "**Cher assureur,** RailInsight note la fiabilité de chaque liaison TGV à partir "
     "de l'historique des retards et des annulations. "
@@ -26,7 +23,7 @@ INTRO_TEXT = (
 @st.cache_data
 def load_scores() -> pd.DataFrame:
     """Read the scores."""
-    return pd.read_csv(SCORES_FILE)
+    return get_reliability_table()
 
 
 def hex_color(tier: str) -> str:
@@ -45,9 +42,6 @@ def main() -> None:
     st.caption("Fiabilité des liaisons ferroviaires")
     st.markdown(INTRO_TEXT)
 
-    if not SCORES_FILE.exists():
-        st.error(f"Fichier manquant : {SCORES_FILE.name}")
-        return
     scores = load_scores()
     metrics = home_metrics(scores)
 
