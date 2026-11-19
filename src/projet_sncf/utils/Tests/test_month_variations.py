@@ -3,7 +3,6 @@ import pytest
 import pandas as pd
 import numpy as np
 from unittest.mock import patch, MagicMock
-import matplotlib.pyplot as plt
 
 from month_variations import (
     plot_month_lateness,
@@ -173,7 +172,7 @@ class TestPlotMonthAnnulations:
         assert "Aucune donnée pour le mois 13" in caplog.text
 
 
-class TestPlotMonthAnnulations:
+class TestPlo_Month_Annulations:
     @patch('matplotlib.pyplot.show')
     @patch('matplotlib.pyplot.subplots')
     def test_mois_valide(self, mock_subplots, mock_show, sample_df_annul):
