@@ -56,7 +56,7 @@ def plotMonthlyLateness(df, gare_depart, gare_arrive, mois,
     fig, ax = plt.subplots(figsize=(8, 6))
     plot_month_lateness(ax, d, mois, gare_depart, gare_arrive,
                 col_retard_dep, col_retard_arr)
-    ax.set_title(f'{gare_depart} -> {gare_arrive} — Mois {mois}')
+    ax.set_title(f'{gare_depart} -> {gare_arrive} - Mois {mois}')
     plt.tight_layout()
     plt.show()
 
@@ -143,7 +143,7 @@ def plotMonthAnnulationsAll(df, gare_depart, gare_arrive,
     logger.info("Plot 12 mois annulations : %s -> %s", gare_depart, gare_arrive)
 
     fig, axes = plt.subplots(4, 3, figsize=(14, 16))
-    fig.suptitle(f'{gare_depart} -> {gare_arrive} — Annulations', fontsize=14)
+    fig.suptitle(f'{gare_depart} -> {gare_arrive}  Annulations', fontsize=14)
 
     for mois in range(1, 13):
         ax = axes[(mois - 1) // 3, (mois - 1) % 3]
