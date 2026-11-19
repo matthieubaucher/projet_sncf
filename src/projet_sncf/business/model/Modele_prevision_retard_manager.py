@@ -8,16 +8,16 @@ class ModelManager:
         self.dataframe = get_dataframe()
         self.modeles = {} # stockage des modèles entrainés
 
-    def get_id_axe(self, colonnes_X, axe, cible):
+    def get_id_axe(self, colonnes_X, axe, cible:str):
         id_axe = "<->".join(sorted(axe))
         id_col = "/".join(sorted(colonnes_X))
         return id_axe + "__" + cible + "__" + id_col
 
-    def get_trained_modele(self, X, axe, cible):
-        id_modele = self.get_id_axe(X.columns, axe, cible)
+    def get_trained_modele(self, X, axe, cible:str):
+        id_modele = self.get_id_axe(X.columns.tolist(), axe, cible)
         modele = self.modeles.get(id_modele)
         if modele is None:
-            modele = ModelePrevisionRetard(axe[0], axe[1], X.columns, cible)
+            modele = ModelePrevisionRetard(axe[0], axe[1], X.columns.tolist(), cible)
             self.modeles[id_modele] = modele
             modele.train(self.dataframe)
         return modele

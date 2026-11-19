@@ -3,7 +3,7 @@ from sklearn.model_selection import GridSearchCV
 
 class ModelePrevisionRetard:
 
-    def __init__(self, depart, arrivee, colonnes_X, colonne_Y):
+    def __init__(self, depart:str, arrivee:str, colonnes_X:list, colonne_Y:str):
         self.depart = depart
         self.arrivee = arrivee
         self.colonnes_X = colonnes_X
