@@ -1,10 +1,12 @@
 """Diagnostic de la qualité du jeu de données AQST.
 
 Ce module regroupe les contrôles du notebook
-notebooks/exploration_nettoyage.ipynb : valeurs manquantes,
+``notebooks/exploration_nettoyage.ipynb`` (section 3) : valeurs manquantes,
 doublons, valeurs impossibles et valeurs négatives, ainsi que les vérifications
-faites après le nettoyage.
+faites après le nettoyage (section 4).
 
+Les fonctions ne modifient jamais les données : elles comptent et renvoient des
+tableaux.
 """
 
 import logging
@@ -20,6 +22,9 @@ COL_ANNULES = "Nombre de trains annulés"
 COL_RETARDS = "Nombre de trains en retard à l'arrivée"
 COL_RETARD_30 = "Nombre trains en retard > 30min"
 COL_RETARD_60 = "Nombre trains en retard > 60min"
+COL_RETARD_MOYEN_15 = (
+    "Retard moyen trains en retard > 15 (si liaison concurrencée par vol)"
+)
 
 #: Textes qui représentent une valeur manquante sans être un vrai NaN.
 VALEURS_VIDES = [
@@ -48,7 +53,7 @@ def compter_valeurs_manquantes(
 ) -> int:
     """Compte les valeurs manquantes, faux vides compris.
 
-    Les faux vides, comme « NA » ou «  », sont comptés comme manquants.
+    Les faux vides, comme « NA » ou « - », sont comptés comme manquants.
 
     Args:
         data (pandas.DataFrame): Données à contrôler.
@@ -83,7 +88,7 @@ def chercher_doublons(
     Args:
         data (pandas.DataFrame): Données à contrôler.
         cle (list[str] | None): Colonnes qui devraient identifier une ligne.
-            Par défaut :data:CLE_SANS_SERVICE.
+            Par défaut :data:`CLE_SANS_SERVICE`.
 
     Returns:
         tuple[dict, pandas.DataFrame]: Un résumé (lignes identiques, lignes en
@@ -120,7 +125,7 @@ def masques_valeurs_impossibles(data: pd.DataFrame) -> dict[str, pd.Series]:
 
     Returns:
         dict[str, pandas.Series]: Pour chaque contrôle, un masque booléen
-            (True = ligne en défaut).
+            (``True`` = ligne en défaut).
 
     Raises:
         KeyError: Si une colonne nécessaire est absente.
@@ -135,8 +140,7 @@ def masques_valeurs_impossibles(data: pd.DataFrame) -> dict[str, pd.Series]:
             COL_RETARD_60,
             "Durée moyenne du trajet",
             "Retard moyen des trains en retard à l'arrivée",
-            "Retard moyen trains en retard > 15 "
-            "(si liaison concurrencée par vol)",
+            COL_RETARD_MOYEN_15,
         ],
     )
     prevues, annules = data[COL_PREVUES], data[COL_ANNULES]
@@ -156,8 +160,7 @@ def masques_valeurs_impossibles(data: pd.DataFrame) -> dict[str, pd.Series]:
         ]
         < 0,
         "Retard moyen des trains en retard > 15 min négatif": data[
-            "Retard moyen trains en retard > 15 "
-            "(si liaison concurrencée par vol)"
+            COL_RETARD_MOYEN_15
         ]
         < 0,
     }
@@ -207,7 +210,7 @@ def compter_inclusions(
         masques (dict[str, pandas.Series]): Masques renvoyés
             par :func:`masques_valeurs_impossibles`.
         reference (str): Nom du contrôle de référence, par exemple
-            "Circulations prévues = 0".
+            ``"Circulations prévues = 0"``.
 
     Returns:
         pandas.DataFrame: Pour chaque autre contrôle, le nombre de lignes et le
@@ -237,8 +240,8 @@ def negatifs_par_annee(
     """Compte les valeurs négatives de chaque colonne, par année.
 
     Args:
-        data (pandas.DataFrame): Données brutes, avec Date au format
-            AAAA-MM.
+        data (pandas.DataFrame): Données brutes, avec ``Date`` au format
+            ``AAAA-MM``.
         colonnes (list[str]): Colonnes à examiner.
 
     Returns:
@@ -258,7 +261,7 @@ def verifier_apres_nettoyage(df_propre: pd.DataFrame) -> pd.Series:
 
     Args:
         df_propre (pandas.DataFrame): Données renvoyées
-            par :func:utils.nettoyage.nettoyer.
+            par :func:`utils.nettoyage.nettoyer`.
 
     Returns:
         pandas.Series: Pour chaque contrôle, le nombre de lignes en défaut.
