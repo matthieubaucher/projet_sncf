@@ -5,11 +5,14 @@ import numpy as np
 from unittest.mock import patch, MagicMock
 import matplotlib.pyplot as plt
 
-from projet_sncf.utils.month_variations import (
+from month_variations import (
     plot_month_lateness,
     filter_route,
     plotMonthlyLateness,
     plotMonthlyLatenessAll,
+    plot_month_annulations,
+    plotMonthAnnulations,
+    plotMonthAnnulationsAll,
 )
 
 
@@ -53,6 +56,7 @@ class TestFilterRoute:
             with pytest.raises(ValueError):
                 filter_route(sample_df, 'Paris', 'Brest')
         assert "Aucune donnée pour le trajet Paris -> Brest" in caplog.text
+
 
 
 class TestPlotMonthLateness:
@@ -120,4 +124,102 @@ class TestPlotMonthlyLatenessAll:
     def test_trajet_inexistant(self, mock_subplots, mock_show, sample_df):
         with pytest.raises(ValueError):
             plotMonthlyLatenessAll(sample_df, 'Paris', 'Brest')
-        mock_show.assert_not_called()   
+        mock_show.assert_not_called()
+
+
+@pytest.fixture
+def sample_df_annul():
+    rows = []
+    for annee in [2022, 2023]:
+        for mois in range(1, 13):
+            rows.append({
+                'gare_depart': 'Paris',
+                'gare_arrive': 'Lyon',
+                'annee': annee,
+                'mois': mois,
+                'Nombre de trains annulés': mois * 2,
+                'Nombre de circulations prévues': 100,
+            })
+    for annee in [2022, 2023]:
+        for mois in range(1, 13):
+            rows.append({
+                'gare_depart': 'Paris',
+                'gare_arrive': 'Marseille',
+                'annee': annee,
+                'mois': mois,
+                'Nombre de trains annulés': 1,
+                'Nombre de circulations prévues': 50,
+            })
+    return pd.DataFrame(rows)
+
+class TestPlotMonthAnnulations:
+    def test_mois_avec_donnees(self, sample_df_annul):
+        ax = MagicMock()
+        plot_month_annulations(ax, sample_df_annul, 6, 'Paris', 'Lyon')
+        assert ax.plot.call_count == 2  # nb annulés + taux %
+        ax.set_title.assert_called_with('Mois 6')
+
+    def test_mois_sans_donnees(self, sample_df_annul):
+        ax = MagicMock()
+        plot_month_annulations(ax, sample_df_annul, 13, 'Paris', 'Lyon')
+        ax.plot.assert_not_called()
+        ax.set_axis_off.assert_called_once()
+        ax.text.assert_called_once()
+
+    def test_log_warning_mois_vide(self, sample_df_annul, caplog):
+        ax = MagicMock()
+        with caplog.at_level(logging.WARNING):
+            plot_month_annulations(ax, sample_df_annul, 13, 'Paris', 'Lyon')
+        assert "Aucune donnée pour le mois 13" in caplog.text
+
+
+class TestPlotMonthAnnulations:
+    @patch('matplotlib.pyplot.show')
+    @patch('matplotlib.pyplot.subplots')
+    def test_mois_valide(self, mock_subplots, mock_show, sample_df_annul):
+        mock_subplots.return_value = (MagicMock(), MagicMock())
+        plotMonthAnnulations(sample_df_annul, 'Paris', 'Lyon', mois=6)
+        mock_show.assert_called_once()
+
+    @patch('matplotlib.pyplot.show')
+    @patch('matplotlib.pyplot.subplots')
+    def test_mois_vide(self, mock_subplots, mock_show, sample_df_annul):
+        with pytest.raises(ValueError, match="Aucune donnée pour le mois"):
+            plotMonthAnnulations(sample_df_annul, 'Paris', 'Lyon', mois=13)
+        mock_show.assert_not_called()
+
+    @patch('matplotlib.pyplot.show')
+    @patch('matplotlib.pyplot.subplots')
+    def test_trajet_inexistant(self, mock_subplots, mock_show, sample_df_annul):
+        with pytest.raises(ValueError, match="Aucune donnée pour"):
+            plotMonthAnnulations(sample_df_annul, 'Paris', 'Brest', mois=6)
+        mock_show.assert_not_called()
+
+
+class TestPlotMonthAnnulationsAll:
+    @patch('matplotlib.pyplot.show')
+    @patch('matplotlib.pyplot.subplots')
+    def test_12_mois(self, mock_subplots, mock_show, sample_df_annul):
+        fig = MagicMock()
+        axes = np.empty((4, 3), dtype=object)
+        for i in range(4):
+            for j in range(3):
+                axes[i, j] = MagicMock()
+        mock_subplots.return_value = (fig, axes)
+        plotMonthAnnulationsAll(sample_df_annul, 'Paris', 'Lyon')
+        mock_show.assert_called_once()
+        fig.tight_layout.assert_called_with(rect=[0, 0, 1, 0.95])
+
+    @patch('matplotlib.pyplot.show')
+    @patch('matplotlib.pyplot.subplots')
+    def test_trajet_inexistant(self, mock_subplots, mock_show, sample_df_annul):
+        with pytest.raises(ValueError):
+            plotMonthAnnulationsAll(sample_df_annul, 'Paris', 'Brest')
+        mock_show.assert_not_called()
+
+    def testPlotMonthAnnulationsMoisAbsent(self, sample_df_annul):
+        ax = MagicMock()
+        plot_month_annulations(ax, sample_df_annul, 13, 'Paris', 'Lyon')
+        ax.plot.assert_not_called()
+        ax.set_axis_off.assert_called_once()
+        ax.text.assert_called_once()    
