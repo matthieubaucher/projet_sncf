@@ -6,7 +6,7 @@ The CSV has one row per line segment, with its geometry as GeoJSON text in the
 simplified, so that the result is small enough to be versioned.
 
 Usage,, from poc/analyse_machoudi/:
-    uv run python -m analyse_machoudi.rail_network <lignes.csv> <output.json>
+    uv run python -m projet_sncf.utils.rail_network <lignes.csv> <output.json>
 """
 
 import json

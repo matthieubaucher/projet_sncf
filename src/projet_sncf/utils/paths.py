@@ -2,7 +2,7 @@ import os
 import glob
 import logging
 
-from analyse_machoudi.constants import DATA_DIR, DEFAULT_PATTERN
+from projet_sncf.business.analysis.constants import DATA_DIR, DEFAULT_PATTERN
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ import json
 import pandas as pd
 import pytest
 
-from analyse_machoudi.rail_network import build_network, parse_paths, simplify
+from projet_sncf.utils.rail_network import build_network, parse_paths, simplify
 
 
 def line(*points):

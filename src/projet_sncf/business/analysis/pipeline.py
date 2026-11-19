@@ -4,12 +4,12 @@ import logging
 
 import pandas as pd
 
-from analyse_machoudi.constants import FINAL_COLUMNS, MIN_MONTHS
-from analyse_machoudi.indicators import compute_cause_profile, compute_indicators
-from analyse_machoudi.regularity import compute_regularity
-from analyse_machoudi.score import compute_score, dominant_cause
-from analyse_machoudi.seasonality import compute_seasonality
-from analyse_machoudi.shocks import compute_national_rates, detect_shock_months
+from projet_sncf.business.analysis.constants import FINAL_COLUMNS, MIN_MONTHS
+from projet_sncf.business.analysis.indicators import compute_cause_profile, compute_indicators
+from projet_sncf.business.analysis.regularity import compute_regularity
+from projet_sncf.business.analysis.score import compute_score, dominant_cause
+from projet_sncf.business.analysis.seasonality import compute_seasonality
+from projet_sncf.business.analysis.shocks import compute_national_rates, detect_shock_months
 
 logger = logging.getLogger(__name__)
 

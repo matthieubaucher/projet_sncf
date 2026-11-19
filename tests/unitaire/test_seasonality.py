@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from analyse_machoudi.constants import (
+from projet_sncf.business.analysis.constants import (
     COL_ARRIVAL,
     COL_CANCELLED,
     COL_DATE,
@@ -13,7 +13,7 @@ from analyse_machoudi.constants import (
     COL_SCHEDULED,
     COL_SERVICE,
 )
-from analyse_machoudi.seasonality import adjusted_r2, compute_seasonality
+from projet_sncf.business.analysis.seasonality import adjusted_r2, compute_seasonality
 
 
 def make_liaison(delayed, start="2022-01", station="B", scheduled=1000):
