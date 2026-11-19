@@ -12,7 +12,7 @@ from projet_sncf.business.map.map_sncf import TIER_COLORS
 
 # Constants
 SCORES_FILE = (
-    Path(__file__).resolve().parents[1] / "data" / "map" / "scores_liaisons.csv"
+    Path(__file__).resolve().parents[3] / "data" / "map" / "scores_liaisons.csv"
 )
 
 INTRO_TEXT = (

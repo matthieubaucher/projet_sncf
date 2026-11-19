@@ -31,7 +31,7 @@ from projet_sncf.business.map.map_sncf import (
 )
 
 # Constants
-DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "map"
+DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "map"
 SCORES_FILE = DATA_DIR / "scores_liaisons.csv"
 STATIONS_FILE = DATA_DIR / "stations_coordonnees.csv"
 NETWORK_FILE = DATA_DIR / "reseau_ferre_simplifie.json"
