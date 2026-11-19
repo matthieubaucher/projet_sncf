@@ -3,7 +3,11 @@ Name: projet_sncf
 Version: 0.1.0
 Summary: Projet commun sncf
 Requires-Python: >=3.11
+Requires-Dist: ipykernel>=7.4.0
+Requires-Dist: matplotlib>=3.11.2
 Requires-Dist: numpy>=2.4.6
+Requires-Dist: pandas>=3.0.6
+Requires-Dist: plotly>=7.1.0
 Requires-Dist: pytest>=9.1.1
 Requires-Dist: scikit-learn>=1.9.1
 Requires-Dist: seaborn>=0.13.2
