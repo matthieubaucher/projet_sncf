@@ -4,7 +4,7 @@ Contexte national, trafic et causes de retard.
 
 Ce module regroupe les calculs des sections 1 et 2 du notebook
 ``notebooks/exploration_nettoyage.ipynb``. Les fonctions renvoient des
-tableaux ; les graphiques sont tracés avec :mod:`utils.graphiques`.
+tableaux ; les graphiques sont tracés avec :mod:`projet_sncf.utils.graphiques`.
 """
 
 import pandas as pd

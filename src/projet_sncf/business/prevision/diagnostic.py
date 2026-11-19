@@ -13,7 +13,10 @@ import logging
 
 import pandas as pd
 
-from utils.nettoyage import COLONNES_COMMENTAIRES, verifier_colonnes
+from projet_sncf.database.nettoyage import (
+    COLONNES_COMMENTAIRES,
+    verifier_colonnes,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -261,7 +264,7 @@ def verifier_apres_nettoyage(df_propre: pd.DataFrame) -> pd.Series:
 
     Args:
         df_propre (pandas.DataFrame): Données renvoyées
-            par :func:`utils.nettoyage.nettoyer`.
+            par :func:`projet_sncf.database.nettoyage.nettoyer`.
 
     Returns:
         pandas.Series: Pour chaque contrôle, le nombre de lignes en défaut.

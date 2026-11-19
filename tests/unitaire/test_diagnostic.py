@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from utils.diagnostic import (
+from projet_sncf.business.prevision.diagnostic import (
     chercher_doublons,
     compter_inclusions,
     compter_valeurs_manquantes,
@@ -11,7 +11,7 @@ from utils.diagnostic import (
     tableau_controles,
     verifier_apres_nettoyage,
 )
-from utils.nettoyage import nettoyer
+from projet_sncf.database.nettoyage import nettoyer
 
 RETARD_EN_RETARD = "Retard moyen des trains en retard à l'arrivée"
 RETARD_15 = (

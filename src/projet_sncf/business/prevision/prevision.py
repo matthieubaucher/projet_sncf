@@ -34,7 +34,7 @@ from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from utils.nettoyage import verifier_colonnes
+from projet_sncf.database.nettoyage import verifier_colonnes
 
 logger = logging.getLogger(__name__)
 
@@ -78,9 +78,9 @@ def preparer_donnees(df: pd.DataFrame) -> pd.DataFrame:
     Les trains réellement circulés sont les trains prévus moins les annulés.
 
     Args:
-        df (pandas.DataFrame): Données nettoyées
-            par :func:`utils.nettoyage.nettoyer`, avec une colonne ``Date`` au
-            format date.
+        df (pandas.DataFrame): Données nettoyées par
+            :func:`projet_sncf.database.nettoyage.nettoyer`, avec une colonne
+            ``Date`` au format date.
 
     Returns:
         pandas.DataFrame: Une ligne par liaison et par mois, avec la clé de la

@@ -7,7 +7,7 @@ import pytest
 
 pytest.importorskip("sklearn")
 
-from utils.prevision import (  # noqa: E402
+from projet_sncf.business.prevision.prevision import (  # noqa: E402
     COL_ANNULES,
     COL_PREVUES,
     COL_RETARDS,
@@ -377,7 +377,9 @@ def test_optimiser_foret(
     _, train, test = decouper_train_test(table, "2024-01-01")
     X_train, y_train, _, _, _ = preparer_matrices(train, test)
     grille = {"max_depth": [None, 3], "min_samples_leaf": [1]}
-    with caplog.at_level(logging.INFO, logger="utils.prevision"):
+    with caplog.at_level(
+        logging.INFO, logger="projet_sncf.business.prevision.prevision"
+    ):
         recherche, resultats = optimiser_foret(
             X_train, y_train, train["Date"], grille=grille, n_decoupages=2
         )
@@ -415,7 +417,9 @@ def test_entrainer_modele_final_ecarte_les_mois_de_choc(
 ) -> None:
     connues, _, _ = decouper_train_test(table, "2024-01-01")
     choc = pd.DatetimeIndex(["2023-04-01"])
-    with caplog.at_level(logging.INFO, logger="utils.prevision"):
+    with caplog.at_level(
+        logging.INFO, logger="projet_sncf.business.prevision.prevision"
+    ):
         entrainer_modele_final(connues, choc)
     attendu = (~connues["Date"].isin(choc)).sum()
     assert f"Modèle final entraîné sur {attendu} lignes" in caplog.text
@@ -442,7 +446,9 @@ def test_resultats_test_et_chercher_resultat(
         resultats, "PARIS", "B", "2024-03-01", service="International"
     )
     assert trouve["Gare d'arrivée"] == "B"
-    with caplog.at_level(logging.WARNING, logger="utils.prevision"):
+    with caplog.at_level(
+        logging.WARNING, logger="projet_sncf.business.prevision.prevision"
+    ):
         assert (
             chercher_resultat(resultats, "PARIS", "B", "2024-03-01") is None
         )  # mauvais service
