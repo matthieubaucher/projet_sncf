@@ -18,7 +18,7 @@ LOGO_COLOR = "#f09600"
 
 
 def build_logo() -> str:
-    """Assemble le logo : l'icône de train du fichier SVG et le nom de l'application.
+    """Assemble le logo avec l'icône de train et le nom de l'application.
 
     Returns:
         str: Le logo au format SVG, prêt pour `st.logo`.
@@ -84,8 +84,7 @@ def build_pages() -> dict:
 
 
 def run_app() -> None:
-    """Lance l'application : logo en haut, menu groupé, puis la page choisie."""
-    setup_logging()
+    """Lance l'application avec le logo, le menu et la page sélectionnée."""
     st.logo(build_logo(), size="large")
     page = st.navigation(build_pages(), position="sidebar")
     st.sidebar.caption("Données : SNCF Open Data")
