@@ -21,7 +21,7 @@ def test_simulation_scenario_utilisateur_nominal(
     result = simulation_scenario_utilisateur(
         parameters,
         ["PARIS LYON", "NICE"],
-        "Nombre trains en retard > 30min"
+        "prct annulation"
     )
 
     mock_get_temps.assert_called_once_with(1, 4)
@@ -29,7 +29,7 @@ def test_simulation_scenario_utilisateur_nominal(
     mock_simulation.assert_called_once_with(
         {"Temps": 3, "Cause toto": 42, "Nombre de circulations prévues":10},
         ["PARIS LYON", "NICE"],
-        "Nombre trains en retard > 30min"
+        "prct annulation"
     )
 
     np.testing.assert_array_equal(
@@ -44,7 +44,7 @@ def test_simulation_scenario_utilisateur_axe_inconnu(mock_get_axes):
         simulation_scenario_utilisateur(
             {"Temps": 15, "Nombre de circulations prévues": 10},
             ["FOO", "BAR"],
-            "Nombre trains en retard > 30min"
+            "prct annulation"
         )
 
 @patch("projet_sncf.database.dataloader.get_axes")
@@ -54,7 +54,7 @@ def test_simulation_scenario_utilisateur_nb_circ_0(mock_get_axes):
         simulation_scenario_utilisateur(
             {"Nombre de circulations prévues": 0},
             ["PARIS LYON", "NICE"],
-            "Nombre trains en retard > 30min"
+            "prct annulation"
         )       
 
 @patch("projet_sncf.database.dataloader.get_axes")
@@ -73,7 +73,7 @@ def test_clusterise_ligne_et_axe_axe_inconnu(mock_get_axes):
     with pytest.raises(ValueError, match="Axe.* non disponible.*"):
         clusterise_ligne_et_axe(
             [["FOO", "BAR"], ["A", "B"], ["C", "D"], ["E", "F"], ["G", "H"]],
-            "Nombre trains en retard > 30min"
+            "prct annulation"
         )
 
 @patch("projet_sncf.database.dataloader.get_axes")
@@ -91,6 +91,6 @@ def test_clusterise_ligne_et_axe_axes_en_nombre_insuffisant(mock_get_axes):
     with pytest.raises(ValueError, match="Choisissez au moins 4 axes"):
         clusterise_ligne_et_axe(
             [["PARIS LYON", "NICE"]],
-            "Nombre trains en retard > 30min"
+            "prct annulation"
         )
         
