@@ -72,11 +72,6 @@ def build_pages() -> dict:
                 title="Prévision des perturbations",
                 icon=":material/query_stats:",
             ),
-            st.Page(
-                PAGES_DIR / "clustering_lignes.py",
-                title="Clustering des modèles",
-                icon=":material/hub:",
-            ),
         ],
     }
 
