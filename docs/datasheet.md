@@ -83,7 +83,7 @@ La question de la rémunération des collecteurs ne se pose pas, car la collecte
 
 ## 4. Prétraitement, nettoyage et labellisation
 
-Le nettoyage commun est réalisé par la fonction "nettoyer", appelée par "get_dataframe", la fonction de chargement partagée de l'application. Chaque règle est justifiée dans le notebook "exploration_nettoyage.ipynb". Le principe est de garder les lignes et de remplacer une valeur impossible par une valeur manquante, pour ne pas perdre les autres informations du mois. Le tableau 4 détaille les règles. Au total, le fichier passe de 12 907 à 12 834 lignes, et 656 cases deviennent manquantes.
+Le nettoyage commun est réalisé par la fonction "nettoyer", appelée par "get_dataframe", la fonction de chargement partagée de l'application. Chaque règle est justifiée dans le notebook "02_exploration_nettoyage.ipynb". Le principe est de garder les lignes et de remplacer une valeur impossible par une valeur manquante, pour ne pas perdre les autres informations du mois. Le tableau 4 détaille les règles. Au total, le fichier passe de 12 907 à 12 834 lignes, et 656 cases deviennent manquantes.
 
 **Tableau 4 – Règles de nettoyage**
 

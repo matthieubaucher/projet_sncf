@@ -9,7 +9,7 @@ L'assureur choisit le mois :
 - un **mois passé** de la période de test (2025 et après) : ce que le modèle
   avait prévu, comparé à ce qui s'est réellement passé.
 
-Les prévisions sont produites par le notebook ``notebooks/prevision.ipynb``,
+Les prévisions sont produites par le notebook ``notebooks/03_prevision.ipynb``,
 qui les écrit dans ``data/predictions/`` ; l'historique vient
 de :func:`projet_sncf.database.dataloader.get_dataframe`.
 

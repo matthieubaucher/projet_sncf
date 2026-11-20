@@ -1,6 +1,6 @@
 """Prévision du mois suivant (Normal ou Perturbé) pour chaque liaison TGV.
 
-Ce module regroupe les calculs du notebook ``notebooks/prevision.ipynb``, où
+Ce module regroupe les calculs du notebook ``notebooks/03_prevision.ipynb``, où
 chaque choix est expliqué : la cible, les huit variables explicatives, les mois
 de choc, le découpage dans le temps, les modèles, les mesures de qualité et la
 prévision du mois suivant.
