@@ -127,7 +127,7 @@ with center:
                 parameter,
                 min_value=0,
                 max_value=15000,
-                value=0,
+                value=1,
                 key=parameter
             )
     

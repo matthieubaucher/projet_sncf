@@ -9,6 +9,9 @@ def simulation_scenario_utilisateur(parameters:dict, axe:str, cible:str):
     if axe not in get_axes():
         raise ValueError("Axe non disponible pour la simulation")
 
+    if parameters.get("Nombre de circulations prévues", 0)<=0:
+        raise ValueError("Nombre de circulations prévues doit être au moins 1")
+
     # traduction en temps suivant l'origine définie dans la base    
     temps = parameters["Temps"]
     parameters["Temps"] = dl.get_temps(temps//12, temps%12+1)
