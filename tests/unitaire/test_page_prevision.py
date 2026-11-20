@@ -17,12 +17,19 @@ from projet_sncf.pages.prevision_perturbations import (
     COL_PREVUES,
     COL_RETARDS,
     causes_du_mois,
+    chances,
     charger_previsions,
     historique_liaisons,
     indicateurs_liaison,
+    lecture_historique,
     mois_disponibles,
     niveau_risque,
+    nom_mois,
+    phrase_bilan,
+    phrase_confiance,
+    phrase_prevision,
     previsions_du_mois,
+    taux_par_niveau,
 )
 
 CAUSE_EXTERNE, CAUSE_INFRA = list(CAUSES)[:2]
@@ -279,3 +286,86 @@ def test_page_mois_passe(
     assert [m.value for m in at.metric] == ["1 / 2", "2 / 2", "50%"]
     at.selectbox[1].select_index(1).run()  # deuxième liaison
     assert not at.exception
+
+
+# --- phrases d'interprétation
+
+
+def test_chances_et_nom_du_mois() -> None:
+    assert chances(0.9) == "90 chances sur 100"
+    assert chances(0.004) == "0 chances sur 100"
+    assert nom_mois(pd.Timestamp("2026-02-01")) == "février 2026"
+
+
+def test_phrase_prevision_n_ecrit_pas_la_probabilite_en_pourcent() -> None:
+    phrase = phrase_prevision("A → B", pd.Timestamp("2026-10-01"), 0.67)
+    assert "67 chances sur 100" in phrase
+    assert "67 %" not in phrase
+    assert "20 % des trains" in phrase
+    assert "octobre 2026" in phrase
+
+
+def test_lecture_historique_au_dessus_et_sous_le_seuil() -> None:
+    phrases = lecture_historique(
+        {"mois_dernier": 0.30, "moyenne_12_mois": 0.15, "an_dernier": 0.10}
+    )
+    assert "**au-dessus** du seuil" in phrases[0]
+    assert "sous le seuil" in phrases[1]
+    assert "sous le seuil" in phrases[2]
+    assert "**plus perturbé** que d'habitude" in phrases[3]
+
+
+@pytest.mark.parametrize(
+    ("dernier", "tendance"),
+    [
+        (0.05, "**moins perturbé** que d'habitude"),
+        (0.16, "dans la moyenne habituelle"),
+    ],
+)
+def test_lecture_historique_tendance(dernier: float, tendance: str) -> None:
+    phrases = lecture_historique(
+        {"mois_dernier": dernier, "moyenne_12_mois": 0.15, "an_dernier": None}
+    )
+    assert tendance in phrases[-1]
+    assert len(phrases) == 3
+
+
+def test_lecture_historique_sans_donnees() -> None:
+    assert lecture_historique(
+        {"mois_dernier": None, "moyenne_12_mois": None, "an_dernier": None}
+    ) == ["Pas d'historique pour cette liaison avant ce mois."]
+
+
+@pytest.mark.parametrize(
+    ("prevision", "realite", "attendu"),
+    [
+        ("Perturbé", "Perturbé", "la prévision était juste"),
+        ("Normal", "Normal", "le mois est resté normal, **la prévision"),
+        ("Perturbé", "Normal", "fausse alerte"),
+        ("Normal", "Perturbé", "la perturbation a été manquée"),
+    ],
+)
+def test_phrase_bilan(prevision: str, realite: str, attendu: str) -> None:
+    phrase = phrase_bilan(0.6, prevision, realite, 0.25)
+    assert "60 chances sur 100" in phrase
+    assert "**25 %** des trains" in phrase
+    assert attendu in phrase
+
+
+def test_taux_par_niveau_utilise_seulement_les_mois_passes() -> None:
+    previsions = pd.DataFrame(
+        {
+            "proba_perturbation": [0.9, 0.7, 0.5, 0.1, 0.95],
+            "realite": ["Perturbé", "Normal", "Perturbé", "Normal", None],
+        }
+    )
+    assert taux_par_niveau(previsions) == {
+        "Élevé": 0.5,
+        "Moyen": 1.0,
+        "Faible": 0.0,
+    }
+
+
+def test_phrase_confiance() -> None:
+    assert "7 fois sur 10" in phrase_confiance("Élevé", {"Élevé": 0.70})
+    assert phrase_confiance("Moyen", {"Élevé": 0.70}) == ""
