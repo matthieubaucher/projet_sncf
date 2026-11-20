@@ -1,6 +1,7 @@
 """Page d'accueil."""
 
 # Imports
+import logging
 from pathlib import Path
 
 import altair as alt
@@ -12,6 +13,8 @@ from projet_sncf.business.map.map_sncf import TIER_COLORS
 from projet_sncf.business.analysis.reliability import get_reliability_table
 
 # Constants
+logger = logging.getLogger(__name__)
+
 INTRO_TEXT = (
     "**Cher assureur,** RailInsight note la fiabilité de chaque liaison TGV à partir "
     "de l'historique des retards et des annulations. "
@@ -45,6 +48,8 @@ def hex_color(tier: str) -> str:
 def main() -> None:
     """Dessine la page d'accueil.
 
+    Si les scores ne se chargent pas, la page affiche une erreur et s'arrête.
+
     Returns:
         None: La page est affichée par Streamlit.
     """
@@ -58,7 +63,12 @@ def main() -> None:
     st.caption("Fiabilité des liaisons ferroviaires")
     st.markdown(INTRO_TEXT)
 
-    scores = load_scores()
+    try:
+        scores = load_scores()
+    except (FileNotFoundError, ValueError, KeyError) as error:
+        logger.error("Chargement des scores impossible : %s", error)
+        st.error(f"Impossible de charger les scores : {error}")
+        st.stop()
     metrics = home_metrics(scores)
 
     columns = st.columns(4)
