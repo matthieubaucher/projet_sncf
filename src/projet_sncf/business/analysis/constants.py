@@ -10,7 +10,9 @@ import os
 # Constants
 
 # Racine du dépôt et dossier des données
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+ROOT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+)
 DATA_DIR = os.path.join(ROOT, "data")
 
 # Motif pour trouver le CSV brut dans DATA_DIR
@@ -44,8 +46,13 @@ CAUSE_COLUMNS = {
     "Prct retard pour cause infrastructure": "Infrastructure",
     "Prct retard pour cause gestion trafic": "Gestion du trafic",
     "Prct retard pour cause matériel roulant": "Matériel roulant",
-    "Prct retard pour cause gestion en gare et réutilisation de matériel": "Gestion en gare",
-    "Prct retard pour cause prise en compte voyageurs (affluence, gestions PSH, correspondances)": "Prise en compte des voyageurs",
+    (
+        "Prct retard pour cause gestion en gare et réutilisation de matériel"
+    ): "Gestion en gare",
+    (
+        "Prct retard pour cause prise en compte voyageurs "
+        "(affluence, gestions PSH, correspondances)"
+    ): "Prise en compte des voyageurs",
 }
 
 # Niveaux de confiance et niveaux de fiabilité
