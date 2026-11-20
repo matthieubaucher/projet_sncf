@@ -5,8 +5,6 @@ from pathlib import Path
 
 import streamlit as st
 
-from projet_sncf.utils.logging_config import setup_logging
-
 # Constants
 BASE_DIR = Path(__file__).resolve().parent
 PAGES_DIR = BASE_DIR / "pages"
