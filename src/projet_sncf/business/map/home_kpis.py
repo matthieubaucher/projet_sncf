@@ -15,14 +15,14 @@ def home_metrics(scores: pd.DataFrame) -> dict:
     """Calcule les quatre chiffres affichés sur la page d'accueil.
 
     Args:
-        scores (pd.DataFrame): Tableau de fiabilité, une ligne par liaison, avec les
-            colonnes `tiers`, `taux_perturbation` et `mois`.
+        scores (pd.DataFrame): Tableau de fiabilité, une ligne par liaison,
+            avec les colonnes `tiers`, `taux_perturbation` et `mois`.
 
     Returns:
-        dict: Les clés `liaisons` (nombre de liaisons), `plus_fiables` (nombre de
-        liaisons du niveau « plus fiable »), `taux_perturbation` (moyenne des taux
-        des liaisons) et `mois` (plus grand nombre de mois d'une liaison). Les
-        deux dernières valent 0 si le tableau est vide.
+        dict: Les clés `liaisons` (nombre de liaisons), `plus_fiables`
+        (nombre de liaisons du niveau « plus fiable »), `taux_perturbation`
+        (moyenne des taux des liaisons) et `mois` (plus grand nombre de
+        mois d'une liaison). Les deux dernières valent 0 pour un tableau vide.
     """
     return {
         "liaisons": len(scores),
@@ -46,5 +46,8 @@ def tier_counts(scores: pd.DataFrame) -> pd.DataFrame:
     """
     counts = scores["tiers"].value_counts()
     return pd.DataFrame(
-        {"Niveau": TIERS, "Liaisons": [int(counts.get(tier, 0)) for tier in TIERS]}
+        {
+            "Niveau": TIERS,
+            "Liaisons": [int(counts.get(tier, 0)) for tier in TIERS],
+        }
     )
