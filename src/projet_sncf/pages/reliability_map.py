@@ -81,8 +81,10 @@ INTRO_TEXT = (
 METHOD_TEXT = (
     "- **Score de fiabilité** : 100 moins la part des trains prévus annulés ou en retard à "
     "l'arrivée, observée sur l'historique des données de régularité mensuelle des TGV.\n"
-    "- **Prime pure estimée** : taux de perturbation observé sur la liaison × indemnité choisie. "
-    "C'est le coût moyen attendu par trajet, si le passé se répète.\n"
+    "- **Prime pure estimée** : coût moyen des indemnisations par trajet, sans frais ni marge. "
+    "On multiplie la part de trajets perturbés (annulés ou en retard) par l'indemnité versée. "
+    "Exemple : 1 trajet sur 8 perturbé (12,5 %) × 30 € d'indemnité = 3,75 € par trajet. "
+    "Le calcul suppose que le passé se reproduise.\n"
     "- **Limites** : la durée des retards, les frais, la marge et le prix du billet ne sont pas "
     "pris en compte. Un score reposant sur moins de 24 mois est à confirmer."
 )
@@ -375,7 +377,7 @@ def main() -> None:
         None: La page est affichée par Streamlit.
     """
     try:
-        st.set_page_config(page_title="Carte de fiabilité", layout="wide")
+        st.set_page_config(page_title="Carte interactive", layout="wide")
     except st.errors.StreamlitAPIException:
         # Déjà définie par l'application principale
         pass
