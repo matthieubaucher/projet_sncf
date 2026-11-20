@@ -1,5 +1,9 @@
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
+import logging
+import time
+
+logger = logging.getLogger(__name__)
 
 class ModelePrevisionRetard:
 
@@ -9,9 +13,13 @@ class ModelePrevisionRetard:
         self.colonnes_X = colonnes_X
         self.colonne_Y = colonne_Y
         self.model = None
+        logger.info(f"Modèle créé : {depart} {arrivee} {colonne_Y} parametres : {' + '.join(colonnes_X)}");
  
 
     def train(self, df):
+        logger.info(f"Entrainement du modèle {self.depart} <-> {self.arrivee} sur cible {self.colonne_Y} : début")
+        if len(df) < 20:
+            logger.warning(f"Peu de données d'entrainement : {len(df)} lignes")
         # Le nettoyage garde les valeurs impossibles en NaN : on écarte les lignes
         # où les variables ou la cible de ce modèle sont vides.
         df = df.dropna(subset=self.colonnes_X + [self.colonne_Y])
@@ -24,6 +32,8 @@ class ModelePrevisionRetard:
             "min_samples_leaf": [2, 3],
             "max_features": [2, 3],
         }
+        
+        debut_elapse = time.perf_counter()
 
         grid_search = GridSearchCV(
             estimator=RandomForestRegressor(
@@ -38,10 +48,19 @@ class ModelePrevisionRetard:
 
         grid_search.fit(X_train, y_train)
 
+        elapsed = time.perf_counter() - debut_elapse
+
         self.model = grid_search.best_estimator_
+
+        logger.info(f"Entrainement du modèle {self.depart} <-> {self.arrivee} sur cible {self.colonne_Y} : fin avec R2={grid_search.best_score_:.2f} en {elapsed:.2f} secondes")
+        if grid_search.best_score_<0:
+            logger.warning("ce modèle fait pire que la moyenne")
+        elif grid_search.best_score_<0.2:
+            logger.warning("ce modèle est pas terrible")
 
 
     def predict(self, X):
+        logger.info(f"Une prédiction effectuée sur le modèle {self.depart} <-> {self.arrivee} sur cible {self.colonne_Y}")
         return self.model.predict(X[self.colonnes_X])
 
 
