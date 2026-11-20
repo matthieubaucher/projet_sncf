@@ -61,4 +61,5 @@ def test_graphique_causes_isole_une_ligne_avec_double_clic():
 
     assert figure.layout.legend.itemclick == "toggle"
     assert figure.layout.legend.itemdoubleclick == "toggleothers"
+    assert figure.layout.title.text is None
     assert list(figure.data[0].y) == [0.2, 0.3]

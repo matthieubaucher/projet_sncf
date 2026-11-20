@@ -210,7 +210,7 @@ requestAnimationFrame(adapterGraphique);
 
 def render_page(data: pd.DataFrame) -> None:
     """Affiche les contrôles du classement et le graphique associé aux données."""
-    st.title("Classement des trajets les plus perturbés")
+    st.subheader("Classement des trajets les plus perturbés")
 
     dates = pd.to_datetime(data["Date"], errors="coerce").dropna()
     if dates.empty:

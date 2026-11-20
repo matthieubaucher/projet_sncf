@@ -53,6 +53,7 @@ def test_vue_causes_affiche_le_selecteur_et_la_courbe(donnees_causes):
     app = AppTest.from_function(_afficher_vue_causes, args=(donnees_causes,)).run()
 
     assert not app.exception
+    assert app.subheader[0].value == "Évolution des causes de perturbation"
     assert app.select_slider[0].value == (
         pd.Timestamp("2024-01-01").date(),
         pd.Timestamp("2024-02-01").date(),

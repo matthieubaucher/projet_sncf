@@ -159,6 +159,7 @@ def test_route_ranking_page_shows_period_slider_and_chart(monthly_routes):
     app = AppTest.from_function(_render_ranking_page, args=(monthly_routes,)).run()
 
     assert not app.exception
+    assert app.subheader[0].value == "Classement des trajets les plus perturbés"
     assert app.select_slider[0].value == (
         pd.Timestamp("2022-01-01").date(),
         pd.Timestamp("2024-01-01").date(),

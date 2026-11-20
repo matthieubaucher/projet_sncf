@@ -36,10 +36,7 @@ def raccourcir_intitules_causes(evolution: pd.DataFrame) -> pd.DataFrame:
     return resultat
 
 
-def construire_graphique_causes(
-    evolution: pd.DataFrame,
-    titre: str = "Évolution des causes de retard",
-) -> go.Figure:
+def construire_graphique_causes(evolution: pd.DataFrame) -> go.Figure:
     """Construit un graphique dont la légende isole une cause au double-clic."""
     figure = go.Figure()
     for cause, serie in evolution.groupby("cause", sort=False):
@@ -57,7 +54,6 @@ def construire_graphique_causes(
 
     figure.update_layout(
         height=420,
-        title=titre,
         xaxis_title="Mois",
         yaxis_title="Part des retards à l'arrivée",
         yaxis={"tickformat": ".0%", "range": [0, 1]},
@@ -73,6 +69,7 @@ def construire_graphique_causes(
 
 def afficher_evolution_causes(donnees: pd.DataFrame | None = None) -> None:
     """Affiche l'évolution mensuelle pondérée des causes sur la période choisie."""
+    st.subheader("Évolution des causes de perturbation")
     if donnees is None:
         donnees = charger_donnees_causes()
 
@@ -103,10 +100,8 @@ def afficher_evolution_causes(donnees: pd.DataFrame | None = None) -> None:
     trajet_choisi = st.selectbox("Trajet", options_trajets, key="trajet_causes")
     if trajet_choisi == TOUTES_LES_LIGNES:
         gare_depart = gare_arrivee = None
-        titre = "Évolution des causes de retard - Toutes les lignes"
     else:
         gare_depart, gare_arrivee = trajet_choisi.split(" -> ", maxsplit=1)
-        titre = f"Évolution des causes de retard - {trajet_choisi}"
 
     evolution = calculer_evolution_causes(
         donnees,
@@ -119,7 +114,7 @@ def afficher_evolution_causes(donnees: pd.DataFrame | None = None) -> None:
         return
     evolution = raccourcir_intitules_causes(evolution)
 
-    chart = construire_graphique_causes(evolution, titre)
+    chart = construire_graphique_causes(evolution)
     st.plotly_chart(chart, width="stretch")
 
 
