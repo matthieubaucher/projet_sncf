@@ -87,16 +87,19 @@ with center:
     )
 
 if st.button("Clusteriser"):
-    points = retard_api.clusterise_ligne_et_axe(st.session_state.axes, st.session_state.cible)
-    fig, ax = plt.subplots(figsize=(8, 6))
+    try:
+        points = retard_api.clusterise_ligne_et_axe(st.session_state.axes, st.session_state.cible)
+        fig, ax = plt.subplots(figsize=(8, 6))
 
-    ax.scatter(
-        points[:, 0],
-        points[:, 1]
-    )
+        ax.scatter(
+            points[:, 0],
+            points[:, 1]
+        )
 
-    ax.set_xlabel("Dimension 1")
-    ax.set_ylabel("Dimension 2")
-    ax.set_title("Clustering des axes suivant une cible")
+        ax.set_xlabel("Dimension 1")
+        ax.set_ylabel("Dimension 2")
+        ax.set_title("Clustering des axes suivant une cible")
 
-    st.pyplot(fig)
+        st.pyplot(fig)
+    except Exception as e:
+        st.error(str(e))
