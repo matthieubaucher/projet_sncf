@@ -6,19 +6,38 @@ from projet_sncf.api import Retard_prevision_API as retard_api
 st.markdown("""
 <style>
 .stApp {
-    background:
-        linear-gradient(135deg,
-            #f5f7fa 0%,
-            #e4ecf7 50%,
-            #dce8ff 100%);
+    background: #e4ecf7;
+    color: black !important;
 }
 
 .stNumberInput input {
     background-color: #f8f0da;
+    color: black !important;
 }
 
-.stSelectbox div[data-baseweb="select"] {
+.stNumberInput label,
+.stNumberInput div {
+    background: #e4ecf7 !important;
+}
+.stNumberInput p {
+    background: #e4ecf7 !important;
+    color: black !important;
+}
+
+.stButton * {
     background-color: #f8f0da;
+    color: black !important;
+}
+
+h1, h2, h3 {
+    color: black !important;
+}
+.stMarkdown p {
+    color: black !important;
+}
+.stSelectbox * {
+    background-color: #f8f0da;
+    color: black !important;
 }
 </style>
 """, unsafe_allow_html=True)
