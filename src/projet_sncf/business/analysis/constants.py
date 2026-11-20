@@ -16,10 +16,6 @@ DATA_DIR = os.path.join(ROOT, "data")
 # Motif pour trouver le CSV brut dans DATA_DIR
 DEFAULT_PATTERN = "regularite*.csv"
 
-# Journalisation
-LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-LOG_LEVEL = "INFO"
-
 # Période de l'analyse (les mois suivants ne sont pas utilisés)
 ANALYSIS_START = "2018-01"
 ANALYSIS_END = "2026-06"
