@@ -54,7 +54,7 @@ def clusterise(axes, cible):
     if perplexity <= 1:
         raise ValueError("Trop peu d'axes pour effectuer la projection t-SNE.")
     df = get_dataframe()
-    X = df.sample(n=1000)
+    X = df.sample(n=1000)[get_parameters_disponibles()]
     predictions = []
     for axe in axes:
         y = get_modele_manager().get_inferance(X, axe, cible)
@@ -64,3 +64,29 @@ def clusterise(axes, cible):
     embeddings = tsne.fit_transform(predictions)
     logger.info("Clustering effectuée")
     return embeddings
+
+
+def get_cibles_disponibles():
+    """Renvoie les cibles autorisées pour la simulation."""
+    return [
+        "prct annulation",
+        "Nombre de trains en retard à l'arrivée",
+        "Nombre trains en retard > 60min",
+    ]
+
+
+def get_parameters_disponibles():
+    """Renvoie les paramètres autorisés pour la simulation."""
+    return [
+        "Temps",
+        "Nombre de circulations prévues",
+        "Prct retard pour causes externes",
+        "Prct retard pour cause infrastructure",
+        "Prct retard pour cause gestion trafic",
+        "Prct retard pour cause matériel roulant",
+        "Prct retard pour cause gestion en gare et réutilisation de matériel",
+        (
+            "Prct retard pour cause prise en compte voyageurs "
+            "(affluence, gestions PSH, correspondances)"
+        ),
+    ]

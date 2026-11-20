@@ -2,10 +2,7 @@
 
 # Imports
 import logging
-<<<<<<< HEAD
-=======
 
->>>>>>> 1c6e835 (test(CI): refactor du fichier home.py pour PEP8)
 import altair as alt
 import pandas as pd
 import streamlit as st
@@ -81,7 +78,10 @@ def tier_chart(counts: pd.DataFrame) -> alt.LayerChart:
     """
     total = counts["Liaisons"].sum()
     counts = counts.assign(
-        Texte=[f"{n} liaisons · {100 * n / total:.0f} %" for n in counts["Liaisons"]],
+        Texte=[
+            f"{n} liaisons · {100 * n / total:.0f} %"
+            for n in counts["Liaisons"]
+        ],
         Encre=[ink_color(tier) for tier in counts["Niveau"]],
     )
     base = alt.Chart(counts).encode(
@@ -143,25 +143,10 @@ def main() -> None:
     )
     columns[3].metric("Historique couvert", f"{metrics['mois']} mois")
 
-    st.subheader("Répartition des liaisons par niveau")
-    counts = tier_counts(scores)
-    chart = (
-        alt.Chart(counts)
-        .mark_bar()
-        .encode(
-            x=alt.X(
-                "Niveau", sort=TIERS, axis=alt.Axis(labelAngle=0), title=None
-            ),
-            y=alt.Y("Liaisons", title=None),
-            color=alt.Color(
-                "Niveau",
-                scale=alt.Scale(
-                    domain=TIERS, range=[hex_color(t) for t in TIERS]
-                ),
-                legend=None,
-            ),
-            tooltip=["Niveau", "Liaisons"],
-        )
+    st.subheader("Répartition des liaisons par niveau de fiabilité")
+    st.altair_chart(
+        tier_chart(tier_counts(scores)).properties(height=280),
+        width="stretch",
     )
 
     st.caption("Données : SNCF Open Data. Réseau ferré : SNCF Réseau (ODbL).")
