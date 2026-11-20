@@ -51,17 +51,13 @@ Elle se met à jour automatiquement à chaque modification de la branche
 À partir de ces travaux, l'application s'articule autour des axes suivants,
 accessibles depuis le menu latéral :
 
-- **Accueil** : indicateurs d'ensemble et répartition des liaisons par niveau
-  de fiabilité ;
-- **Carte interactive** : exploration des liaisons, consultation de leur
-  historique et simulation d'une prime pure à partir d'une indemnité choisie ;
-- **Analyse des perturbations** : saisonnalité, classement des trajets et
-  évolution des causes de retard ;
-- **Simulation de retard** : estimation interactive à partir d'une liaison et
-  des paramètres choisis ;
-- **Prévision des perturbations** : visualisation des prévisions et de leurs
-  résultats de test ;
-- **Clustering des modèles** : comparaison de profils de liaisons.
+- **Accueil** : indicateurs d'ensemble et répartition des liaisons par niveau de fiabilité
+- **Carte interactive** : exploration des liaisons, consultation de leur historique et simulation d'une prime pure à partir d'une indemnité choisie 
+- **Analyse des perturbations** : saisonnalité, classement des trajets et évolution des causes de retard 
+- **Simulation de retard** : Une fonctionnalité de simulation permet d'explorer l'impact des différentes causes de retard sur plusieurs indicateurs ferroviaires. Des modèles de machine learning spécialisés par axe permettent d'estimer le nombre de trains en retard, le nombre de retards importants (> 60 min) ou le taux d'annulation
+- **Prévision des perturbations** : Une visualisation des prévisions et de leurs résultats de test 
+- **Clustering des modèles** : Une visualisation exploratoire permet de comparer les axes ferroviaires et de suggérer des similarités entre lignes présentant des comportements comparables face aux perturbations. Pour des raisons de performance, le nombre d'axes affichés simultanément est limité
+
 
 Le score de fiabilité est calculé à partir de l'historique d'une liaison :
 
@@ -78,7 +74,7 @@ de l'assureur.
 
 ## Données
 
-Le jeu de données source est **Régularité mensuelle TGV** de SNCF Open Data :
+Le jeu de données source est **Régularité mensuelle TGV** de SNCF Open Data 2026 :
 [consulter et télécharger le jeu de données](https://ressources.data.sncf.com/explore/dataset/regularite-mensuelle-tgv-aqst/information/).
 Le CSV utilisé par le projet est `data/regularite-mensuelle-tgv-aqst.csv`.
 
@@ -144,18 +140,33 @@ est configuré pour la branche `develop`.
 
 ```text
 src/projet_sncf/
-├── app.py                 # point d'entrée et navigation Streamlit
-├── pages/                 # pages de l'application
-├── business/              # analyses, scores, carte et modèles
-├── database/              # chargement et nettoyage des données
-├── api/                   # fonctions de simulation/prévision
+├── app.py                 # page principale de l'application
+├── pages/                 # sous pages 
+├── business/              # regroupe la logique metier de l'architecture : services, modèles, analyses
+├── database/              # partie technique pour le chargement et nettoyage des données
+├── api/                   # points d'entrées pour nos pages
 └── utils/                 # fonctions utilitaires et journalisation
 data/                      # données source et fichiers auxiliaires
 notebooks/                 # exploration et travaux d'analyse
-tests/
-├── unitaire/
+tests/                     # l'ensemble de nos tests (essentiellement unitaires)
+├── unitaire/               
 └── integration/
 ```
 
 Les dépendances et la configuration des outils sont décrites dans
 `pyproject.toml`. Les tests sont écrits avec `pytest`.
+
+
+## Références
+
+Tout utilisateurs de ce dataset qui exploiter les données doivent citer :
+
+SNCF, « Régularité mensuelle TGV », 2026.
+https://ressources.data.sncf.com/explore/dataset/regularite-mensuelle-tgv-aqst/information/
+
+
+## Bug tracking : comment signaler un bug, un problème ou un biais.
+
+Les anomalies, erreurs ou biais identifiés peuvent être signalés via les issues GitHub du projet ou directement à l'équipe de développement.
+
+
