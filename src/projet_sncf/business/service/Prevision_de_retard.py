@@ -60,7 +60,7 @@ def get_cibles_disponibles():
     """
         cibles autorisées pour la simulation
     """
-    return ["Retard moyen de tous les trains à l'arrivée", "Nombre trains en retard > 30min", "Nombre de trains annulés"]
+    return ["prct annulation", "Nombre de trains en retard à l'arrivée", "Nombre trains en retard > 60min"]
 
 
 def get_parameters_disponibles():
