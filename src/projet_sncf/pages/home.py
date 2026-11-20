@@ -2,19 +2,24 @@
 
 # Imports
 import logging
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1c6e835 (test(CI): refactor du fichier home.py pour PEP8)
 import altair as alt
 import pandas as pd
 import streamlit as st
 
+from projet_sncf.business.analysis.reliability import get_reliability_table
 from projet_sncf.business.map.home_kpis import TIERS, home_metrics, tier_counts
 from projet_sncf.business.map.map_sncf import TIER_COLORS
-from projet_sncf.business.analysis.reliability import get_reliability_table
 
 # Constants
 logger = logging.getLogger(__name__)
 
 INTRO_TEXT = (
-    "**Cher assureur,** RailInsight note la fiabilité de chaque liaison TGV à partir "
+    "**Cher assureur,** RailInsight note la fiabilité de chaque liaison "
+    "TGV à partir "
     "de l'historique des retards et des annulations. "
     "Visualisez les risques et les indicateurs de chaque liaison "
     "pour calibrer au mieux la prime d'assurance."
@@ -138,10 +143,25 @@ def main() -> None:
     )
     columns[3].metric("Historique couvert", f"{metrics['mois']} mois")
 
-    st.subheader("Répartition des liaisons par niveau de fiabilité")
-    st.altair_chart(
-        tier_chart(tier_counts(scores)).properties(height=280),
-        use_container_width=True,
+    st.subheader("Répartition des liaisons par niveau")
+    counts = tier_counts(scores)
+    chart = (
+        alt.Chart(counts)
+        .mark_bar()
+        .encode(
+            x=alt.X(
+                "Niveau", sort=TIERS, axis=alt.Axis(labelAngle=0), title=None
+            ),
+            y=alt.Y("Liaisons", title=None),
+            color=alt.Color(
+                "Niveau",
+                scale=alt.Scale(
+                    domain=TIERS, range=[hex_color(t) for t in TIERS]
+                ),
+                legend=None,
+            ),
+            tooltip=["Niveau", "Liaisons"],
+        )
     )
 
     st.caption("Données : SNCF Open Data. Réseau ferré : SNCF Réseau (ODbL).")
