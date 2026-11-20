@@ -1,7 +1,7 @@
 """Nettoyage du jeu de données « régularité mensuelle TGV » de l'AQST.
 
 Ce module applique les règles de nettoyage décidées dans le notebook
-``notebooks/exploration_nettoyage.ipynb`` (section 4), où
+``notebooks/02_exploration_nettoyage.ipynb`` (section 4), où
 chacune est justifiée.
 
 Chaque règle est une fonction séparée, qui peut être testée seule. La

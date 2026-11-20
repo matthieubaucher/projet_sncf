@@ -6,8 +6,8 @@ Objectif : **prévoir, pour chaque liaison TGV, si le mois suivant sera « Norma
 
 | Fichier | Rôle |
 |---|---|
-| `notebooks/exploration_nettoyage.ipynb` | exploration, contrôles de qualité et nettoyage |
-| `notebooks/prevision.ipynb` | cible, variables, modèles et prévision du mois suivant |
+| `notebooks/02_exploration_nettoyage.ipynb` | exploration, contrôles de qualité et nettoyage |
+| `notebooks/03_prevision.ipynb` | cible, variables, modèles et prévision du mois suivant |
 | `src/projet_sncf/database/nettoyage.py` | règles de nettoyage des données AQST |
 | `src/projet_sncf/business/prevision/diagnostic.py` | contrôles de qualité avant et après nettoyage |
 | `src/projet_sncf/business/prevision/exploration.py` | calculs de l'analyse exploratoire |
@@ -16,7 +16,7 @@ Objectif : **prévoir, pour chaque liaison TGV, si le mois suivant sera « Norma
 | `src/projet_sncf/utils/logging_config.py` | écriture des logs dans `logs/sncf.log` (commun à tout le projet) |
 | `data/regularite-mensuelle-tgv-aqst.csv` | données mensuelles AQST |
 | `data/reglarite-mensuelle-tgv-nationale.xlsx` | régularité nationale des TGV depuis 2015 (contexte) |
-| `data/predictions/` | fichiers écrits par `prevision.ipynb` et lus par la page Streamlit |
+| `data/predictions/` | fichiers écrits par `03_prevision.ipynb` et lus par la page Streamlit |
 | `tests/unitaire/test_diagnostic.py`, `test_exploration.py`, `test_prevision.py`, `test_logging_config.py`, `test_database_nettoyage.py` | tests unitaires |
 
 Les notebooks contiennent les explications et les justifications. Les calculs sont dans `src/`, ce qui garde les notebooks courts et permet de tester chaque fonction.
@@ -67,8 +67,8 @@ source .venv/bin/activate
 
 1. Placer `regularite-mensuelle-tgv-aqst.csv` dans `data/`.
 2. Ouvrir les notebooks depuis `notebooks/` avec le noyau `.venv` de la racine, puis tout exécuter, dans l'ordre :
-   - `exploration_nettoyage.ipynb`
-   - `prevision.ipynb`, qui écrit `data/predictions/predictions_liaisons.csv` et `data/predictions/predictions_test.csv`
+   - `02_exploration_nettoyage.ipynb`
+   - `03_prevision.ipynb`, qui écrit `data/predictions/predictions_liaisons.csv` et `data/predictions/predictions_test.csv`
 3. Le déroulement est enregistré dans `logs/sncf.log`.
 
 Dans un notebook, les fonctions s'importent ainsi :
