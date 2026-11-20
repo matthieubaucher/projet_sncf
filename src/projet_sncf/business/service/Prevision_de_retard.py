@@ -40,6 +40,7 @@ def clusterise(axes, cible):
     df = get_dataframe()
     X = df.sample(n=1000)
     Y = []
+    X = X[get_parameters_disponibles()]
     for axe in axes:
         y = get_modele_manager().get_inferance(X, axe, cible)
         Y += [y]
@@ -50,5 +51,23 @@ def clusterise(axes, cible):
         random_state=42
     )
     Y_2d = tsne.fit_transform(Y)
+
     logger.info(f"Clustering effectuée")
     return Y_2d
+
+
+def get_cibles_disponibles():
+    """
+        cibles autorisées pour la simulation
+    """
+    return ["prct annulation", "Nombre de trains en retard à l'arrivée", "Nombre trains en retard > 60min"]
+
+
+def get_parameters_disponibles():
+    """
+        parametres autorisées à la saisie utilisateur pour la simulation
+    """
+    return["Temps", "Nombre de circulations prévues", "Prct retard pour causes externes", "Prct retard pour cause infrastructure", 
+           "Prct retard pour cause gestion trafic", "Prct retard pour cause matériel roulant", 
+           "Prct retard pour cause gestion en gare et réutilisation de matériel", 
+           "Prct retard pour cause prise en compte voyageurs (affluence, gestions PSH, correspondances)"]

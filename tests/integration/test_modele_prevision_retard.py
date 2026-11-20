@@ -27,24 +27,45 @@ def compute_score(depart, arrivee, cible):
     return r2_score(reel, prediction)
 
 tests = [
-        ("PARIS LYON", "NICE VILLE", "prct Nombre trains en retard > 30min", -0.13),
-        ("PARIS LYON", "NICE VILLE", "prct annulation", 0.38), 
-        ("PARIS LYON", "NICE VILLE", "Retard moyen de tous les trains à l'arrivée", 0.19),
+        ("PARIS LYON", "MARSEILLE ST CHARLES", "Nombre de trains en retard à l'arrivée", 0.45),
+        ("PARIS LYON", "MARSEILLE ST CHARLES", "Nombre trains en retard > 60min", 0.15), # <- résultat mitigé partout : on garde ? 
+        ("PARIS LYON", "MARSEILLE ST CHARLES", "prct Nombre trains en retard > 30min", .17),
+        ("PARIS LYON", "MARSEILLE ST CHARLES", "prct annulation", 0.5), # <- tous les "prct annulation" sont bien
+        ("PARIS LYON", "MARSEILLE ST CHARLES", "Retard moyen de tous les trains à l'arrivée", 0), # <- celui la il est vraiment variable : on prend pas
 
-        ("PARIS MONTPARNASSE", "RENNES", "prct Nombre trains en retard > 30min", -0.07),
-        ("PARIS MONTPARNASSE", "RENNES", "prct annulation", 0.39),
-        ("PARIS MONTPARNASSE", "RENNES", "Retard moyen de tous les trains à l'arrivée", 0.07),
+        ("PARIS LYON", "NICE VILLE", "Nombre de trains en retard à l'arrivée", 0.66),
+        ("PARIS LYON", "NICE VILLE", "Nombre trains en retard > 60min", 0.27),
+        ("PARIS LYON", "NICE VILLE", "prct Nombre trains en retard > 30min", 0.32),
+        ("PARIS LYON", "NICE VILLE", "prct annulation", 0.48), 
+        ("PARIS LYON", "NICE VILLE", "Retard moyen de tous les trains à l'arrivée", 0.42),
 
-        ("PARIS NORD", "LILLE", "prct Nombre trains en retard > 30min", -0.30),  
-        ("PARIS NORD", "LILLE", "prct annulation", 0.13),
-        ("PARIS NORD", "LILLE", "Retard moyen de tous les trains à l'arrivée", 0.23)
-    ]
+        ("PARIS MONTPARNASSE", "RENNES", "Nombre de trains en retard à l'arrivée", 0.15), # <- on garde quand même : les autres sont bons 
+        ("PARIS MONTPARNASSE", "RENNES", "Nombre trains en retard > 60min", 0.145),
+        ("PARIS MONTPARNASSE", "RENNES", "prct Nombre trains en retard > 30min", -0.1), # <- celui la il est vraiment pas terrible : on prend pas
+        ("PARIS MONTPARNASSE", "RENNES", "prct annulation", 0.56),
+        ("PARIS MONTPARNASSE", "RENNES", "Retard moyen de tous les trains à l'arrivée", 0.139),
 
+        ("PARIS NORD", "LILLE", "Nombre de trains en retard à l'arrivée", 0.44),
+        ("PARIS NORD", "LILLE", "Nombre trains en retard > 60min", 0.23),
+        ("PARIS NORD", "LILLE", "prct Nombre trains en retard > 30min", 0.269),  
+        ("PARIS NORD", "LILLE", "prct annulation", 0.5),
+        ("PARIS NORD", "LILLE", "Retard moyen de tous les trains à l'arrivée", 0.34),
+
+        ("PARIS MONTPARNASSE", "BORDEAUX ST JEAN", "Nombre de trains en retard à l'arrivée", 0.39),
+        ("PARIS MONTPARNASSE", "BORDEAUX ST JEAN", "Nombre trains en retard > 60min", 0.139),
+        ("PARIS MONTPARNASSE", "BORDEAUX ST JEAN", "prct Nombre trains en retard > 30min", 0.34), # <- c'est pas si mal, ca fait hésiter  
+        ("PARIS MONTPARNASSE", "BORDEAUX ST JEAN", "prct annulation", 0.609),
+        ("PARIS MONTPARNASSE", "BORDEAUX ST JEAN", "Retard moyen de tous les trains à l'arrivée", 0.21)
+    ] 
+# => je pense proposer "prct annulation", "Nombre de trains en retard à l'arrivée", "Nombre trains en retard > 60min" à l'utilisateur
+# et c'est raccord avec le theme de l'assurance
 
 @pytest.mark.parametrize("depart,arrivee,cible,seuil", tests)
 def test_modelePrevisionRetard(depart, arrivee, cible, seuil):
     score = compute_score(depart, arrivee, cible)
     assert score > seuil, f"le r2 de la prévision \"{cible}\" est bas ({score:5.3f}) pour la ligne {depart} -> {arrivee}"
+
+
 
 
 if __name__ == "__main__":

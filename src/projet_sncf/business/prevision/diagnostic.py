@@ -1,7 +1,7 @@
 """Diagnostic de la qualité du jeu de données AQST.
 
 Ce module regroupe les contrôles du notebook
-``notebooks/exploration_nettoyage.ipynb`` (section 3) : valeurs manquantes,
+``notebooks/02_exploration_nettoyage.ipynb`` (section 3) : valeurs manquantes,
 doublons, valeurs impossibles et valeurs négatives, ainsi que les vérifications
 faites après le nettoyage (section 4).
 

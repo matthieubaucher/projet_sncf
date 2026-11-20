@@ -6,18 +6,18 @@ Objectif : **prévoir, pour chaque liaison TGV, si le mois suivant sera « Norma
 
 | Fichier | Rôle |
 |---|---|
-| `notebooks/exploration_nettoyage.ipynb` | exploration, contrôles de qualité et nettoyage |
-| `notebooks/prevision.ipynb` | cible, variables, modèles et prévision du mois suivant |
+| `notebooks/02_exploration_nettoyage.ipynb` | exploration, contrôles de qualité et nettoyage |
+| `notebooks/03_prevision.ipynb` | cible, variables, modèles et prévision du mois suivant |
 | `src/projet_sncf/database/nettoyage.py` | règles de nettoyage des données AQST |
 | `src/projet_sncf/business/prevision/diagnostic.py` | contrôles de qualité avant et après nettoyage |
 | `src/projet_sncf/business/prevision/exploration.py` | calculs de l'analyse exploratoire |
 | `src/projet_sncf/business/prevision/prevision.py` | variables, modèles et prévision du mois suivant |
 | `src/projet_sncf/utils/graphiques.py` | graphiques des notebooks |
-| `src/projet_sncf/utils/journal.py` | écriture des logs dans `logs/sncf.log` |
+| `src/projet_sncf/utils/logging_config.py` | écriture des logs dans `logs/sncf.log` (commun à tout le projet) |
 | `data/regularite-mensuelle-tgv-aqst.csv` | données mensuelles AQST |
 | `data/reglarite-mensuelle-tgv-nationale.xlsx` | régularité nationale des TGV depuis 2015 (contexte) |
-| `data/predictions/` | fichiers écrits par `prevision.ipynb` et lus par la page Streamlit |
-| `tests/unitaire/test_diagnostic.py`, `test_exploration.py`, `test_prevision.py`, `test_journal.py`, `test_database_nettoyage.py` | tests unitaires |
+| `data/predictions/` | fichiers écrits par `03_prevision.ipynb` et lus par la page Streamlit |
+| `tests/unitaire/test_diagnostic.py`, `test_exploration.py`, `test_prevision.py`, `test_logging_config.py`, `test_database_nettoyage.py` | tests unitaires |
 
 Les notebooks contiennent les explications et les justifications. Les calculs sont dans `src/`, ce qui garde les notebooks courts et permet de tester chaque fonction.
 
@@ -31,7 +31,7 @@ Principe : **on garde les lignes et on remplace une valeur impossible par une va
 |---|---|
 | Colonnes de commentaires | supprimées (texte libre, inutilisé) |
 | `Nombre de circulations prévues` = 0 | ligne supprimée (73 lignes) |
-| `Nombre trains en retard > 30min` négatif, ou inférieur à `> 60min` | les deux colonnes mises à NaN |
+| `Nombre trains en retard > 30min` négatif, ou inférieur à `> 60min` | seule la case `> 30min` mise à NaN (354 cases) |
 | Retards moyens négatifs | valeur mise à NaN |
 
 Résultat (données jusqu'à septembre 2026) : 12 907 → 12 834 lignes, 656 cases mises à NaN.
@@ -67,8 +67,8 @@ source .venv/bin/activate
 
 1. Placer `regularite-mensuelle-tgv-aqst.csv` dans `data/`.
 2. Ouvrir les notebooks depuis `notebooks/` avec le noyau `.venv` de la racine, puis tout exécuter, dans l'ordre :
-   - `exploration_nettoyage.ipynb`
-   - `prevision.ipynb`, qui écrit `data/predictions/predictions_liaisons.csv` et `data/predictions/predictions_test.csv`
+   - `02_exploration_nettoyage.ipynb`
+   - `03_prevision.ipynb`, qui écrit `data/predictions/predictions_liaisons.csv` et `data/predictions/predictions_test.csv`
 3. Le déroulement est enregistré dans `logs/sncf.log`.
 
 Dans un notebook, les fonctions s'importent ainsi :
@@ -85,5 +85,5 @@ Depuis la racine du projet :
 ```bash
 python -m pytest                                                # tous les tests
 python -m pytest --doctest-modules src/projet_sncf/business/prevision \
-    src/projet_sncf/utils/journal.py                            # exemples des docstrings
+    src/projet_sncf/utils/logging_config.py                     # exemples des docstrings
 ```
