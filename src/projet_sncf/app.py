@@ -2,7 +2,10 @@
 
 # Imports
 from pathlib import Path
+
 import streamlit as st
+
+from projet_sncf.utils.logging_config import setup_logging
 
 # Constants
 BASE_DIR = Path(__file__).resolve().parent
@@ -82,6 +85,7 @@ def build_pages() -> dict:
 
 def run_app() -> None:
     """Lance l'application : logo en haut, menu groupé, puis la page choisie."""
+    setup_logging()
     st.logo(build_logo(), size="large")
     page = st.navigation(build_pages(), position="sidebar")
     st.sidebar.caption("Données : SNCF Open Data")
