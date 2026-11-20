@@ -63,7 +63,7 @@ def get_axes():
 st.header("Clustering des modèles prenant en paramètres les causes de retards")
 
 st.write("""
-Choisissez les axes et ensuite la cible des modèles et nous faisons le clustering !
+Choisissez les axes et ensuite la cible des modèles et nous faisons le clustering de modèle !
 """)
 
 left, center, right = st.columns([1, 2, 1])
@@ -100,8 +100,12 @@ if st.button("Clusteriser"):
 
         ax.set_xlabel("Dimension 1")
         ax.set_ylabel("Dimension 2")
-        ax.set_title("Clustering des axes suivant une cible")
+        ax.set_title("Clustering de modèle")
 
         st.pyplot(fig)
+
+        st.write("""
+                Vous pouvez voir si certains modèles ont tendance a être proches, voir à se regrouper
+                """)
     except Exception as e:
         st.error(str(e))
