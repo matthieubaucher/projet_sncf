@@ -4,10 +4,13 @@
 import logging
 import math
 from pathlib import Path
+
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
 
+from projet_sncf.business.analysis.reliability import get_reliability_table
+from projet_sncf.business.map.map_data import read_json
 from projet_sncf.business.map.map_sncf import (
     CONFIDENCE_LOW,
     MODE_EACH_DIRECTION,
@@ -17,8 +20,8 @@ from projet_sncf.business.map.map_sncf import (
     TIER_LESS,
     TIER_MIDDLE,
     TIER_MORE,
-    disruption_frequency,
     display_name,
+    disruption_frequency,
     filter_links,
     insurer_reading,
     least_reliable,
@@ -29,8 +32,6 @@ from projet_sncf.business.map.map_sncf import (
     station_points,
     summary_metrics,
 )
-from projet_sncf.business.analysis.reliability import get_reliability_table
-from projet_sncf.business.map.map_data import read_json
 
 # Constants
 logger = logging.getLogger(__name__)
@@ -71,22 +72,23 @@ NETWORK_LAYER, HALO_LAYER, LINKS_LAYER, POINTS_LAYER, LABELS_LAYER = (
     "noms",
 )
 INTRO_TEXT = (
-    "Cet outil aide un assureur à évaluer le niveau de risque des trajets en train "
-    "qu'il envisage d'assurer. Chaque trait est une liaison, colorée selon sa fiabilité "
-    "historique : plus elle est fiable, moins il y a de risques d'annulations ou de "
-    "retards à indemniser.\n\n"
-    "**Comment l'utiliser :** cliquez sur une liaison pour lire sa recommandation, puis "
-    "**simulez sa prime** en réglant l'indemnité moyenne dans la barre latérale à gauche."
+    "Cet outil aide un assureur à évaluer les risques des trajets en train "
+    "qu'il envisage d'assurer. Chaque trait représente une liaison, colorée "
+    "selon sa fiabilité historique : plus elle est fiable, moins les risques "
+    "d'annulations ou de retards à indemniser sont élevés.\n\n"
+    "**Comment l'utiliser :** cliquez sur une liaison pour lire sa "
+    "recommandation, puis **simulez sa prime** en réglant l'indemnité dans "
+    "la barre latérale."
 )
 METHOD_TEXT = (
-    "- **Score de fiabilité** : 100 moins la part des trains prévus annulés ou en retard à "
-    "l'arrivée, observée sur l'historique des données de régularité mensuelle des TGV.\n"
-    "- **Prime pure estimée** : coût moyen des indemnisations par trajet, sans frais ni marge. "
-    "On multiplie la part de trajets perturbés (annulés ou en retard) par l'indemnité versée. "
-    "Exemple : 1 trajet sur 8 perturbé (12,5 %) × 30 € d'indemnité = 3,75 € par trajet. "
-    "Le calcul suppose que le passé se reproduise.\n"
-    "- **Limites** : la durée des retards, les frais, la marge et le prix du billet ne sont pas "
-    "pris en compte. Un score reposant sur moins de 24 mois est à confirmer."
+    "- **Score de fiabilité** : 100 moins la part des trains prévus annulés "
+    "ou en retard à l'arrivée, observée sur l'historique mensuel des TGV.\n"
+    "- **Prime pure estimée** : taux de perturbation observé sur la liaison × "
+    "indemnité choisie. C'est le coût moyen attendu par trajet si le passé "
+    "se répète.\n"
+    "- **Limites** : la durée des retards, les frais, la marge et le prix du "
+    "billet ne sont pas pris en compte. Un score avec moins de 24 mois "
+    "d'historique est à confirmer."
 )
 MAP_HEIGHT = 640
 VIEW = {"latitude": 46.4, "longitude": 2.6, "zoom": 4.7}
@@ -107,9 +109,10 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame, list, dict]:
     """Charge les données de la carte, gardées en cache par Streamlit.
 
     Returns:
-        tuple[pd.DataFrame, pd.DataFrame, list, dict]: Le tableau de fiabilité, les
-        coordonnées des gares, les chemins du réseau et les trajets des liaisons. Les
-        trajets forment un dictionnaire vide si leur JSON est absent.
+        tuple[pd.DataFrame, pd.DataFrame, list, dict]: Le tableau de
+        fiabilité, les coordonnées des gares, les chemins du réseau et les
+        trajets des liaisons. Les trajets forment un dictionnaire vide si
+        leur JSON est absent.
 
     Raises:
         FileNotFoundError: Si le CSV des gares ou le JSON du réseau manque.
@@ -136,7 +139,8 @@ def legend() -> str:
     ]:
         red, green, blue = TIER_COLORS[tier]
         items.append(
-            f'<span style="color:rgb({red},{green},{blue});font-size:1.3em">●</span> {text}'
+            f'<span style="color:rgb({red},{green},{blue});font-size:1.3em">'
+            f"●</span> {text}"
         )
     return " &nbsp;&nbsp; ".join(items)
 
@@ -145,7 +149,7 @@ def current_theme() -> str:
     """Donne le mode d'affichage de Streamlit, sombre ou clair.
 
     Returns:
-        str: "dark" ou "light". Le mode clair est choisi si le thème est inconnu.
+        str: "dark" ou "light". "light" est choisi si le thème est inconnu.
     """
     try:
         theme = st.context.theme.type
@@ -163,8 +167,8 @@ def percent(value: float | None, decimals: int = 1) -> str:
         decimals (int): Nombre de décimales.
 
     Returns:
-        str: Le pourcentage, par exemple "12.3 %", ou "n.d." si la valeur est absente
-        ou NaN.
+        str: Le pourcentage, par exemple "12.3 %", ou "n.d." si la valeur
+        est absente ou NaN.
     """
     if value is None or (isinstance(value, float) and math.isnan(value)):
         return "n.d."
@@ -187,11 +191,13 @@ def selected_link(state) -> dict | None:
     return objects[0] if objects else None
 
 
-def show_details(scores: pd.DataFrame, selected: dict | None, indemnity: float) -> None:
+def show_details(
+    scores: pd.DataFrame, selected: dict | None, indemnity: float
+) -> None:
     """Affiche à côté de la carte la liaison sur laquelle on a cliqué.
 
-    Sans liaison sélectionnée, ou si elle est introuvable, la page invite à cliquer
-    sur une liaison.
+    Sans liaison sélectionnée ou si elle est introuvable, la page invite à
+    cliquer sur une liaison.
 
     Args:
         scores (pd.DataFrame): Tableau de fiabilité, une ligne par liaison.
@@ -201,7 +207,9 @@ def show_details(scores: pd.DataFrame, selected: dict | None, indemnity: float) 
     Returns:
         None: Les détails sont affichés par Streamlit.
     """
-    hint = "Cliquez sur une liaison de la carte pour voir son niveau de risque."
+    hint = (
+        "Cliquez sur une liaison de la carte pour voir son niveau de risque."
+    )
     if selected is None:
         st.info(hint)
         return
@@ -216,48 +224,59 @@ def show_details(scores: pd.DataFrame, selected: dict | None, indemnity: float) 
     red, green, blue = TIER_COLORS.get(tier, (150, 150, 150))
     st.markdown(f"#### {selected['titre']}")
     st.markdown(
-        f'<span style="color:rgb({red},{green},{blue});font-size:1.3em">●</span> '
-        f"{tier if isinstance(tier, str) else 'non classé'} · {row['Service']}",
+        f'<span style="color:rgb({red},{green},{blue});font-size:1.3em">'
+        "●</span> "
+        f"{tier if isinstance(tier, str) else 'non classé'} · "
+        f"{row['Service']}",
         unsafe_allow_html=True,
     )
     kind, sentence = insurer_reading(tier if isinstance(tier, str) else None)
     getattr(st, kind)(sentence)
     st.write(disruption_frequency(row["taux_perturbation"]))
-    st.metric(
-        "Prime pure estimée",
-        f"{pure_premium(row['taux_perturbation'], indemnity):.2f} € par trajet",
-    )
+    premium = pure_premium(row["taux_perturbation"], indemnity)
+    st.metric("Prime pure estimée", f"{premium:.2f} € par trajet")
     st.caption(
-        f"{percent(row['taux_perturbation'])} de trajets perturbés sur {int(row['mois'])} mois "
+        f"{percent(row['taux_perturbation'])} de trajets perturbés "
+        f"sur {int(row['mois'])} mois "
         f"× {indemnity:.0f} € d'indemnité. Indicatif : hors frais et marge."
     )
     if row["confiance"] == CONFIDENCE_LOW:
-        st.warning(f"Score à confirmer : seulement {int(row['mois'])} mois de données.")
+        st.warning(
+            f"Score à confirmer : seulement {int(row['mois'])} mois "
+            "de données."
+        )
 
     with st.expander("Détail du score"):
         st.metric("Score de fiabilité", f"{row['score']:.1f} / 100")
         st.write(f"**Historique :** {int(row['mois'])} mois")
         if "taux_annulation" in row:
             st.write(
-                f"**Annulations :** {percent(row['taux_annulation'])} des trains prévus"
+                f"**Annulations :** {percent(row['taux_annulation'])} "
+                "des trains prévus"
             )
         if "taux_retard" in row:
             st.write(
-                f"**Retards à l'arrivée :** {percent(row['taux_retard'])} des trains circulés"
+                f"**Retards à l'arrivée :** {percent(row['taux_retard'])} "
+                "des trains circulés"
             )
         if "pires_mois_hors_chocs" in row:
             st.write(
                 "**Concentration des perturbations :** "
-                f"{percent(row['pires_mois_hors_chocs'])} dans les 10 % de pires mois "
-                f"({percent(row.get('pires_mois_tous'))} avec les chocs nationaux)"
+                f"{percent(row['pires_mois_hors_chocs'])} dans les 10 % "
+                "de pires mois "
+                f"({percent(row.get('pires_mois_tous'))} avec les "
+                "chocs nationaux)"
             )
         if "saisonnalite" in row:
             st.write(
-                f"**Saisonnalité :** {row['saisonnalite']:.2f} (R² ajusté du mois)"
+                f"**Saisonnalité :** {row['saisonnalite']:.2f} "
+                "(R² ajusté du mois)"
             )
         if not causes.empty:
             st.write("**Causes des retards (en %)**")
-            chart = causes.round(1).rename_axis("Cause").reset_index(name="Part")
+            chart = (
+                causes.round(1).rename_axis("Cause").reset_index(name="Part")
+            )
             st.bar_chart(
                 chart,
                 x="Cause",
@@ -283,14 +302,15 @@ def build_layers(
 ) -> list:
     """Construit les couches de la carte, de bas en haut.
 
-    Chaque couche a besoin d'un identifiant pour la sélection. Les textes sont entre
-    deux guillemets, car pydeck les lit comme du JavaScript.
+    Chaque couche a besoin d'un identifiant pour la sélection. Les textes
+    sont entre guillemets, car pydeck les lit comme du JavaScript.
 
     Args:
         network (list): Chemins du réseau ferré, dessinés en fond.
         shown (pd.DataFrame): Liaisons affichées.
         points (pd.DataFrame): Gares à dessiner, avec leurs étiquettes.
-        selected (dict | None): Liaison sélectionnée, entourée d'un halo, ou `None`.
+        selected (dict | None): Liaison sélectionnée, entourée d'un halo,
+            ou `None`.
         theme (str): "light" ou "dark".
 
     Returns:
@@ -371,7 +391,7 @@ def build_layers(
 def main() -> None:
     """Dessine la page de la carte de fiabilité.
 
-    Si les données de la carte manquent, la page affiche une erreur et s'arrête.
+    Sans données de carte, la page signale l'erreur et s'arrête.
 
     Returns:
         None: La page est affichée par Streamlit.
@@ -404,7 +424,10 @@ def main() -> None:
         mode = st.radio(
             "Sens des liaisons",
             [MODE_WORST_DIRECTION, MODE_EACH_DIRECTION],
-            help="« Le moins bon des deux sens » dessine un seul trait par paire de gares.",
+            help=(
+                "« Le moins bon des deux sens » dessine un seul trait "
+                "par paire de gares."
+            ),
         )
         links, unlocated = prepare_links(scores, stations, mode, routes)
         station = st.selectbox(
@@ -420,17 +443,23 @@ def main() -> None:
             default=sorted(scores["Service"].unique()),
         )
         tiers = st.multiselect("Niveau de fiabilité", TIERS, default=TIERS)
-        low, high = float(math.floor(links["score"].min())), float(
-            math.ceil(links["score"].max())
+        low, high = (
+            float(math.floor(links["score"].min())),
+            float(math.ceil(links["score"].max())),
         )
-        score_range = st.slider("Score de fiabilité", low, high, (low, high), step=0.5)
+        score_range = st.slider(
+            "Score de fiabilité", low, high, (low, high), step=0.5
+        )
         st.header("Simulateur de prime")
         indemnity = st.number_input(
             "Indemnité moyenne par trajet perturbé (€)",
             min_value=0.0,
             value=DEFAULT_INDEMNITY,
             step=5.0,
-            help="Montant que l'assureur verserait pour un trajet annulé ou en retard. À ajuster.",
+            help=(
+                "Montant que l'assureur verserait pour un trajet annulé "
+                "ou en retard. À ajuster."
+            ),
         )
 
     shown = filter_links(
@@ -469,7 +498,9 @@ def main() -> None:
     map_col, detail_col = st.columns([7, 3])
     with map_col:
         deck = pdk.Deck(
-            layers=build_layers(network, shown, points, selected, current_theme()),
+            layers=build_layers(
+                network, shown, points, selected, current_theme()
+            ),
             initial_view_state=pdk.ViewState(**VIEW),
             map_provider=None,
             tooltip=TOOLTIP,
@@ -491,15 +522,19 @@ def main() -> None:
     )
     if unlocated:
         st.caption(
-            f"{unlocated} liaisons ne sont pas dessinées, car l'une de leurs gares n'a pas de "
+            f"{unlocated} liaisons ne sont pas dessinées, car l'une de "
+            "leurs gares n'a pas de "
             "coordonnées (par exemple l'Italie, qui n'est pas une gare)."
         )
     if not routes:
         st.caption(
-            "Fichier des tracés absent : toutes les liaisons sont dessinées en courbe."
+            "Fichier des tracés absent : toutes les liaisons sont dessinées "
+            "en courbe."
         )
 
-    with st.expander("Les 10 liaisons les moins fiables parmi celles affichées"):
+    with st.expander(
+        "Les 10 liaisons les moins fiables parmi celles affichées"
+    ):
         st.dataframe(least_reliable(shown, 10), hide_index=True)
     with st.expander("Voir toutes les liaisons affichées"):
         st.dataframe(least_reliable(shown, len(shown)), hide_index=True)
