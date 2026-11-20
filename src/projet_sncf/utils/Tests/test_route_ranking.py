@@ -89,6 +89,64 @@ def test_rank_worst_routes_returns_empty_for_period_without_rows(monthly_routes)
     assert ranking.empty
 
 
+def test_graphique_classement_ajoute_une_infobulle_avec_camembert():
+    from projet_sncf.pages.classement_pire_trajets import (
+        construire_graphique_classement,
+        construire_html_graphique,
+    )
+
+    classement = pd.DataFrame({
+        "trajet": ["A → B"],
+        "valeur": [0.2],
+        "taux": [0.2],
+        "trains_concernes": [20],
+        "circulations_prevues": [100],
+    })
+    figure = construire_graphique_classement(
+        classement,
+        "Part des circulations prévues",
+        False,
+    )
+    html = construire_html_graphique(figure)
+
+    assert tuple(figure.data[0].customdata[0]) == (20, 100, 0.2)
+    assert "plotly_hover" in html
+    assert "conic-gradient" in html
+    assert "Trains concernés" in html
+    assert "Circulations prévues" in html
+    assert "background:#ffffff" in html
+    assert "ResizeObserver" in html
+    assert "window.addEventListener('resize'" in html
+    assert "streamlit:setFrameHeight" in html
+
+
+def test_graphique_classement_adapte_le_theme_et_wrappe_les_trajets():
+    from projet_sncf.pages.classement_pire_trajets import construire_graphique_classement
+
+    trajet = "SAINT GERVAIS LES BAINS → PARIS MONTPARNASSE"
+    classement = pd.DataFrame({
+        "trajet": [trajet],
+        "valeur": [20],
+        "taux": [0.2],
+        "trains_concernes": [20],
+        "circulations_prevues": [100],
+    })
+
+    figure = construire_graphique_classement(
+        classement,
+        "Nombre de trains concernés",
+        True,
+        mode_sombre=True,
+    )
+    libelle = figure.layout.yaxis.ticktext[0]
+
+    assert figure.layout.font.color == "#f2f3f5"
+    assert "<br>" in libelle
+    assert libelle.replace("<br>", "").replace("→", "").replace(" ", "") == (
+        trajet.replace("→", "").replace(" ", "")
+    )
+
+
 def _render_ranking_page(data):
     from projet_sncf.pages.classement_pire_trajets import render_page
 
