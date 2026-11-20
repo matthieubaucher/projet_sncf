@@ -6,10 +6,10 @@ import streamlit as st
 
 from projet_sncf.database.dataloader import get_dataframe
 from projet_sncf.utils.month_variations import (
-    plotMonthAnnulations,
-    plotMonthAnnulationsAll,
-    plotMonthlyLateness,
-    plotMonthlyLatenessAll,
+    plot_month_annulations_all,
+    plot_monthly_annulations,
+    plot_monthly_lateness,
+    plot_monthly_lateness_all,
 )
 from projet_sncf.utils.saisonality_view import (
     plot_heatmap_annulations,
@@ -64,14 +64,14 @@ def build_plot(
             )
         if metric == "Retards":
             return (
-                plotMonthlyLatenessAll(data, *route)
+                plot_monthly_lateness_all(data, *route)
                 if month is None
-                else plotMonthlyLateness(data, *route, month)
+                else plot_monthly_lateness(data, *route, month)
             )
         return (
-            plotMonthAnnulationsAll(data, *route)
+            plot_month_annulations_all(data, *route)
             if month is None
-            else plotMonthAnnulations(data, *route, month)
+            else plot_monthly_annulations(data, *route, month)
         )
 
     if metric == "Retards":
