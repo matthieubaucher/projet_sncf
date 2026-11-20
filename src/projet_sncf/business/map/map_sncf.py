@@ -58,14 +58,14 @@ LABEL_HEIGHT = 0.5
 INSURER_READINGS = {
     TIER_MORE: (
         "success",
-        "Risque faible : liaison favorable à assurer, une prime attractive est possible.",
+        "Risque faible : peu de perturbations à indemniser, la prime peut rester modérée.",
     ),
     TIER_MIDDLE: (
         "warning",
-        "Risque modéré : assurable, avec une prime ajustée ou une franchise.",
+        "Risque modéré : prime à ajuster, avec éventuellement une franchise.",
     ),
-    TIER_LESS: ("error", "Risque élevé : prime majorée, ou liaison à éviter."),
-    None: ("info", "Niveau non classé : pas de recommandation."),
+    TIER_LESS: ("error", "Risque élevé : prime à majorer en conséquence."),
+    None: ("info", "Niveau non classé : risque non évalué."),
 }
 
 MODE_EACH_DIRECTION = "Chaque sens"

@@ -280,7 +280,7 @@ def test_summary_metrics_counts_the_best_and_worst_tiers():
 def test_insurer_reading_depends_on_the_tier():
     """Each tier has its own message."""
     assert insurer_reading(TIER_MORE)[0] == "success"
-    assert "favorable à assurer" in insurer_reading(TIER_MORE)[1]
+    assert "Risque faible" in insurer_reading(TIER_MORE)[1]
     assert insurer_reading(TIER_MIDDLE)[0] == "warning"
     assert insurer_reading(TIER_LESS)[0] == "error"
     assert insurer_reading(None)[0] == "info"
