@@ -289,8 +289,235 @@ def niveau_risque(proba: float) -> tuple[str, str]:
     return "Faible", VERT
 
 
-def _pourcent(valeur: float | None) -> str:
-    return "–" if valeur is None or pd.isna(valeur) else f"{valeur:.0%}"
+# --- phrases d'interprétation (sans Streamlit, testables)
+# --------------------------------------------------------
+
+#: Écart (en points de pourcentage) en dessous duquel deux taux sont
+#: considérés comme proches.
+ECART_PROCHE = 0.02
+
+MOIS_FR = [
+    "janvier", "février", "mars", "avril", "mai", "juin", "juillet",
+    "août", "septembre", "octobre", "novembre", "décembre",
+]
+
+
+def nom_mois(mois: pd.Timestamp) -> str:
+    """Écrit un mois en toutes lettres, en français.
+
+    Args:
+        mois (pandas.Timestamp): Le mois.
+
+    Returns:
+        str: Par exemple ``"octobre 2026"``.
+
+    Example:
+        >>> nom_mois(pd.Timestamp("2026-10-01"))
+        'octobre 2026'
+    """
+    mois = pd.Timestamp(mois)
+    return f"{MOIS_FR[mois.month - 1]} {mois.year}"
+
+
+def chances(proba: float) -> str:
+    """Écrit une probabilité en « chances sur 100 ».
+
+    On évite ainsi de l'écrire en %, pour ne pas la confondre avec la part des
+    trains perturbés.
+
+    Args:
+        proba (float): Probabilité, entre 0 et 1.
+
+    Returns:
+        str: Par exemple ``"67 chances sur 100"``.
+
+    Example:
+        >>> chances(0.666)
+        '67 chances sur 100'
+    """
+    return f"{round(proba * 100)} chances sur 100"
+
+
+def phrase_prevision(liaison: str, mois: pd.Timestamp, proba: float) -> str:
+    """Explique la prévision en une phrase.
+
+    Args:
+        liaison (str): Liaison lisible, par exemple ``"PARIS LYON → NICE"``.
+        mois (pandas.Timestamp): Mois prévu.
+        proba (float): Probabilité de perturbation, entre 0 et 1.
+
+    Returns:
+        str: La phrase, en Markdown.
+
+    Example:
+        >>> phrase_prevision("A → B", pd.Timestamp("2026-10-01"), 0.67)
+        'Il y a **67 chances sur 100** que, en octobre 2026, plus de **20 % des trains** A → B soient annulés ou arrivent en retard.'
+    """  # noqa: E501
+    return (
+        f"Il y a **{chances(proba)}** que, en {nom_mois(mois)}, plus de "
+        f"**{_part(SEUIL_PERTURBATION)} des trains** {liaison} soient annulés "
+        "ou arrivent en retard."
+    )
+
+
+def _position_seuil(taux: float) -> str:
+    return (
+        "**au-dessus** du seuil de 20 %"
+        if taux > SEUIL_PERTURBATION
+        else "sous le seuil de 20 %"
+    )
+
+
+def _part(taux: float) -> str:
+    return f"{taux:.0%}".replace("%", " %")
+
+
+def lecture_historique(indicateurs: dict[str, float | None]) -> list[str]:
+    """Interprète l'historique d'une liaison, par rapport au seuil de 20 %.
+
+    Args:
+        indicateurs (dict): Dictionnaire renvoyé
+            par :func:`indicateurs_liaison`.
+
+    Returns:
+        list[str]: Une phrase par indicateur connu, puis une phrase sur la
+        tendance (mois dernier comparé à la moyenne sur 12 mois).
+
+    Example:
+        >>> lecture_historique(
+        ...     {"mois_dernier": 0.24, "moyenne_12_mois": None,
+        ...      "an_dernier": None}
+        ... )[0]
+        'Le mois dernier, **24 %** des trains ont été perturbés : **au-dessus** du seuil de 20 %.'
+    """  # noqa: E501
+    dernier = indicateurs.get("mois_dernier")
+    moyenne = indicateurs.get("moyenne_12_mois")
+    an_dernier = indicateurs.get("an_dernier")
+    phrases = []
+    if dernier is not None and not pd.isna(dernier):
+        phrases.append(
+            f"Le mois dernier, **{_part(dernier)}** des trains ont été "
+            f"perturbés : {_position_seuil(dernier)}."
+        )
+    if moyenne is not None and not pd.isna(moyenne):
+        phrases.append(
+            f"Sur les 12 derniers mois, **{_part(moyenne)}** en moyenne : "
+            f"{_position_seuil(moyenne)}."
+        )
+    if an_dernier is not None and not pd.isna(an_dernier):
+        phrases.append(
+            f"Le même mois l'an dernier, **{_part(an_dernier)}** des trains "
+            f"avaient été perturbés : {_position_seuil(an_dernier)}."
+        )
+    if (
+        dernier is not None
+        and moyenne is not None
+        and not pd.isna(dernier)
+        and not pd.isna(moyenne)
+    ):
+        if dernier > moyenne + ECART_PROCHE:
+            tendance = "**plus perturbé** que d'habitude"
+        elif dernier < moyenne - ECART_PROCHE:
+            tendance = "**moins perturbé** que d'habitude"
+        else:
+            tendance = "dans la moyenne habituelle"
+        phrases.append(f"Le mois dernier a donc été {tendance}.")
+    if not phrases:
+        phrases.append("Pas d'historique pour cette liaison avant ce mois.")
+    return phrases
+
+
+def phrase_bilan(
+    proba: float, prevision: str, realite: str, taux_reel: float
+) -> str:
+    """Compare, pour un mois passé, la prévision et ce qui s'est passé.
+
+    Args:
+        proba (float): Probabilité de perturbation donnée par le modèle.
+        prevision (str): ``"Perturbé"`` ou ``"Normal"``.
+        realite (str): ``"Perturbé"`` ou ``"Normal"``.
+        taux_reel (float): Part des trains réellement perturbés.
+
+    Returns:
+        str: La phrase, en Markdown.
+
+    Example:
+        >>> phrase_bilan(0.67, "Perturbé", "Perturbé", 0.31)
+        'Le modèle donnait **67 chances sur 100**. En réalité, **31 %** des trains ont été perturbés : le mois a bien été perturbé, **la prévision était juste**.'
+    """  # noqa: E501
+    debut = (
+        f"Le modèle donnait **{chances(proba)}**. En réalité, "
+        f"**{_part(taux_reel)}** des trains ont été perturbés : "
+    )
+    if prevision == realite == "Perturbé":
+        fin = "le mois a bien été perturbé, **la prévision était juste**."
+    elif prevision == realite:
+        fin = "le mois est resté normal, **la prévision était juste**."
+    elif prevision == "Perturbé":
+        fin = "le mois est resté normal, **c'était une fausse alerte**."
+    else:
+        fin = (
+            "le mois a été perturbé alors que le modèle ne l'annonçait pas, "
+            "**la perturbation a été manquée**."
+        )
+    return debut + fin
+
+
+def taux_par_niveau(previsions: pd.DataFrame) -> dict[str, float]:
+    """Mesure, par niveau de risque, la part de mois vraiment perturbés.
+
+    Le calcul utilise les mois passés, où la réalité est connue.
+
+    Args:
+        previsions (pandas.DataFrame): Tableau renvoyé
+            par :func:`charger_previsions`.
+
+    Returns:
+        dict[str, float]: Pour ``"Faible"``, ``"Moyen"`` et ``"Élevé"``, la
+        part des mois réellement perturbés (absent si aucun mois connu).
+
+    Example:
+        >>> p = pd.DataFrame({
+        ...     "proba_perturbation": [0.9, 0.8, 0.1],
+        ...     "realite": ["Perturbé", "Normal", "Normal"],
+        ... })
+        >>> taux_par_niveau(p)
+        {'Élevé': 0.5, 'Faible': 0.0}
+    """
+    passe = previsions.dropna(subset=["realite"])
+    niveaux = passe["proba_perturbation"].map(lambda p: niveau_risque(p)[0])
+    perturbes = passe["realite"].eq("Perturbé")
+    parts = perturbes.groupby(niveaux, sort=False).mean()
+    return {str(niveau): float(part) for niveau, part in parts.items()}
+
+
+def phrase_confiance(niveau: str, taux: dict[str, float]) -> str:
+    """Dit à quel point on peut se fier à un niveau de risque.
+
+    Args:
+        niveau (str): ``"Faible"``, ``"Moyen"`` ou ``"Élevé"``.
+        taux (dict[str, float]): Dictionnaire renvoyé
+            par :func:`taux_par_niveau`.
+
+    Returns:
+        str: La phrase, ou une chaîne vide si le niveau n'a pas de mois
+        passé.
+
+    Example:
+        >>> phrase_confiance("Élevé", {"Élevé": 0.7})
+        'Par le passé, quand le risque était **élevé**, le mois a vraiment été perturbé **7 fois sur 10**.'
+    """  # noqa: E501
+    if niveau not in taux:
+        return ""
+    return (
+        f"Par le passé, quand le risque était **{niveau.lower()}**, le mois "
+        f"a vraiment été perturbé **{round(taux[niveau] * 10)} fois sur 10**."
+    )
+
+
+def _md(texte: str) -> None:
+    """Affiche du Markdown sans couper « 20 % » en fin de ligne."""
+    st.markdown(texte.replace(" %", "\u00a0%"))
 
 
 def _libelle_mois(mois: pd.Timestamp, premier: bool) -> str:
@@ -518,53 +745,51 @@ def afficher_page(previsions: pd.DataFrame, historique: pd.DataFrame) -> None:
         ligne["Gare d'arrivée"],
         ligne["Service"],
     )
-    niveau, couleur = niveau_risque(ligne["proba_perturbation"])
-    reel = ""
-    if passe:
-        verdict = (
-            "prévision juste ✓"
-            if ligne["prevision"] == ligne["realite"]
-            else "prévision fausse ✗"
-        )
-        reel = (
-            "<div style='margin-top:0.4rem'>"
-            f"Réalité : <b>{ligne['realite']}</b> "
-            f"({_pourcent(ligne['taux_reel'])} de trains perturbés) "
-            f"· {verdict}</div>"
-        )
+    proba = ligne["proba_perturbation"]
+    niveau, couleur = niveau_risque(proba)
 
-    gauche, droite = st.columns([1, 2])
-    with gauche:
+    gauche, droite = st.columns(2)
+    with gauche, st.container(border=True):
+        st.markdown(f"**Prévision du modèle pour {nom_mois(mois)}**")
         st.markdown(
             f"<div style='border-left:6px solid {couleur};"
-            "padding:0.5rem 1rem;margin-bottom:1rem'>"
-            "<div style='font-size:0.9rem'>"
-            f"Prévision pour {mois.strftime('%m/%Y')}</div>"
+            "padding:0.3rem 1rem;margin-bottom:0.6rem'>"
             "<div style='font-size:1.8rem;font-weight:600'>"
             f"{ligne['prevision']}</div>"
-            f"<div>Probabilité : <b>{ligne['proba_perturbation']:.0%}</b>"
-            f" · risque <b>{niveau.lower()}</b></div>"
-            f"{reel}</div>",
+            f"<div><b>{chances(proba)}</b> · risque "
+            f"<b>{niveau.lower()}</b></div></div>",
             unsafe_allow_html=True,
         )
+        _md(phrase_prevision(ligne["liaison"], mois, proba))
+        confiance_niveau = phrase_confiance(
+            niveau, taux_par_niveau(previsions)
+        )
+        if confiance_niveau:
+            st.caption(confiance_niveau)
+        if passe:
+            st.markdown("**Ce qui s'est réellement passé**")
+            _md(
+                phrase_bilan(
+                    proba,
+                    ligne["prevision"],
+                    ligne["realite"],
+                    ligne["taux_reel"],
+                )
+            )
+    with droite, st.container(border=True):
+        st.markdown("**Ce qui s'est passé avant sur cette liaison**")
         ind = indicateurs_liaison(
             historique, depart, arrivee, service_liaison, mois
         )
-        st.markdown(
-            f"- Mois dernier : **{_pourcent(ind['mois_dernier'])}** "
-            "de trains perturbés\n"
-            "- Moyenne sur 12 mois : "
-            f"**{_pourcent(ind['moyenne_12_mois'])}**\n"
-            f"- Même mois l'an dernier : **{_pourcent(ind['an_dernier'])}**"
-        )
-    with droite:
-        st.plotly_chart(
-            _graphique_historique(
-                _filtrer_liaison(historique, depart, arrivee, service_liaison),
-                mois,
-            ),
-            width="stretch",
-        )
+        _md("\n".join(f"- {p}" for p in lecture_historique(ind)))
+
+    st.plotly_chart(
+        _graphique_historique(
+            _filtrer_liaison(historique, depart, arrivee, service_liaison),
+            mois,
+        ),
+        width="stretch",
+    )
 
     st.subheader("D'où venaient les retards ?")
     mois_dernier = mois - pd.DateOffset(months=1)
