@@ -119,7 +119,7 @@ with center:
                     key="temps_mois",
                     format_func=lambda m: [
                         "Janvier", "Février", "Mars", "Avril","Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-                    ][m - 1]
+                    ][m]
                 )
             st.session_state["Temps"] = 12 * annee + mois
         else:
