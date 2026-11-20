@@ -1,12 +1,10 @@
-"""Seasonality of the delay rate of each liaison.
+"""Saisonnalité du taux de retard de chaque liaison.
 
-Seasonality is measured by the adjusted R² of the calendar month (January to
-December) on the monthly delay rate: the share of the variation explained by the
-time of year, corrected for the number of months observed.
+Elle se mesure avec le R² ajusté du mois calendaire sur le taux de retard mensuel.
 """
 
+# Imports
 import logging
-
 import numpy as np
 import pandas as pd
 
@@ -20,21 +18,22 @@ from projet_sncf.business.analysis.constants import (
 )
 from projet_sncf.business.analysis.indicators import _check_columns, filter_valid_rows
 
+# Constants
 logger = logging.getLogger(__name__)
 
 
+# Functions
 def adjusted_r2(rates: pd.Series, calendar_months: pd.Series, min_months: int) -> float:
-    """Compute the adjusted R² of the calendar month on a series of rates.
+    """Calcule le R² ajusté du mois calendaire sur une série de taux.
 
     Args:
-        rates (pd.Series): Monthly delay rates of one liaison. NaN values are ignored.
-        calendar_months (pd.Series): Calendar month (1 to 12) of each rate, same index.
-        min_months (int): Minimum number of months required.
+        rates (pd.Series): Taux de retard mensuels d'une liaison. Les NaN sont ignorés.
+        calendar_months (pd.Series): Mois calendaire (1 à 12) de chaque taux, même index.
+        min_months (int): Nombre minimal de mois exigé.
 
     Returns:
-        float: The adjusted R², or NaN if there are fewer than ``min_months``
-        months, if the rate never varies, or if there are not more months than
-        distinct calendar months.
+        float: Le R² ajusté. NaN s'il y a moins de `min_months` mois, si le taux ne
+        varie jamais, ou s'il n'y a pas plus de mois que de mois calendaires distincts.
     """
     y = rates.dropna()
     n = len(y)
@@ -53,22 +52,22 @@ def compute_seasonality(
     shock_months: pd.DatetimeIndex = pd.DatetimeIndex([]),
     min_months: int = MIN_MONTHS,
 ) -> pd.Series:
-    """Compute the seasonality of the delay rate of each liaison.
+    """Calcule la saisonnalité du taux de retard de chaque liaison.
 
-    Shock months are removed first, so that a national event is not mistaken for a
-    seasonal effect.
+    On retire d'abord les mois de choc, pour ne pas prendre un événement national
+    pour un effet de saison.
 
     Args:
-        df (pd.DataFrame): Cleaned monthly data.
-        shock_months (pd.DatetimeIndex): Months to exclude, see ``detect_shock_months``.
-        min_months (int): Minimum number of months required for a liaison.
+        df (pd.DataFrame): Données mensuelles nettoyées.
+        shock_months (pd.DatetimeIndex): Mois à exclure, voir `detect_shock_months`.
+        min_months (int): Nombre minimal de mois exigé pour une liaison.
 
     Returns:
-        pd.Series: ``saisonnalite``, one value per liaison indexed by
-        ``LIAISON_KEY``. NaN for liaisons without enough months.
+        pd.Series: `saisonnalite`, une valeur par liaison, indexée par `LIAISON_KEY`.
+        NaN pour les liaisons qui n'ont pas assez de mois.
 
     Raises:
-        KeyError: If a required column is missing.
+        KeyError: Si une colonne nécessaire manque.
     """
     _check_columns(df, LIAISON_KEY + [COL_DATE])
     valid = filter_valid_rows(df)

@@ -1,22 +1,32 @@
-"""Build the table of coordinates of the stations used by the map.
+"""Construit le tableau des coordonnées des gares utilisées par la carte.
 
-Usage, from poc/analyse_machoudi/:
-    uv run python -m projet_sncf.utils.build_station_coordinates <gares_voyageurs.csv> <dataset.csv> <output.csv>
+Utilisation, depuis la racine du dépôt :
+    uv run python -m projet_sncf.utils.build_station_coordinates <gares_voyageurs.csv> <dataset.csv> <sortie.csv>
 """
 
+# Imports
 import sys
+
 import pandas as pd
 
 from projet_sncf.utils.stations import match_stations
 
 
+# Functions
 def main(reference_path: str, dataset_path: str, output_path: str) -> None:
-    """Match the stations of the dataset and write their coordinates.
+    """Associe les gares du jeu de données à leurs coordonnées et les écrit.
+
+    Les gares sont lues dans les colonnes de départ et d'arrivée (les 3e et 4e
+    colonnes). Le programme affiche le nombre de gares localisées, la source de leurs
+    coordonnées, puis les gares sans correspondance.
 
     Args:
-        reference_path (str): "Gares de voyageurs" CSV (separator ``;``).
-        dataset_path (str): Liaisons CSV (separator ``;``).
-        output_path (str): Where to write the table of coordinates.
+        reference_path (str): CSV « Gares de voyageurs », séparé par `;`.
+        dataset_path (str): CSV des liaisons, séparé par `;`.
+        output_path (str): Où écrire le tableau des coordonnées.
+
+    Returns:
+        None: Les coordonnées sont écrites dans `output_path`.
     """
     reference = pd.read_csv(reference_path, sep=";")
     dataset = pd.read_csv(dataset_path, sep=";")
@@ -30,5 +40,6 @@ def main(reference_path: str, dataset_path: str, output_path: str) -> None:
         print(unmatched.to_string(index=False))
 
 
+# Main program
 if __name__ == "__main__":
     main(*sys.argv[1:4])

@@ -1,4 +1,4 @@
-"""Home page."""
+"""Page d'accueil."""
 
 # Imports
 from pathlib import Path
@@ -9,12 +9,9 @@ import streamlit as st
 
 from projet_sncf.business.map.home_kpis import TIERS, home_metrics, tier_counts
 from projet_sncf.business.map.map_sncf import TIER_COLORS
+from projet_sncf.business.analysis.reliability import get_reliability_table
 
 # Constants
-SCORES_FILE = (
-    Path(__file__).resolve().parents[3] / "data" / "map" / "scores_liaisons.csv"
-)
-
 INTRO_TEXT = (
     "**Cher assureur,** RailInsight note la fiabilité de chaque liaison TGV à partir "
     "de l'historique des retards et des annulations. "
@@ -25,29 +22,42 @@ INTRO_TEXT = (
 # Functions
 @st.cache_data
 def load_scores() -> pd.DataFrame:
-    """Read the scores."""
-    return pd.read_csv(SCORES_FILE)
+    """Charge le tableau de fiabilité, gardé en cache par Streamlit.
+
+    Returns:
+        pd.DataFrame: Une ligne par liaison, voir `get_reliability_table`.
+    """
+    return get_reliability_table()
 
 
 def hex_color(tier: str) -> str:
-    """Color of a tier, as hex."""
+    """Donne la couleur d'un niveau au format hexadécimal.
+
+    Args:
+        tier (str): Niveau de fiabilité, une clé de `TIER_COLORS`.
+
+    Returns:
+        str: La couleur, par exemple "#d63031".
+    """
     return "#{:02x}{:02x}{:02x}".format(*TIER_COLORS[tier])
 
 
 def main() -> None:
-    """Draw the page."""
+    """Dessine la page d'accueil.
+
+    Returns:
+        None: La page est affichée par Streamlit.
+    """
     try:
         st.set_page_config(page_title="Accueil", layout="wide")
     except st.errors.StreamlitAPIException:
-        pass  # already set by the main app
+        # Déjà définie par l'application principale
+        pass
 
     st.title("RailInsight")
     st.caption("Fiabilité des liaisons ferroviaires")
     st.markdown(INTRO_TEXT)
 
-    if not SCORES_FILE.exists():
-        st.error(f"Fichier manquant : {SCORES_FILE.name}")
-        return
     scores = load_scores()
     metrics = home_metrics(scores)
 

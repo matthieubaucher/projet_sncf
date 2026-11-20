@@ -1,23 +1,36 @@
+"""Constantes de l'analyse de fiabilité.
+
+Chemins, paramètres de la méthode, noms de colonnes du jeu de données
+et libellés utilisés par les modules de `business/analysis`.
+"""
+
+# Imports
 import os
 
-# Folder containing this file
+# Constants
+
+# Racine du dépôt et dossier des données
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 DATA_DIR = os.path.join(ROOT, "data")
 
-# Default pattern used to find the raw CSV file
+# Motif pour trouver le CSV brut dans DATA_DIR
 DEFAULT_PATTERN = "regularite*.csv"
 
-# Logging configuration
+# Journalisation
 LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 LOG_LEVEL = "INFO"
 
-# Method parameters
+# Période de l'analyse (les mois suivants ne sont pas utilisés)
+ANALYSIS_START = "2018-01"
+ANALYSIS_END = "2026-06"
+
+# Paramètres de la méthode
 MIN_MONTHS = 24
 WORST_MONTHS_SHARE = 0.10
 SHOCK_SIGMA = 3.0
 MAD_TO_SIGMA = 1.4826
 
-# Dataset columns
+# Colonnes du jeu de données
 COL_DATE = "Date"
 COL_DEPARTURE = "Gare de départ"
 COL_ARRIVAL = "Gare d'arrivée"
@@ -26,10 +39,10 @@ COL_SCHEDULED = "Nombre de circulations prévues"
 COL_CANCELLED = "Nombre de trains annulés"
 COL_DELAYED = "Nombre de trains en retard à l'arrivée"
 
-# A liaison is a trpilet :: departure, arrival, service
+# Clé d'une liaison : gare de départ, gare d'arrivée, service
 LIAISON_KEY = [COL_DEPARTURE, COL_ARRIVAL, COL_SERVICE]
 
-# Delay causes: dataset column and short name
+# Causes de retard : colonne du jeu de données et nom court
 CAUSE_COLUMNS = {
     "Prct retard pour causes externes": "Externes",
     "Prct retard pour cause infrastructure": "Infrastructure",
@@ -39,12 +52,12 @@ CAUSE_COLUMNS = {
     "Prct retard pour cause prise en compte voyageurs (affluence, gestions PSH, correspondances)": "Prise en compte des voyageurs",
 }
 
-# Confidence levels and tiers
+# Niveaux de confiance et niveaux de fiabilité
 CONFIDENCE_ENOUGH = "suffisante"
 CONFIDENCE_LOW = "peu fiable"
 TIER_LABELS = ["moins fiable", "intermédiaire", "plus fiable"]
 
-# Columns of the final table
+# Colonnes du tableau de fiabilité final
 FINAL_COLUMNS = [
     "mois",
     "confiance",
