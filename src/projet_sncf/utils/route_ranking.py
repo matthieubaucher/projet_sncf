@@ -1,4 +1,4 @@
-"""Rank SNCF routes by their delay or cancellation rate."""
+"""Classe les trajets SNCF selon leurs taux de retard ou d'annulation."""
 
 from datetime import date
 
@@ -32,11 +32,12 @@ def rank_worst_routes(
     metric: str,
     limit: int = 10,
 ) -> pd.DataFrame:
-    """Return routes with the highest selected rate or absolute count.
+    """Renvoie les trajets les plus perturbés selon le critère choisi.
 
-    Rates use the summed number of delayed or cancelled trains divided by the
-    summed number of planned services for each route in the selected period.
-    Absolute metrics rank by the summed number of affected trains.
+    Les taux correspondent à la somme des trains en retard ou annulés divisée par
+    la somme des circulations prévues pour chaque trajet sur la période choisie.
+    Les critères en valeur absolue classent les trajets selon le nombre total de
+    trains concernés.
     """
     start_period = (
         pd.Period(year=start_period, month=1, freq="M")
