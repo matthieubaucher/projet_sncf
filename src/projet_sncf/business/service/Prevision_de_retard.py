@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.manifold import TSNE
 
 
-def simulation(parameters, axe, cible):
+def simulation(parameters:dict, axe:list, cible:str):
     """
         Fait 1000 modifications des entrées utilisateur pour avoir les 1000 vecteurs de paramètre
         Utilisation du previsionneur (avec ces data, et les vecteurs de paramètre) : méthode get_inferance_retard
@@ -15,8 +15,8 @@ def simulation(parameters, axe, cible):
     perturbe = lambda x: np.random.normal(loc=x, scale=0.05 * abs(x)) # TODO : normalisation des prct de causes a faire
     values = []
     for _ in range(1000):
-        values.append([perturbe(parameter) for parameter in parameters])
-    X = pd.DataFrame(values, columns=parameters.index)
+        values.append([perturbe(parameter) for parameter in parameters.values()])
+    X = pd.DataFrame(values, columns=parameters.keys())
     Y = get_modele_manager().get_inferance(X, axe, cible)
     return Y
 
