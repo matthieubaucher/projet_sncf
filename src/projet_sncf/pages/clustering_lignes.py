@@ -88,7 +88,9 @@ with center:
 
 if st.button("Clusteriser"):
     try:
-        points = retard_api.clusterise_ligne_et_axe(st.session_state.axes, st.session_state.cible)
+        with st.spinner("Calcul du clustering en cours..."):
+            points = retard_api.clusterise_ligne_et_axe(st.session_state.axes, st.session_state.cible)
+            
         fig, ax = plt.subplots(figsize=(8, 6))
 
         ax.scatter(

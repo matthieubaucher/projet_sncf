@@ -24,6 +24,9 @@ def clusterise_ligne_et_axe(axes:list, cible:str):
 
     if len(axes)<4:
         raise ValueError("Choisissez au moins 4 axes")
+
+    if len(axes)>7:
+        raise ValueError("Choisissez maximum 7 axes") # limites streamlit : on aurait aimé pouvoir montrer plus
     
     for axe in axes:
         if axe not in get_axes():            
