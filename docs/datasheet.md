@@ -1,12 +1,14 @@
 # Datasheet pour la Régularité mensuelle TGV par liaisons (SNCF)
 
-> Version : 1.0 | Date : 2026-11-20 | Auteur(s) : équipe projet SNCF 2026 — Amy KANE, Aristide MAWUENA RUKUNDO, Machoudi ADEGOUNTE, Matthieu BAUCHER
+> Version : 1.1 | Date : 2026-11-20 | Auteur(s) : équipe projet SNCF 2026 — Amy KANE, Aristide MAWUENA RUKUNDO, Machoudi ADEGOUNTE, Matthieu BAUCHER
 
-Cette fiche décrit le fichier `regularite-mensuelle-tgv-aqst.csv` tel qu'il est utilisé dans le projet.
+Cette fiche décrit le fichier 'regularite-mensuelle-tgv-aqst.csv' tel qu'il est utilisé dans le projet.
+
+**Source.** Les données sont collectées et publiées par SNCF Voyageurs, sur son portail open data (<https://ressources.data.sncf.com/explore/dataset/regularite-mensuelle-tgv-aqst/>).
 
 ## 1. Motivation
 
-Ce jeu de données publie, pour chaque liaison TGV et chaque mois, le nombre de trains prévus, annulés et en retard, l'ampleur des retards et la part de chaque cause de retard. Il a été créé et est édité par SNCF Voyageurs, et il porte la mention AQST (Autorité de la qualité de service dans les transports).
+Ce jeu de données publie, pour chaque liaison TGV et chaque mois, le nombre de trains prévus, annulés et en retard, l'ampleur des retards et la part de chaque cause de retard. Il a été créé et est édité par SNCF Voyageurs, et il porte la mention AQST (Autorité de la qualité de service dans les transports). La source n'indique pas de financement particulier. Notre projet, lui, n'est pas financé : il est purement académique.
 
 Son usage prévu est d'informer le public sur la régularité des TGV et de comparer les liaisons dans le temps. Dans notre projet, il sert de base à un outil d'aide à la décision pour un assureur, et chaque membre de l'équipe l'utilise pour une partie de cet outil (tableau 1).
 
@@ -75,13 +77,13 @@ Aucune ligne n'est répétée, et aucune combinaison mois, gare de départ, gare
 
 Selon la source, les horaires d'arrivée sont mesurés par des capteurs qui détectent le passage du train à l'entrée en gare, et exceptionnellement par un suivi manuel. Les retards sont arrondis à la minute inférieure.
 
-Les données sont produites par SNCF Voyageurs avec ses systèmes de suivi des circulations ; notre équipe s'est contentée de télécharger le fichier CSV publié.
+Les données sont produites par SNCF Voyageurs avec ses systèmes de suivi des circulations ; notre équipe s'est contentée de télécharger le fichier CSV publié. La dernière mise à jour de la source date du 2 octobre 2026, et la version utilisée contient les données jusqu'à septembre 2026.
 
 La question de la rémunération des collecteurs ne se pose pas, car la collecte est automatique. Celles du consentement et de la vie privée ne se posent pas non plus, car les données sont agrégées par liaison et par mois avant publication et ne décrivent aucune personne.
 
 ## 4. Prétraitement, nettoyage et labellisation
 
-Le nettoyage commun est réalisé par la fonction `nettoyer`, appelée par `get_dataframe`, la fonction de chargement partagée de l'application. Chaque règle est justifiée dans le notebook `exploration_nettoyage.ipynb`. Le principe est de garder les lignes et de remplacer une valeur impossible par une valeur manquante, pour ne pas perdre les autres informations du mois. Le tableau 4 détaille les règles. Au total, le fichier passe de 12 907 à 12 834 lignes, et 656 cases deviennent manquantes.
+Le nettoyage commun est réalisé par la fonction "nettoyer", appelée par "get_dataframe", la fonction de chargement partagée de l'application. Chaque règle est justifiée dans le notebook "exploration_nettoyage.ipynb". Le principe est de garder les lignes et de remplacer une valeur impossible par une valeur manquante, pour ne pas perdre les autres informations du mois. Le tableau 4 détaille les règles. Au total, le fichier passe de 12 907 à 12 834 lignes, et 656 cases deviennent manquantes.
 
 **Tableau 4 – Règles de nettoyage**
 
@@ -95,13 +97,13 @@ Le nettoyage commun est réalisé par la fonction `nettoyer`, appelée par `get_
 | Retard moyen des trains en retard de plus de 15 min négatif | valeur mise à manquant | 8 cases |
 | Retard moyen des trains en retard à l'arrivée négatif | valeur mise à manquant | 2 cases |
 
-Les indicateurs sont calculés automatiquement à partir des colonnes. Il n'y a pas d'annotation manuelle, donc pas de taux d'accord inter-annotateurs. Les mois de choc national, comme les grèves ou le confinement, sont repérés automatiquement à partir de leur écart à la médiane. Ils sont écartés du calcul de la saisonnalité et de la régularité, ainsi que de l'apprentissage de la prévision du mois suivant, mais ils restent dans les données et dans le score de fiabilité.
+Les indicateurs sont calculés automatiquement à partir des colonnes. Il n'y a pas d'annotation manuelle, donc pas de taux d'accord inter-annotateurs. Les mois de choc national, comme les grèves ou le confinement, ne sont pas indiqués dans le CSV : le projet les repère automatiquement, à partir de l'écart du taux de perturbation national à sa médiane. Ils sont écartés du calcul de la saisonnalité et de la régularité, ainsi que de l'apprentissage de la prévision du mois suivant, mais ils restent dans les données et dans le score de fiabilité.
 
 ## 5. Usages
 
 En plus des usages décrits à la section 1, ce jeu convient pour étudier les causes de retard. Les usages déconseillés sont aussi décrits à la section 1.
 
-Plusieurs biais sont connus. Le seuil à partir duquel un train est compté en retard dépend de la durée du trajet (tableau 5) : comparer une liaison courte et une liaison longue revient donc à mélanger des seuils différents. Les mois exceptionnels pèsent lourd sur les moyennes. Enfin, les causes sont déclarées par l'opérateur.
+Plusieurs biais sont connus. Selon la source, un train est considéré à l'heure si son retard au terminus reste sous un seuil qui dépend de la durée du trajet (tableau 5) : comparer une liaison courte et une liaison longue revient donc à mélanger des seuils différents. Les mois exceptionnels pèsent lourd sur les moyennes. Enfin, les causes sont déclarées par l'opérateur, et nous ne connaissons pas les méthodes que la SNCF utilise pour contrôler et valider ses mesures.
 
 **Tableau 5 – Seuil de retard selon la durée du trajet**
 
@@ -123,19 +125,19 @@ Les mesures de qualité attendues dépendent de l'usage (tableau 6).
 
 | Usage | Mesure |
 |---|---|
-| Score de fiabilité | indicateur descriptif, sans mesure de performance ; le niveau de confiance signale les liaisons de moins de 24 mois |
-| Analyses descriptives | sans objet |
+| Score de fiabilité | indicateur descriptif, sans mesure de performance ; les liaisons avec moins de 24 mois de données sont marquées « peu fiable », car leur score repose sur trop peu de mois |
+| Analyses descriptives | pas de mesure de performance : ces analyses montrent, de façon simplifiée, si les perturbations sont saisonnières et comment les retards, les annulations et leurs causes évoluent dans le temps |
 | Simulation des retards par axe | R², à calculer sur les mois les plus récents plutôt que sur des mois tirés au hasard |
 | Prévision du mois suivant | F1 macro, rappel, précision et AUC sur janvier 2025 à septembre 2026 : la forêt aléatoire retenue obtient un F1 de 0,749 et une AUC de 0,838, contre un F1 de 0,720 pour la règle « comme le mois dernier » |
 
 ## 6. Distribution
 
-Le jeu est diffusé en CSV et en JSON sur le portail open data de la SNCF (<https://ressources.data.sncf.com>, jeu `regularite-mensuelle-tgv-aqst`).
+Le jeu est diffusé en CSV et en JSON, sur les deux sites indiqués en tête de fiche : le portail open data de la SNCF et data.gouv.fr.
 
 Il est publié sous la licence Open Data Commons Open Database License (ODbL). L'accès est libre et ne demande pas d'inscription. L'ODbL demande de citer la source et de partager sous la même licence les bases de données dérivées que l'on diffuse publiquement, ce qui concerne aussi nos fichiers de prévisions.
 
 ## 7. Maintenance
 
-La source est maintenue par SNCF Voyageurs. La copie du projet est maintenue par notre équipe, dans le dépôt GitHub `projectSNCF-2026/projet_sncf`.
+La source est maintenue par SNCF Voyageurs. La copie du projet est maintenue par notre équipe, dans le dépôt GitHub "projectSNCF-2026/projet_sncf".
 
 La fréquence officielle de mise à jour n'est pas renseignée par la source ; en pratique, de nouveaux mois sont ajoutés au fil du temps. Nous mettons notre copie à jour à la main : nous téléchargeons le nouveau fichier, le remplaçons dans `data/`, puis relançons les notebooks et les tests.
