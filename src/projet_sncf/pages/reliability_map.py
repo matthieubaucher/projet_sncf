@@ -4,7 +4,6 @@
 import logging
 import math
 from pathlib import Path
-
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
@@ -72,9 +71,10 @@ NETWORK_LAYER, HALO_LAYER, LINKS_LAYER, POINTS_LAYER, LABELS_LAYER = (
     "noms",
 )
 INTRO_TEXT = (
-    "Cet outil aide un assureur à repérer les liaisons TGV les plus intéressantes à couvrir. "
-    "Chaque trait est une liaison, colorée selon sa fiabilité historique : plus elle est fiable, "
-    "moins il y a de trajets annulés ou en retard à indemniser.\n\n"
+    "Cet outil aide un assureur à évaluer le niveau de risque des trajets en train "
+    "qu'il envisage d'assurer. Chaque trait est une liaison, colorée selon sa fiabilité "
+    "historique : plus elle est fiable, moins il y a de risques d'annulations ou de "
+    "retards à indemniser.\n\n"
     "**Comment l'utiliser :** cliquez sur une liaison pour lire sa recommandation, puis "
     "**simulez sa prime** en réglant l'indemnité moyenne dans la barre latérale à gauche."
 )
@@ -199,7 +199,7 @@ def show_details(scores: pd.DataFrame, selected: dict | None, indemnity: float) 
     Returns:
         None: Les détails sont affichés par Streamlit.
     """
-    hint = "Cliquez sur une liaison de la carte pour voir si elle est intéressante à assurer."
+    hint = "Cliquez sur une liaison de la carte pour voir son niveau de risque."
     if selected is None:
         st.info(hint)
         return
@@ -444,7 +444,7 @@ def main() -> None:
     if summary["liaisons"]:
         st.markdown(
             f"**{summary['liaisons']}** liaisons affichées · "
-            f"**{summary['plus_fiables']}** à risque faible, à assurer en priorité · "
+            f"**{summary['plus_fiables']}** à risque faible · "
             f"**{summary['moins_fiables']}** à risque élevé"
         )
     else:
