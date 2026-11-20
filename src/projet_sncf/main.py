@@ -7,3 +7,4 @@ Démonstrateur d'analyse des retards, annulations et coûts des liaisons SNCF po
 """)
 
 st.page_link("pages/prediction_retard.py", label="Prévision des retards")
+st.page_link("pages/clustering_lignes.py", label="clustering des modèles")

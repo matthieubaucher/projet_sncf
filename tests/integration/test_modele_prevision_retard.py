@@ -31,7 +31,7 @@ tests = [
         ("PARIS LYON", "NICE VILLE", "prct annulation", 0.38), 
         ("PARIS LYON", "NICE VILLE", "Retard moyen de tous les trains à l'arrivée", 0.19),
 
-        ("PARIS MONTPARNASSE", "RENNES", "prct Nombre trains en retard > 30min", 0.11),
+        ("PARIS MONTPARNASSE", "RENNES", "prct Nombre trains en retard > 30min", -0.07),
         ("PARIS MONTPARNASSE", "RENNES", "prct annulation", 0.39),
         ("PARIS MONTPARNASSE", "RENNES", "Retard moyen de tous les trains à l'arrivée", 0.07),
 

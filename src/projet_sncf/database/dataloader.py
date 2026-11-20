@@ -1,15 +1,16 @@
 """Chargement des données de régularité mensuelle des TGV.
 
 Un seul appel à :func:`get_dataframe` renvoie les données chargées, nettoyées
-(avec :func:`projet_sncf.database.nettoyage.nettoyer`) et complétées par des colonnes utiles
-aux analyses.
+(avec :func:`projet_sncf.database.nettoyage.nettoyer`) et complétées par des
+colonnes utiles aux analyses.
 
-Les valeurs impossibles sont remplacées par NaN au lieu de supprimer la ligne : chaque
-modèle écarte lui-même les lignes dont il ne peut pas se servir.
+Les valeurs impossibles sont remplacées par NaN au lieu de supprimer la ligne :
+chaque modèle écarte lui-même les lignes dont il ne peut pas se servir.
 """
 
 import logging
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
 
@@ -36,11 +37,12 @@ COLONNES_RETARD = [
 
 COL_PREVUES = "Nombre de circulations prévues"
 
-#: Premier mois des données : la colonne ``Temps`` compte les mois depuis cette date.
+#: Premier mois des données : la colonne ``Temps`` compte les mois depuis cette
+#: date.
 ORIGINE_DU_TEMPS = pd.Timestamp("2018-01-01")
 
 
-def get_dataframe():
+def get_dataframe() -> pd.DataFrame:
     """Charge, nettoie et complète les données.
 
     Returns:
@@ -53,7 +55,7 @@ def get_dataframe():
     return df
 
 
-def get_initial_dataframe():
+def get_initial_dataframe() -> pd.DataFrame:
     """Lit le fichier CSV brut de l'AQST.
 
     Returns:
@@ -62,18 +64,21 @@ def get_initial_dataframe():
     return pd.read_csv(DATA_PATH, sep=";")
 
 
-def typer_gares(df):
+def typer_gares(df: pd.DataFrame) -> pd.DataFrame:
     """Met les colonnes de gares au type ``category``, plus léger en mémoire.
 
     Args:
-        df (pandas.DataFrame): Données avec les colonnes ``Gare de départ`` et ``Gare d'arrivée``.
+        df (pandas.DataFrame): Données avec les colonnes ``Gare de départ`` et
+            ``Gare d'arrivée``.
 
     Returns:
         pandas.DataFrame: Une copie des données avec les gares en ``category``.
 
     Example:
         >>> import pandas as pd
-        >>> df = typer_gares(pd.DataFrame({"Gare de départ": ["PARIS"], "Gare d'arrivée": ["LYON"]}))
+        >>> df = typer_gares(pd.DataFrame(
+        ...     {"Gare de départ": ["PARIS"], "Gare d'arrivée": ["LYON"]}
+        ... ))
         >>> str(df["Gare de départ"].dtype)
         'category'
     """
@@ -83,7 +88,9 @@ def typer_gares(df):
     return df
 
 
-def get_temps(annee, mois):
+def get_temps(
+    annee: int | pd.Series, mois: int | pd.Series
+) -> int | pd.Series:
     """Compte le nombre de mois écoulés depuis :data:`ORIGINE_DU_TEMPS`.
 
     Args:
@@ -97,10 +104,12 @@ def get_temps(annee, mois):
         >>> get_temps(2019, 7)
         18
     """
-    return (annee - ORIGINE_DU_TEMPS.year) * 12 + (mois - ORIGINE_DU_TEMPS.month)
+    return (annee - ORIGINE_DU_TEMPS.year) * 12 + (
+        mois - ORIGINE_DU_TEMPS.month
+    )
 
 
-def add_usefull_column(df):
+def add_usefull_column(df: pd.DataFrame) -> pd.DataFrame:
     """Ajoute des colonnes utiles aux analyses.
 
     Colonnes ajoutées :
@@ -108,12 +117,13 @@ def add_usefull_column(df):
     - ``Temps`` : nombre de mois depuis janvier 2018 ;
     - ``Mois`` : mois de l'année (1 à 12) ;
     - ``Saison`` : température moyenne en France pour ce mois ;
-    - ``prct <colonne>`` : chaque colonne de :data:`COLONNES_RETARD` divisée par le nombre
-      de circulations prévues ;
-    - ``prct annulation`` : trains annulés divisés par le nombre de circulations prévues.
+    - ``prct <colonne>`` : chaque colonne de :data:`COLONNES_RETARD` divisée
+      par le nombre de circulations prévues ;
+    - ``prct annulation`` : trains annulés divisés par le nombre de
+      circulations prévues.
 
-    Aucune ligne n'est supprimée : un pourcentage vaut NaN quand la valeur d'origine a été
-    jugée impossible par le nettoyage.
+    Aucune ligne n'est supprimée : un pourcentage vaut NaN quand la valeur
+    d'origine a été jugée impossible par le nettoyage.
 
     Args:
         df (pandas.DataFrame): Données nettoyées, avec ``Date`` au format date.
@@ -124,29 +134,41 @@ def add_usefull_column(df):
     df_augmented = df.copy()
 
     # Temps : nombre de mois depuis janvier 2018 (voir get_temps)
-    df_augmented["Temps"] = get_temps(df_augmented["Date"].dt.year, df_augmented["Date"].dt.month).astype("int16")
+    temps = cast(
+        pd.Series,
+        get_temps(df_augmented["Date"].dt.year, df_augmented["Date"].dt.month),
+    )
+    df_augmented["Temps"] = temps.astype("int16")
 
     # Mois et saison (température moyenne du mois)
     df_augmented["Mois"] = df_augmented["Date"].dt.month.astype("int8")
-    saison = {mois: temperature for mois, temperature in enumerate(TEMPERATURES_MOYENNES, start=1)}
+    saison = {
+        mois: temperature
+        for mois, temperature in enumerate(TEMPERATURES_MOYENNES, start=1)
+    }
     df_augmented["Saison"] = df_augmented["Mois"].map(saison).astype("int8")
 
     # Pourcentages de retard et d'annulation
     for colonne in COLONNES_RETARD:
-        df_augmented[f"prct {colonne}"] = df_augmented[colonne] / df_augmented[COL_PREVUES]
-    df_augmented["prct annulation"] = df_augmented["Nombre de trains annulés"] / df_augmented[COL_PREVUES]
+        df_augmented[f"prct {colonne}"] = (
+            df_augmented[colonne] / df_augmented[COL_PREVUES]
+        )
+    df_augmented["prct annulation"] = (
+        df_augmented["Nombre de trains annulés"] / df_augmented[COL_PREVUES]
+    )
 
     logger.info("Colonnes utiles ajoutées : %d lignes", len(df_augmented))
     return df_augmented
 
 
-def get_axes():
+def get_axes() -> list[tuple[str, str]]:
     """Liste les liaisons des données, sans tenir compte du sens.
 
     Une liaison A → B et la liaison B → A ne forment qu'un seul axe.
 
     Returns:
-        list[tuple[str, str]]: Les paires de gares, chacune triée par ordre alphabétique.
+        list[tuple[str, str]]: Les paires de gares, chacune triée par ordre
+            alphabétique.
     """
     df = get_dataframe()
     axes = (

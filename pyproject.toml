@@ -8,7 +8,11 @@ version = "0.1.0"
 description = "Projet commun sncf"
 requires-python = ">=3.11"
 dependencies = [
+    "ipykernel>=7.4.0",
+    "matplotlib>=3.11.2",
     "numpy>=2.4.6",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.6",
     "plotly>=7.1.0",
     "pytest>=9.1.1",
     "scikit-learn>=1.9.1",
@@ -36,3 +40,14 @@ dev = [
 [tool.coverage.run]
 source = ["src"]  # uniquement ce répertoire est verifier en couverture
 branch = true
+
+[tool.ruff]
+line-length = 79  # limite de PEP 8
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N"]  # pycodestyle, pyflakes, imports, nommage
+
+[tool.ruff.lint.pep8-naming]
+# X_train, X_test : convention de scikit-learn pour une matrice de variables
+extend-ignore-names = ["X", "X_*"]
