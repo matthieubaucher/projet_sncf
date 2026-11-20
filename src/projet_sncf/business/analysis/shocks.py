@@ -2,6 +2,7 @@
 
 # Imports
 import logging
+
 import pandas as pd
 
 from projet_sncf.business.analysis.constants import (
@@ -29,9 +30,9 @@ def compute_national_rates(df: pd.DataFrame) -> pd.DataFrame:
         df (pd.DataFrame): Données mensuelles nettoyées.
 
     Returns:
-        pd.DataFrame: Une ligne par mois, indexé par la date. Colonnes : `prevues`,
-        `annules`, `reelles`, `retards`, `taux_annulation`, `taux_retard` et
-        `taux_perturbation`.
+        pd.DataFrame: Une ligne par mois, indexée par la date. Colonnes
+        `prevues`, `annules`, `reelles`, `retards`, `taux_annulation`,
+        `taux_retard` et `taux_perturbation`.
 
     Raises:
         KeyError: Si une colonne nécessaire manque.
@@ -52,17 +53,19 @@ def compute_national_rates(df: pd.DataFrame) -> pd.DataFrame:
     monthly["taux_retard"] = monthly["retards"] / monthly["reelles"].where(
         monthly["reelles"] > 0
     )
-    monthly["taux_perturbation"] = (monthly["annules"] + monthly["retards"]) / monthly[
-        "prevues"
-    ]
+    monthly["taux_perturbation"] = (
+        monthly["annules"] + monthly["retards"]
+    ) / monthly["prevues"]
     return monthly
 
 
-def compute_shock_threshold(monthly: pd.DataFrame, sigma: float = SHOCK_SIGMA) -> float:
-    """Calcule le taux de perturbation à partir duquel un mois est un choc national.
+def compute_shock_threshold(
+    monthly: pd.DataFrame, sigma: float = SHOCK_SIGMA
+) -> float:
+    """Calcule le seuil au-delà duquel un mois est un choc national.
 
-    Le seuil vaut `médiane + sigma * s`, où `s` est la déviation absolue médiane
-    (MAD) multipliée par 1,4826.
+    Le seuil vaut `médiane + sigma * s`, où `s` est la déviation absolue
+    médiane (MAD) multipliée par 1,4826.
 
     Args:
         monthly (pd.DataFrame): Résultat de `compute_national_rates`.
@@ -85,7 +88,7 @@ def compute_shock_threshold(monthly: pd.DataFrame, sigma: float = SHOCK_SIGMA) -
 def detect_shock_months(
     monthly: pd.DataFrame, sigma: float = SHOCK_SIGMA
 ) -> pd.DatetimeIndex:
-    """Renvoie les mois dont le taux de perturbation national est anormalement haut.
+    """Renvoie les mois de perturbation anormalement élevés sur le réseau.
 
     Un mois est un choc quand son taux dépasse strictement le seuil de
     `compute_shock_threshold`.
@@ -104,6 +107,9 @@ def detect_shock_months(
     rate = monthly["taux_perturbation"]
     shocks = rate.index[rate > threshold]
     logger.info(
-        "Seuil de choc : %.3f, %d mois sur %d", threshold, len(shocks), len(rate)
+        "Seuil de choc : %.3f, %d mois sur %d",
+        threshold,
+        len(shocks),
+        len(rate),
     )
     return shocks

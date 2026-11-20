@@ -1,6 +1,7 @@
 """Dessin simplifié du réseau ferré français, utilisé en fond de carte.
 
-Source : « Fichier de formes des lignes du Réseau Ferré National » (SNCF Réseau, ODbL).
+Source : « Fichier de formes des lignes du Réseau Ferré National »
+(SNCF Réseau, ODbL).
 
 Utilisation, depuis la racine du dépôt :
     uv run python -m projet_sncf.utils.rail_network <lignes.csv> <sortie.json>
@@ -36,8 +37,8 @@ def parse_paths(shape: str) -> list[list[list[float]]]:
 
     Returns:
         list[list[list[float]]]: Les chemins, chacun étant une liste de points
-        [longitude, latitude]. Vide si le texte manque, est mal formé ou d'un autre
-        type.
+        [longitude, latitude]. Vide si le texte manque, est mal formé ou d'un
+        autre type.
     """
     try:
         geometry = json.loads(shape)
@@ -66,7 +67,9 @@ def _distance_to_segment(point, start, end) -> float:
     dx, dy = ex - sx, ey - sy
     if dx == 0 and dy == 0:
         return math.hypot(px - sx, py - sy)
-    t = max(0.0, min(1.0, ((px - sx) * dx + (py - sy) * dy) / (dx * dx + dy * dy)))
+    t = max(
+        0.0, min(1.0, ((px - sx) * dx + (py - sy) * dy) / (dx * dx + dy * dy))
+    )
     return math.hypot(px - (sx + t * dx), py - (sy + t * dy))
 
 
@@ -77,8 +80,8 @@ def simplify(
 
     Args:
         path (list[list[float]]): Points [longitude, latitude].
-        tolerance (float): Plus grande distance, en degrés, entre le chemin et sa
-            version simplifiée.
+        tolerance (float): Distance maximale, en degrés, entre le chemin et
+            sa version simplifiée.
 
     Returns:
         list[list[float]]: Un chemin avec moins de points, qui garde les deux
@@ -108,8 +111,8 @@ def build_network(
     """Construit les chemins simplifiés du réseau.
 
     Args:
-        lines (pd.DataFrame): Le CSV des lignes, avec la colonne `Geo Shape` et,
-            si elle existe, `MNEMO` (seule la valeur `EXPLOITE` est gardée).
+        lines (pd.DataFrame): Le CSV des lignes avec la colonne `Geo Shape`
+            et, si présent, `MNEMO` (seule la valeur `EXPLOITE` est gardée).
         tolerance (float): Tolérance de la simplification, en degrés.
 
     Returns:
@@ -121,7 +124,8 @@ def build_network(
     """
     if COL_SHAPE not in lines.columns:
         raise KeyError(
-            f"Colonne manquante : {COL_SHAPE}. Colonnes : {list(lines.columns)}"
+            f"Colonne manquante : {COL_SHAPE}. "
+            f"Colonnes : {list(lines.columns)}"
         )
     if COL_STATUS in lines.columns:
         lines = lines[lines[COL_STATUS] == STATUS_IN_SERVICE]
@@ -130,7 +134,8 @@ def build_network(
         for path in parse_paths(shape):
             simple = simplify(path, tolerance)
             rounded = [
-                [round(lon, DECIMALS), round(lat, DECIMALS)] for lon, lat in simple
+                [round(lon, DECIMALS), round(lat, DECIMALS)]
+                for lon, lat in simple
             ]
             inside = all(
                 LONGITUDE_RANGE[0] <= lon <= LONGITUDE_RANGE[1]

@@ -23,5 +23,8 @@ jobs:
       - name: Installer les dépendances
         run: uv sync
 
+      - name: Vérifier le style PEP 8
+        run: uv run --with ruff ruff check src/projet_sncf --output-format=github
+
       - name: Exécuter les tests
         run: uv run pytest

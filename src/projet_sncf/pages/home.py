@@ -2,19 +2,21 @@
 
 # Imports
 import logging
+
 import altair as alt
 import pandas as pd
 import streamlit as st
 
+from projet_sncf.business.analysis.reliability import get_reliability_table
 from projet_sncf.business.map.home_kpis import TIERS, home_metrics, tier_counts
 from projet_sncf.business.map.map_sncf import TIER_COLORS
-from projet_sncf.business.analysis.reliability import get_reliability_table
 
 # Constants
 logger = logging.getLogger(__name__)
 
 INTRO_TEXT = (
-    "**Cher assureur,** RailInsight note la fiabilité de chaque liaison TGV à partir "
+    "**Cher assureur,** RailInsight note la fiabilité de chaque liaison "
+    "TGV à partir "
     "de l'historique des retards et des annulations. "
     "Visualisez les risques et les indicateurs de chaque liaison "
     "pour calibrer au mieux la prime d'assurance."
@@ -76,7 +78,10 @@ def tier_chart(counts: pd.DataFrame) -> alt.LayerChart:
     """
     total = counts["Liaisons"].sum()
     counts = counts.assign(
-        Texte=[f"{n} liaisons · {100 * n / total:.0f} %" for n in counts["Liaisons"]],
+        Texte=[
+            f"{n} liaisons · {100 * n / total:.0f} %"
+            for n in counts["Liaisons"]
+        ],
         Encre=[ink_color(tier) for tier in counts["Niveau"]],
     )
     base = alt.Chart(counts).encode(
@@ -141,7 +146,7 @@ def main() -> None:
     st.subheader("Répartition des liaisons par niveau de fiabilité")
     st.altair_chart(
         tier_chart(tier_counts(scores)).properties(height=280),
-        use_container_width=True,
+        width="stretch",
     )
 
     st.caption("Données : SNCF Open Data. Réseau ferré : SNCF Réseau (ODbL).")

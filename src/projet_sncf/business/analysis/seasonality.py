@@ -1,10 +1,11 @@
 """Saisonnalité du taux de retard de chaque liaison.
 
-Elle se mesure avec le R² ajusté du mois calendaire sur le taux de retard mensuel.
+Mesurée avec le R² ajusté du mois calendaire sur le taux mensuel.
 """
 
 # Imports
 import logging
+
 import numpy as np
 import pandas as pd
 
@@ -16,24 +17,32 @@ from projet_sncf.business.analysis.constants import (
     LIAISON_KEY,
     MIN_MONTHS,
 )
-from projet_sncf.business.analysis.indicators import _check_columns, filter_valid_rows
+from projet_sncf.business.analysis.indicators import (
+    _check_columns,
+    filter_valid_rows,
+)
 
 # Constants
 logger = logging.getLogger(__name__)
 
 
 # Functions
-def adjusted_r2(rates: pd.Series, calendar_months: pd.Series, min_months: int) -> float:
+def adjusted_r2(
+    rates: pd.Series, calendar_months: pd.Series, min_months: int
+) -> float:
     """Calcule le R² ajusté du mois calendaire sur une série de taux.
 
     Args:
-        rates (pd.Series): Taux de retard mensuels d'une liaison. Les NaN sont ignorés.
-        calendar_months (pd.Series): Mois calendaire (1 à 12) de chaque taux, même index.
+        rates (pd.Series): Taux de retard mensuels d'une liaison.
+            Les NaN sont ignorés.
+        calendar_months (pd.Series): Mois calendaire (1 à 12) de chaque taux,
+            avec le même index.
         min_months (int): Nombre minimal de mois exigé.
 
     Returns:
-        float: Le R² ajusté. NaN s'il y a moins de `min_months` mois, si le taux ne
-        varie jamais, ou s'il n'y a pas plus de mois que de mois calendaires distincts.
+        float: Le R² ajusté. NaN s'il y a moins de `min_months` mois, si le
+        taux ne varie jamais ou s'il n'y a pas plus de mois que de mois
+        calendaires distincts.
     """
     y = rates.dropna()
     n = len(y)
@@ -54,17 +63,18 @@ def compute_seasonality(
 ) -> pd.Series:
     """Calcule la saisonnalité du taux de retard de chaque liaison.
 
-    On retire d'abord les mois de choc, pour ne pas prendre un événement national
-    pour un effet de saison.
+    Les mois de choc sont retirés pour ne pas confondre un événement national
+    avec un effet de saison.
 
     Args:
         df (pd.DataFrame): Données mensuelles nettoyées.
-        shock_months (pd.DatetimeIndex): Mois à exclure, voir `detect_shock_months`.
+        shock_months (pd.DatetimeIndex): Mois à exclure, voir
+            `detect_shock_months`.
         min_months (int): Nombre minimal de mois exigé pour une liaison.
 
     Returns:
-        pd.Series: `saisonnalite`, une valeur par liaison, indexée par `LIAISON_KEY`.
-        NaN pour les liaisons qui n'ont pas assez de mois.
+        pd.Series: `saisonnalite`, une valeur par liaison, indexée par
+        `LIAISON_KEY`. NaN pour les liaisons avec trop peu de mois.
 
     Raises:
         KeyError: Si une colonne nécessaire manque.

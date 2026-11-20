@@ -2,6 +2,7 @@
 
 # Imports
 import math
+
 import pandas as pd
 
 # Constants
@@ -58,7 +59,8 @@ LABEL_HEIGHT = 0.5
 INSURER_READINGS = {
     TIER_MORE: (
         "success",
-        "Risque faible : peu de perturbations à indemniser, la prime peut rester modérée.",
+        "Risque faible : peu de perturbations à indemniser, "
+        "la prime peut rester modérée.",
     ),
     TIER_MIDDLE: (
         "warning",
@@ -88,8 +90,8 @@ def display_name(station: str) -> str:
         station (str): Nom de la gare, en majuscules.
 
     Returns:
-        str: Le nom avec une majuscule à chaque mot, « TGV » gardé en majuscules et
-        les petits mots (en, de, la, le, des) en minuscules.
+        str: Le nom avec une majuscule à chaque mot, « TGV » en majuscules
+        et les petits mots (en, de, la, le, des) en minuscules.
     """
     name = station.title().replace(" Tgv", " TGV")
     for word, replacement in LOWER_CASE_WORDS.items():
@@ -110,12 +112,14 @@ def build_curve(
         start (tuple[float, float]): Point de départ, en (longitude, latitude).
         end (tuple[float, float]): Point d'arrivée, en (longitude, latitude).
         side (int): 1 courbe vers la gauche, -1 vers la droite.
-        bend (float): Décalage du milieu, en part de la distance entre les points.
+        bend (float): Décalage du milieu, en fraction de la distance
+            entre les points.
         points (int): Nombre de points de la courbe.
 
     Returns:
-        list[list[float]]: Les points de la courbe, chacun en [longitude, latitude].
-        Si les deux points sont identiques, le point de départ est répété.
+        list[list[float]]: Les points de la courbe, chacun en
+        [longitude, latitude]. Si les points sont identiques, le point de
+        départ est répété.
     """
     stretch = math.cos(math.radians((start[1] + end[1]) / 2))
     x0, y0 = start[0] * stretch, start[1]
@@ -152,17 +156,17 @@ def route_key(station_a: str, station_b: str) -> str:
 def offset_path(
     path: list[list[float]], distance: float = OFFSET_DEGREES
 ) -> list[list[float]]:
-    """Décale un chemin vers la droite, pour que les deux sens d'une voie ne se chevauchent pas.
+    """Décale un chemin pour séparer les deux sens d'une même voie.
 
     Le décalage diminue près des gares, sur `OFFSET_TAPER_KM` kilomètres.
 
     Args:
-        path (list[list[float]]): Points du chemin, chacun en [longitude, latitude].
+        path (list[list[float]]): Points du chemin en [longitude, latitude].
         distance (float): Décalage maximal, en degrés.
 
     Returns:
-        list[list[float]]: Le chemin décalé. Un chemin de moins de deux points est
-        simplement copié.
+        list[list[float]]: Le chemin décalé. Un chemin de moins de deux
+        points est simplement copié.
     """
     count = len(path)
     if count < 2:
@@ -174,7 +178,8 @@ def offset_path(
     along = [0.0]
     for i in range(1, count):
         along.append(
-            along[-1] + math.hypot(xs[i] - xs[i - 1], ys[i] - ys[i - 1]) * KM_PER_DEGREE
+            along[-1]
+            + math.hypot(xs[i] - xs[i - 1], ys[i] - ys[i - 1]) * KM_PER_DEGREE
         )
     total = along[-1]
 
@@ -184,7 +189,9 @@ def offset_path(
         dx, dy = xs[after] - xs[before], ys[after] - ys[before]
         length = math.hypot(dx, dy)
         weight = min(
-            1.0, along[i] / OFFSET_TAPER_KM, (total - along[i]) / OFFSET_TAPER_KM
+            1.0,
+            along[i] / OFFSET_TAPER_KM,
+            (total - along[i]) / OFFSET_TAPER_KM,
         )
         weight = max(weight, 0.0)
         if length == 0:
@@ -206,32 +213,36 @@ def prepare_links(
 
     Args:
         scores (pd.DataFrame): Tableau de fiabilité, une ligne par liaison.
-        stations (pd.DataFrame): Coordonnées des gares, avec les colonnes `gare`,
-            `latitude` et `longitude`.
+        stations (pd.DataFrame): Coordonnées des gares, avec les colonnes
+            `gare`, `latitude` et `longitude`.
         mode (str): `MODE_EACH_DIRECTION` garde toutes les liaisons,
-            `MODE_WORST_DIRECTION` garde seulement le moins bon sens de chaque paire.
+            `MODE_WORST_DIRECTION` garde le moins bon sens de chaque paire.
         routes (dict[str, list[list[float]]] | None): Chemins le long du réseau
-            ferré, par clé de voie (voir `route_key`). Sans chemin, on trace une
-            courbe.
+            ferré, par clé de voie (voir `route_key`). Sans chemin, une
+            courbe est tracée.
 
     Returns:
-        tuple[pd.DataFrame, int]: Les liaisons à tracer, les pires en dernier pour
-        qu'elles soient dessinées au-dessus, et le nombre de liaisons écartées
-        faute de coordonnées.
+        tuple[pd.DataFrame, int]: Les liaisons à tracer, les pires en dernier
+        pour qu'elles soient dessinées au-dessus, et le nombre de liaisons
+        écartées faute de coordonnées.
     """
     routes = routes or {}
-    coordinates = stations.dropna(subset=["latitude", "longitude"]).set_index("gare")
-    table = scores.copy()
-    located = table[COL_DEPARTURE].isin(coordinates.index) & table[COL_ARRIVAL].isin(
-        coordinates.index
+    coordinates = stations.dropna(subset=["latitude", "longitude"]).set_index(
+        "gare"
     )
+    table = scores.copy()
+    located = table[COL_DEPARTURE].isin(coordinates.index) & table[
+        COL_ARRIVAL
+    ].isin(coordinates.index)
     unlocated = int((~located).sum())
     table = table[located].copy()
 
     if mode == MODE_WORST_DIRECTION and len(table):
         pair = table.apply(
-            lambda r: tuple(sorted([r[COL_DEPARTURE], r[COL_ARRIVAL]]))
-            + (r[COL_SERVICE],),
+            lambda r: (
+                tuple(sorted([r[COL_DEPARTURE], r[COL_ARRIVAL]]))
+                + (r[COL_SERVICE],)
+            ),
             axis=1,
         )
         table = table.loc[table.groupby(pair)["score"].idxmin()]
@@ -261,7 +272,10 @@ def prepare_links(
         red, green, blue = TIER_COLORS.get(row["tiers"], NO_TIER_COLOR)
         title = f"{display_name(departure)} → {display_name(arrival)}"
         if mode == MODE_WORST_DIRECTION:
-            title = f"{display_name(departure)} ↔ {display_name(arrival)} (sens le moins bon)"
+            title = (
+                f"{display_name(departure)} ↔ {display_name(arrival)} "
+                "(sens le moins bon)"
+            )
         cause = row.get("cause_dominante")
         rows.append(
             {
@@ -275,13 +289,17 @@ def prepare_links(
                 "width": WIDTH,
                 "score": row["score"],
                 "tiers": (
-                    row["tiers"] if isinstance(row["tiers"], str) else "non classé"
+                    row["tiers"]
+                    if isinstance(row["tiers"], str)
+                    else "non classé"
                 ),
                 "confiance": row["confiance"],
                 "score_txt": f"{row['score']:.1f} / 100",
                 "perturbation_txt": f"{100 * row['taux_perturbation']:.1f} %",
                 "cause_txt": (
-                    cause if isinstance(cause, str) else "aucune (pas de retard)"
+                    cause
+                    if isinstance(cause, str)
+                    else "aucune (pas de retard)"
                 ),
                 "mois_txt": f"{int(row['mois'])} mois",
             }
@@ -333,9 +351,10 @@ def filter_links(
         links (pd.DataFrame): Liaisons à tracer.
         services (list[str]): Services à garder.
         tiers (list[str]): Niveaux à garder.
-        station (str | None): Une gare (de départ ou d'arrivée), ou `PARIS_GROUP`
-            pour toutes les gares de Paris. Sans valeur, toutes les gares sont gardées.
-        score_range (tuple[float, float] | None): Score minimal et maximal à garder.
+        station (str | None): Une gare de départ ou d'arrivée, ou
+            `PARIS_GROUP` pour toutes les gares de Paris. Sans valeur,
+            toutes les gares sont gardées.
+        score_range (tuple[float, float] | None): Scores minimal et maximal.
 
     Returns:
         pd.DataFrame: Les liaisons qui passent tous les filtres.
@@ -359,8 +378,8 @@ def label_name(station: str) -> str:
         station (str): Nom de la gare, en majuscules.
 
     Returns:
-        str: « Paris » pour toutes les gares de Paris. Sinon le nom lisible, sans
-        le suffixe de `LABEL_SUFFIXES` s'il y en a un.
+        str: « Paris » pour les gares de Paris. Sinon, le nom lisible sans
+        suffixe éventuel de `LABEL_SUFFIXES`.
     """
     if station.upper().startswith("PARIS"):
         return "Paris"
@@ -374,18 +393,20 @@ def label_name(station: str) -> str:
 def station_points(
     links: pd.DataFrame, stations: pd.DataFrame, min_links_for_label: int = 4
 ) -> pd.DataFrame:
-    """Prépare les gares à dessiner, avec des étiquettes qui ne se chevauchent pas.
+    """Prépare les gares à dessiner avec des étiquettes distinctes.
 
     Les gares les plus desservies passent en premier et gardent leur étiquette.
 
     Args:
         links (pd.DataFrame): Liaisons à tracer.
         stations (pd.DataFrame): Coordonnées des gares.
-        min_links_for_label (int): Nombre minimal de liaisons pour avoir une étiquette.
+        min_links_for_label (int): Nombre minimal de liaisons pour afficher
+            une étiquette.
 
     Returns:
-        pd.DataFrame: Une ligne par gare, avec les colonnes `gare`, `nom`, `label`,
-        `lon`, `lat` et `liaisons`. Le `label` est vide si la gare n'a pas d'étiquette.
+        pd.DataFrame: Une ligne par gare, avec les colonnes `gare`, `nom`,
+        `label`, `lon`, `lat` et `liaisons`. `label` est vide si aucune
+        étiquette n'est affichée.
     """
     counts = pd.concat([links["depart"], links["arrivee"]]).value_counts()
     points = stations[stations["gare"].isin(counts.index)].copy()
@@ -405,7 +426,8 @@ def station_points(
             continue
         half_width = LABEL_CHAR_WIDTH * len(name) / 2
         overlaps = any(
-            abs(row["lon"] - lon) < half_width + LABEL_CHAR_WIDTH * len(other) / 2
+            abs(row["lon"] - lon)
+            < half_width + LABEL_CHAR_WIDTH * len(other) / 2
             and abs(row["lat"] - lat) < LABEL_HEIGHT
             for other, lon, lat in kept
         )
@@ -413,9 +435,9 @@ def station_points(
             kept.append((name, row["lon"], row["lat"]))
             labels[row["gare"]] = name
     points["label"] = points["gare"].map(labels)
-    return points[["gare", "nom", "label", "lon", "lat", "liaisons"]].reset_index(
-        drop=True
-    )
+    return points[
+        ["gare", "nom", "label", "lon", "lat", "liaisons"]
+    ].reset_index(drop=True)
 
 
 def summary_metrics(links: pd.DataFrame) -> dict:
@@ -435,7 +457,7 @@ def summary_metrics(links: pd.DataFrame) -> dict:
 
 
 def least_reliable(links: pd.DataFrame, count: int = 10) -> pd.DataFrame:
-    """Donne les liaisons qui ont les scores les plus bas, sous forme de tableau.
+    """Retourne les liaisons aux scores les plus bas sous forme de tableau.
 
     Args:
         links (pd.DataFrame): Liaisons à tracer.
@@ -456,8 +478,8 @@ def insurer_reading(tier: str | None) -> tuple[str, str]:
     """Donne le message pour l'assureur, selon le niveau de la liaison.
 
     Args:
-        tier (str | None): Niveau de la liaison. Un niveau inconnu ou `None` donne
-            le message « non classé ».
+        tier (str | None): Niveau de la liaison. Un niveau inconnu ou
+            `None` donne le message « non classé ».
 
     Returns:
         tuple[str, str]: Le type de message (`success`, `warning`, `error` ou
@@ -467,27 +489,31 @@ def insurer_reading(tier: str | None) -> tuple[str, str]:
 
 
 def disruption_frequency(rate: float) -> str:
-    """Dit à quelle fréquence un trajet est perturbé, par exemple « 1 trajet sur 8 ».
+    """Indique la fréquence des perturbations sur un trajet.
 
     Args:
         rate (float): Taux de perturbation, entre 0 et 1.
 
     Returns:
-        str: Une phrase. Si le taux est nul, aucune perturbation. Si presque tous les
-        trajets sont perturbés, une phrase pour ce cas.
+        str: Une phrase indiquant la fréquence. Un taux nul signifie
+        qu'aucune perturbation n'est observée.
     """
     if rate <= 0:
         return "Aucune perturbation observée."
     one_in = round(1 / rate)
     if one_in <= 1:
-        return "Presque tous les trajets sont perturbés (annulés ou en retard à l'arrivée)."
+        return (
+            "Presque tous les trajets sont perturbés "
+            "(annulés ou en retard à l'arrivée)."
+        )
     return (
-        f"Environ 1 trajet sur {one_in} est perturbé (annulé ou en retard à l'arrivée)."
+        f"Environ 1 trajet sur {one_in} est perturbé "
+        "(annulé ou en retard à l'arrivée)."
     )
 
 
 def pure_premium(rate: float, indemnity: float) -> float:
-    """Calcule le coût attendu par trajet : taux de perturbation fois indemnité.
+    """Calcule le coût attendu par trajet selon le taux et l'indemnité.
 
     Args:
         rate (float): Taux de perturbation, entre 0 et 1.
@@ -511,9 +537,9 @@ def link_details(
         service (str): Service.
 
     Returns:
-        tuple[pd.Series | None, pd.Series]: La ligne de la liaison, ou `None` si elle
-        n'existe pas, et ses causes de retard (une série vide si elle est introuvable
-        ou sans retard).
+        tuple[pd.Series | None, pd.Series]: La ligne de la liaison, ou `None`
+        si elle n'existe pas, et ses causes de retard (série vide si
+        introuvable ou sans retard).
     """
     found = scores[
         (scores[COL_DEPARTURE] == departure)

@@ -3,6 +3,7 @@
 # Imports
 import logging
 import math
+
 import numpy as np
 import pandas as pd
 
@@ -15,7 +16,10 @@ from projet_sncf.business.analysis.constants import (
     MIN_MONTHS,
     WORST_MONTHS_SHARE,
 )
-from projet_sncf.business.analysis.indicators import _check_columns, filter_valid_rows
+from projet_sncf.business.analysis.indicators import (
+    _check_columns,
+    filter_valid_rows,
+)
 
 # Constants
 logger = logging.getLogger(__name__)
@@ -30,18 +34,19 @@ def worst_months_share(
 ) -> float:
     """Calcule la part des perturbations qui tombe dans les pires mois.
 
-    Les pires mois sont les `ceil(share * n)` mois au taux de perturbation le plus
-    haut.
+    Les pires mois sont les `ceil(share * n)` mois aux taux de perturbation
+    les plus hauts.
 
     Args:
-        disruptions (pd.Series): Trains annulés plus trains en retard de chaque mois.
+        disruptions (pd.Series): Trains annulés et trains en retard
+            de chaque mois.
         rates (pd.Series): Taux de perturbation de chaque mois, même index.
         min_months (int): Nombre minimal de mois exigé.
         share (float): Part de mois comptés comme les pires.
 
     Returns:
-        float: Part des perturbations dans les pires mois, entre 0 et 1. NaN s'il y
-        a moins de `min_months` mois ou aucune perturbation.
+        float: Part des perturbations dans les pires mois, entre 0 et 1.
+        NaN s'il y a moins de `min_months` mois ou aucune perturbation.
     """
     total = disruptions.sum()
     if len(disruptions) < min_months or total == 0:
@@ -61,15 +66,16 @@ def compute_regularity(
 
     Args:
         df (pd.DataFrame): Données mensuelles nettoyées.
-        shock_months (pd.DatetimeIndex): Mois exclus pour la deuxième colonne, voir
-            `detect_shock_months`.
+        shock_months (pd.DatetimeIndex): Mois exclus pour la deuxième
+            colonne, voir `detect_shock_months`.
         min_months (int): Nombre minimal de mois exigé pour une liaison.
         share (float): Part de mois comptés comme les pires.
 
     Returns:
-        pd.DataFrame: Une ligne par liaison, indexé par `LIAISON_KEY`. Colonnes :
-        `pires_mois_tous` (tous les mois) et `pires_mois_hors_chocs` (sans les mois
-        de choc). NaN pour les liaisons qui n'ont pas assez de mois.
+        pd.DataFrame: Une ligne par liaison, indexée par `LIAISON_KEY`.
+        Colonnes `pires_mois_tous` (tous les mois) et
+        `pires_mois_hors_chocs` (sans les mois de choc). NaN pour les
+        liaisons qui n'ont pas assez de mois.
 
     Raises:
         KeyError: Si une colonne nécessaire manque.
@@ -99,8 +105,11 @@ def compute_regularity(
         columns=["pires_mois_tous", "pires_mois_hors_chocs"],
         dtype=float,
     )
-    regularity.index = pd.MultiIndex.from_tuples(regularity.index, names=LIAISON_KEY)
+    regularity.index = pd.MultiIndex.from_tuples(
+        regularity.index, names=LIAISON_KEY
+    )
     logger.info(
-        "Régularité calculée : %d liaisons", regularity["pires_mois_tous"].notna().sum()
+        "Régularité calculée : %d liaisons",
+        regularity["pires_mois_tous"].notna().sum(),
     )
     return regularity

@@ -15,7 +15,8 @@ import pandas as pd
 # Constants
 logger = logging.getLogger(__name__)
 
-# Si des gares étrangères, absentes de la référence alors on définit des coordonnées approximatives (latitude, longitude)
+# Coordonnées approximatives (latitude, longitude) des gares étrangères
+# absentes du jeu de référence.
 MANUAL_COORDINATES = {
     "BARCELONA": (41.3791, 2.1403),
     "FRANCFORT": (50.1071, 8.6628),
@@ -31,7 +32,9 @@ ALIASES = {
     "BELLEGARDE (AIN)": "Bellegarde-sur-Valserine",
     "DIJON VILLE": "Dijon",
     "LA ROCHELLE VILLE": "La Rochelle",
-    "LE CREUSOT MONTCEAU MONTCHANIN": "Le Creusot - Montceau-les-Mines - Montchanin TGV",
+    "LE CREUSOT MONTCEAU MONTCHANIN": (
+        "Le Creusot - Montceau-les-Mines - Montchanin TGV"
+    ),
     "LILLE": "Lille Flandres",
     "MACON LOCHE": "Mâcon Loché TGV",
     "MARNE LA VALLEE": "Marne-la-Vallée - Chessy",
@@ -54,12 +57,12 @@ def normalize_name(name: str) -> str:
     """Met un nom de gare sous une forme qui ne dépend pas de l'écriture.
 
     Args:
-        name (str): Nom de la gare, en majuscules ou non, avec ou sans accents et
+        name (str): Nom de la gare, avec ou sans majuscules, accents et
             tirets.
 
     Returns:
-        str: Le nom en majuscules, sans accents, tirets ni apostrophes, avec `ST` et
-        `STE` écrits `SAINT` et `SAINTE`.
+        str: Le nom en majuscules, sans accents, tirets ni apostrophes.
+        `ST` et `STE` sont écrits `SAINT` et `SAINTE`.
     """
     text = unicodedata.normalize("NFKD", name)
     text = "".join(c for c in text if not unicodedata.combining(c)).upper()
@@ -77,8 +80,8 @@ def parse_position(position: str) -> tuple[float, float]:
             "49.68, 1.77".
 
     Returns:
-        tuple[float, float]: La latitude et la longitude. (NaN, NaN) si le texte est
-        vide ou mal formé.
+        tuple[float, float]: La latitude et la longitude.
+        `(NaN, NaN)` si le texte est vide ou mal formé.
     """
     try:
         latitude, longitude = str(position).split(",")
@@ -92,18 +95,19 @@ def match_stations(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Trouve les coordonnées de chaque gare.
 
-    Les règles s'appliquent dans cet ordre : coordonnées manuelles, alias, puis nom
-    normalisé identique.
+    Les règles s'appliquent dans cet ordre : coordonnées manuelles, alias,
+    puis nom normalisé identique.
 
     Args:
         names (list[str]): Noms des gares du jeu de données des liaisons.
-        reference (pd.DataFrame): Le jeu de données « Gares de voyageurs », avec les
+        reference (pd.DataFrame): Le jeu « Gares de voyageurs », avec les
             colonnes `Nom_Gare` et `Position géographique`.
 
     Returns:
-        tuple[pd.DataFrame, pd.DataFrame]: Les gares trouvées, avec les colonnes
-        `gare`, `latitude`, `longitude`, `source` et `nom_reference`, puis les gares
-        sans correspondance, avec les colonnes `gare` et `candidats`.
+        tuple[pd.DataFrame, pd.DataFrame]: Les gares trouvées, avec les
+        colonnes `gare`, `latitude`, `longitude`, `source` et
+        `nom_reference`, puis les gares sans correspondance, avec les
+        colonnes `gare` et `candidats`.
     """
     reference = reference.copy()
     reference["cle"] = reference["Nom_Gare"].map(normalize_name)
@@ -129,7 +133,8 @@ def match_stations(
             unmatched.append((name, " | ".join(by_key.loc[close, "Nom_Gare"])))
 
     matched_df = pd.DataFrame(
-        matched, columns=["gare", "latitude", "longitude", "source", "nom_reference"]
+        matched,
+        columns=["gare", "latitude", "longitude", "source", "nom_reference"],
     )
     unmatched_df = pd.DataFrame(unmatched, columns=["gare", "candidats"])
     logger.info("Gares localisées : %d sur %d", len(matched_df), len(names))

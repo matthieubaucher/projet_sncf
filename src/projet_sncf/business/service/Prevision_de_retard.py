@@ -1,73 +1,92 @@
-
-from projet_sncf.database.dataloader import get_dataframe
-from projet_sncf.business.model.Modele_prevision_retard_manager import get_modele_manager
-import pandas as pd
-import numpy as np
-from sklearn.manifold import TSNE
 import logging
+
+import numpy as np
+import pandas as pd
+from sklearn.manifold import TSNE
+
+from projet_sncf.business.model.Modele_prevision_retard_manager import (
+    get_modele_manager,
+)
+from projet_sncf.database.dataloader import get_dataframe
 
 logger = logging.getLogger(__name__)
 
-def simulation(parameters:dict, axe:list, cible:str):
+
+def simulation(parameters: dict, axe: list, cible: str):
+    """Simule mille variations des paramètres saisis par l'utilisateur.
+
+    Les valeurs simulées sont transmises au modèle, puis renvoyées sous la
+    forme d'un vecteur de 1000 prédictions pour affichage dans une boîte à
+    moustaches.
     """
-        Fait 1000 modifications des entrées utilisateur pour avoir les 1000 vecteurs de paramètre
-        Utilisation du previsionneur (avec ces data, et les vecteurs de paramètre) : méthode get_inferance_retard
-        on renvoie un vecteur [1000] affichable dans une boxplot
-    """
-    logger.info(f"L'utilisateur demande une prévision de retard sur  : {'<->'.join(axe)} {cible}");
-    perturbe = lambda x: np.random.normal(loc=x, scale=0.05 * abs(x)) # TODO : normalisation des prct de causes a faire
+    logger.info(
+        "Prévision de retard demandée sur %s pour la cible %s",
+        "<->".join(axe),
+        cible,
+    )
+
+    def perturbe(value: float) -> float:
+        return np.random.normal(loc=value, scale=0.05 * abs(value))
+
     values = []
     for _ in range(1000):
-        values.append([perturbe(parameter) for parameter in parameters.values()])
+        values.append(
+            [perturbe(parameter) for parameter in parameters.values()]
+        )
     X = pd.DataFrame(values, columns=parameters.keys())
-    Y = get_modele_manager().get_inferance(X, axe, cible)
-    logger.info(f"Prévision de retard effectuée")
-    return Y
+    predictions = get_modele_manager().get_inferance(X, axe, cible)
+    logger.info("Prévision de retard effectuée")
+    return predictions
 
 
-def clusterise(axes, cible):    
+def clusterise(axes, cible):
+    """Projette les profils de perturbation des liaisons en deux dimensions.
+
+    Un échantillon de données est passé au modèle pour chaque axe. Les
+    prédictions obtenues sont ensuite projetées avec t-SNE pour affichage.
     """
-        Va chercher le dataframe de Data  
-        créé 1000 scénari possibles en base via shuffle
-        Utilisation du previsionneur (avec ces data, et les vecteurs de parametre) : méthode get_inferance_retard
-        utiliser l'algo TSNE
-        on renvoie la matrice [len(axes), 2] affichable coté streamlit
-    """
-    logger.info(f"L'utilisateur demande un clustering sur  : {len(axes)} axes avec cible = {cible}");
-    perplexity = min(len(axes)//2,5)
-    if perplexity<=1:
+    logger.info(
+        "Projection demandée pour %d axes avec la cible %s",
+        len(axes),
+        cible,
+    )
+    perplexity = min(len(axes) // 2, 5)
+    if perplexity <= 1:
         raise ValueError("Trop peu d'axes pour effectuer la projection t-SNE.")
     df = get_dataframe()
-    X = df.sample(n=1000)
-    Y = []
-    X = X[get_parameters_disponibles()]
+    X = df.sample(n=1000)[get_parameters_disponibles()]
+    predictions = []
     for axe in axes:
         y = get_modele_manager().get_inferance(X, axe, cible)
-        Y += [y]
-    Y = np.array(Y)        
-    tsne = TSNE(
-        n_components=2,
-        perplexity=perplexity,
-        random_state=42
-    )
-    Y_2d = tsne.fit_transform(Y)
-
-    logger.info(f"Clustering effectuée")
-    return Y_2d
+        predictions.append(y)
+    predictions = np.array(predictions)
+    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=42)
+    embeddings = tsne.fit_transform(predictions)
+    logger.info("Clustering effectuée")
+    return embeddings
 
 
 def get_cibles_disponibles():
-    """
-        cibles autorisées pour la simulation
-    """
-    return ["prct annulation", "Nombre de trains en retard à l'arrivée", "Nombre trains en retard > 60min"]
+    """Renvoie les cibles autorisées pour la simulation."""
+    return [
+        "prct annulation",
+        "Nombre de trains en retard à l'arrivée",
+        "Nombre trains en retard > 60min",
+    ]
 
 
 def get_parameters_disponibles():
-    """
-        parametres autorisées à la saisie utilisateur pour la simulation
-    """
-    return["Temps", "Nombre de circulations prévues", "Prct retard pour causes externes", "Prct retard pour cause infrastructure", 
-           "Prct retard pour cause gestion trafic", "Prct retard pour cause matériel roulant", 
-           "Prct retard pour cause gestion en gare et réutilisation de matériel", 
-           "Prct retard pour cause prise en compte voyageurs (affluence, gestions PSH, correspondances)"]
+    """Renvoie les paramètres autorisés pour la simulation."""
+    return [
+        "Temps",
+        "Nombre de circulations prévues",
+        "Prct retard pour causes externes",
+        "Prct retard pour cause infrastructure",
+        "Prct retard pour cause gestion trafic",
+        "Prct retard pour cause matériel roulant",
+        "Prct retard pour cause gestion en gare et réutilisation de matériel",
+        (
+            "Prct retard pour cause prise en compte voyageurs "
+            "(affluence, gestions PSH, correspondances)"
+        ),
+    ]

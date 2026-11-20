@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 import pytest  # type: ignore[import-not-found]
 
-colonnes_X = ["Temps", "Saison", "Nombre de circulations prévues", "Prct retard pour causes externes", 
+feature_columns = ["Temps", "Saison", "Nombre de circulations prévues", "Prct retard pour causes externes", 
 "Prct retard pour cause infrastructure", "Prct retard pour cause gestion trafic", "Prct retard pour cause matériel roulant",
 "Prct retard pour cause gestion en gare et réutilisation de matériel", 
 "Prct retard pour cause prise en compte voyageurs (affluence, gestions PSH, correspondances)"]
@@ -13,8 +13,10 @@ colonnes_X = ["Temps", "Saison", "Nombre de circulations prévues", "Prct retard
 def compute_score(depart, arrivee, cible):
     df = get_dataframe()
     df = df[(df["Gare de départ"]==depart) & (df["Gare d'arrivée"]==arrivee) | (df["Gare de départ"]==arrivee) & (df["Gare d'arrivée"]==depart)]
-    df = df.dropna(subset=colonnes_X + [cible])  # lignes où la cible ou une variable est vide
-    modele = ModelePrevisionRetard(depart, arrivee, colonnes_X, colonne_Y=cible)
+    df = df.dropna(subset=feature_columns + [cible])  # lignes où la cible ou une variable est vide
+    modele = ModelePrevisionRetard(
+        depart, arrivee, feature_columns, target_column=cible
+    )
     df_train, df_test = train_test_split(
         df,
         test_size=0.2,

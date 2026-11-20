@@ -52,7 +52,10 @@ def test_clusterise(mock_get_dataframe, mock_get_inferance, mock_get_parameters_
     # Given
     axes = [["NICE VILLE", "PARIS LYON"], ["NANTES", "PARIS MONTPARNASSE"], ["LILLE", "LYON PART DIEU"], ["LAUSANE", "PARIS LYON"]]
     mock_get_parameters_disponibles.return_value = ["Prct retard pour causes externes"]
-    mock_get_dataframe.return_value = pd.DataFrame({"Prct retard pour causes externes": np.random.rand(1500)})
+    mock_get_dataframe.return_value = pd.DataFrame({
+        "Prct retard pour causes externes": np.random.rand(1500),
+        "Nombre de trains annulés": np.random.rand(1500),
+    })
     mock_get_inferance.side_effect = [
         np.random.rand(1000),
         np.random.rand(1000),
@@ -66,6 +69,8 @@ def test_clusterise(mock_get_dataframe, mock_get_inferance, mock_get_parameters_
     # Then
     mock_get_dataframe.assert_called_once()
     assert mock_get_inferance.call_count == len(axes)
+    for call in mock_get_inferance.call_args_list:
+        assert call.args[0].columns.tolist() == ["Prct retard pour causes externes"]
     print(result)
     assert result.shape == (len(axes), 2)
     assert np.isfinite(result).all()    

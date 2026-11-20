@@ -40,14 +40,8 @@ def setup_logging(
     précédent sont retirés avant d'en ajouter de nouveaux.
 
     Args:
-        level (str | int): Niveau minimal des messages, en texte (``"INFO"``)
-            ou en nombre (``logging.INFO``). Par défaut `LOG_LEVEL`.
-        log_dir (str | pathlib.Path | None): Dossier du fichier de logs, créé
-            s'il n'existe pas. ``None`` pour ne pas écrire de fichier. Par
-            défaut `LOG_DIR`.
-        log_file (str): Nom du fichier de logs. Par défaut `LOG_FILE`.
-        console (bool): Si ``True``, affiche aussi les messages à l'écran.
-            Par défaut ``True``.
+        level (str): Nom du niveau de journalisation, par exemple "INFO".
+            Par défaut `LOG_LEVEL`.
 
     Returns:
         pathlib.Path | None: Chemin du fichier de logs, ou ``None`` si aucun

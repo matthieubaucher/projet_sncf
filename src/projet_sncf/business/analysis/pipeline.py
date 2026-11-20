@@ -1,7 +1,8 @@
-"""Chaîne complète : du jeu de données mensuel nettoyé au tableau de fiabilité."""
+"""Chaîne complète des données nettoyées au tableau de fiabilité."""
 
 # Imports
 import logging
+
 import pandas as pd
 
 from projet_sncf.business.analysis.constants import FINAL_COLUMNS, MIN_MONTHS
@@ -31,13 +32,13 @@ def build_reliability_table(
     saisonnalité, régularité, puis score, confiance et tier.
 
     Args:
-        df (pd.DataFrame): Données mensuelles nettoyées, une ligne par liaison et par
-            mois. La colonne `Service` doit rester, elle fait partie de la clé.
+        df (pd.DataFrame): Données mensuelles nettoyées, une ligne par liaison
+            et par mois. La colonne `Service` fait partie de la clé.
         min_months (int): Nombre minimal de mois pour un score fiable.
 
     Returns:
-        pd.DataFrame: Une ligne par liaison, indexé par (départ, arrivée, service),
-        trié par score croissant. Colonnes de `FINAL_COLUMNS`.
+        pd.DataFrame: Une ligne par liaison, indexée par (départ, arrivée,
+        service), triée par score croissant. Colonnes de `FINAL_COLUMNS`.
 
     Raises:
         KeyError: Si une colonne nécessaire manque.

@@ -2,6 +2,7 @@
 
 # Imports
 import logging
+
 import pandas as pd
 
 from projet_sncf.business.analysis.constants import (
@@ -40,7 +41,8 @@ def filter_valid_rows(df: pd.DataFrame) -> pd.DataFrame:
     comptes est négatif ou si un des comptes est manquant.
 
     Args:
-        df (pd.DataFrame): Données mensuelles, une ligne par liaison et par mois.
+        df (pd.DataFrame): Données mensuelles, une ligne par liaison
+            et par mois.
 
     Returns:
         pd.DataFrame: Une copie de `df` sans les lignes invalides.
@@ -60,7 +62,9 @@ def filter_valid_rows(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    """Calcule les taux d'annulation, de retard et de perturbation de chaque liaison.
+    """Calcule les taux d'annulation, de retard et de perturbation.
+
+    Les taux sont calculés pour chaque liaison.
 
     Le taux de retard se calcule sur les trains qui ont circulé (prévus moins
     annulés). Le taux de perturbation compte les trains annulés et en retard,
@@ -70,10 +74,11 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
         df (pd.DataFrame): Données mensuelles nettoyées.
 
     Returns:
-        pd.DataFrame: Une ligne par liaison, indexé par `LIAISON_KEY`. Colonnes :
+        pd.DataFrame: Une ligne par liaison, indexée par `LIAISON_KEY`.
+        Colonnes :
         `mois`, `prevues`, `annules`, `reelles`, `retards`, `taux_annulation`,
-        `taux_retard` et `taux_perturbation`. Le taux de retard vaut NaN si aucun
-        train n'a circulé.
+        `taux_retard` et `taux_perturbation`. Le taux de retard vaut NaN
+        si aucun train n'a circulé.
 
     Raises:
         KeyError: Si une colonne nécessaire manque.
@@ -89,10 +94,12 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
         reelles=("circulations_reelles", "sum"),
         retards=(COL_DELAYED, "sum"),
     )
-    indicators["taux_annulation"] = indicators["annules"] / indicators["prevues"]
-    indicators["taux_retard"] = indicators["retards"] / indicators["reelles"].where(
-        indicators["reelles"] > 0
+    indicators["taux_annulation"] = (
+        indicators["annules"] / indicators["prevues"]
     )
+    indicators["taux_retard"] = indicators["retards"] / indicators[
+        "reelles"
+    ].where(indicators["reelles"] > 0)
     indicators["taux_perturbation"] = (
         indicators["annules"] + indicators["retards"]
     ) / indicators["prevues"]
@@ -101,19 +108,22 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_cause_profile(df: pd.DataFrame) -> pd.DataFrame:
-    """Calcule la part de chaque cause de retard pour chaque liaison, en pourcentage.
+    """Calcule la part de chaque cause de retard par liaison.
+
+    Les parts sont exprimées en pourcentage.
 
     Chaque pourcentage mensuel est converti en nombre de trains (pourcentage
     multiplié par les trains en retard). On additionne sur la période, puis on
     divise par le total.
 
     Args:
-        df (pd.DataFrame): Données mensuelles nettoyées, avec les six colonnes de causes.
+        df (pd.DataFrame): Données nettoyées avec les six colonnes
+            de causes.
 
     Returns:
         pd.DataFrame: Une ligne par liaison et une colonne par cause (les noms
-        courts de `CAUSE_COLUMNS`). Chaque ligne somme à 100. Elle vaut NaN si la
-        liaison n'a aucun retard.
+        courts de `CAUSE_COLUMNS`). Chaque ligne somme à 100. Elle vaut NaN
+        si la liaison n'a aucun retard.
 
     Raises:
         KeyError: Si une colonne nécessaire manque.
