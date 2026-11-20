@@ -18,7 +18,7 @@ Son usage prévu est d'informer le public sur la régularité des TGV et de comp
 |---|---|
 | Analyse des retards et score de fiabilité | score de fiabilité par liaison, régularité, saisonnalité, cause dominante, mois de choc national, niveau de confiance ; carte de fiabilité |
 | Analyses descriptives | variations mensuelles des retards et des annulations, heatmap de saisonnalité, évolution des causes, classement des pires trajets |
-| Simulation des retards par axe | modèle de retard par axe, simulation de scénarios, regroupement des axes (clustering) |
+| Simulation des retards par axe | modèle de retard par axe, simulation de scénarios |
 | Nettoyage et prévision | nettoyage commun des données, prévision « Normal / Perturbé » du mois suivant par liaison |
 
 La source déconseille d'additionner les liaisons pour calculer une régularité globale ou par axe, car un même TGV peut compter dans plusieurs liaisons. Comme les données sont mensuelles et agrégées, elles ne permettent pas non plus de juger un train, un jour ou une personne.
