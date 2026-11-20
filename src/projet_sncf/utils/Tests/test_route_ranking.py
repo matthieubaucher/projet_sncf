@@ -1,4 +1,4 @@
-"""Tests for route ranking by delay and cancellation rates."""
+"""Tests du classement des trajets selon les retards et les taux d'annulation."""
 
 import pandas as pd
 import pytest
