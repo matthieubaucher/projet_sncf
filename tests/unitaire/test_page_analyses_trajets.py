@@ -8,8 +8,8 @@ from projet_sncf.utils.evolution_causes import CAUSES_PERTURBATION
 
 def test_afficher_vue_saisonnalite(monkeypatch):
     appels = []
-    monkeypatch.setattr(analyses_trajets.saisonnalite, "main", lambda: appels.append("saisonnalite"))
-    monkeypatch.setattr(analyses_trajets.classement_pire_trajets, "main", lambda: appels.append("classement"))
+    monkeypatch.setattr(analyses_trajets.saisonnalite, "main", lambda **kwargs: appels.append("saisonnalite"))
+    monkeypatch.setattr(analyses_trajets.classement_pire_trajets, "main", lambda **kwargs: appels.append("classement"))
 
     analyses_trajets.afficher_vue(analyses_trajets.VUE_SAISONNALITE)
 
@@ -18,8 +18,8 @@ def test_afficher_vue_saisonnalite(monkeypatch):
 
 def test_afficher_vue_classement(monkeypatch):
     appels = []
-    monkeypatch.setattr(analyses_trajets.saisonnalite, "main", lambda: appels.append("saisonnalite"))
-    monkeypatch.setattr(analyses_trajets.classement_pire_trajets, "main", lambda: appels.append("classement"))
+    monkeypatch.setattr(analyses_trajets.saisonnalite, "main", lambda **kwargs: appels.append("saisonnalite"))
+    monkeypatch.setattr(analyses_trajets.classement_pire_trajets, "main", lambda **kwargs: appels.append("classement"))
 
     analyses_trajets.afficher_vue(analyses_trajets.VUE_CLASSEMENT)
 
@@ -28,11 +28,34 @@ def test_afficher_vue_classement(monkeypatch):
 
 def test_afficher_vue_causes(monkeypatch):
     appels = []
-    monkeypatch.setattr(analyses_trajets, "afficher_evolution_causes", lambda: appels.append("causes"))
+    monkeypatch.setattr(analyses_trajets, "afficher_evolution_causes", lambda **kwargs: appels.append("causes"))
 
     analyses_trajets.afficher_vue(analyses_trajets.VUE_CAUSES)
 
     assert appels == ["causes"]
+
+
+def test_afficher_vue_masque_le_titre_interne(monkeypatch):
+    appels = []
+    monkeypatch.setattr(
+        analyses_trajets.classement_pire_trajets,
+        "main",
+        lambda **kwargs: appels.append(kwargs["afficher_titre"]),
+    )
+
+    analyses_trajets.afficher_vue(analyses_trajets.VUE_CLASSEMENT, afficher_titre=False)
+
+    assert appels == [False]
+
+
+def test_styles_entete_sticky_sont_opaques_et_floutes():
+    clair = analyses_trajets.styles_entete_sticky(False)
+    sombre = analyses_trajets.styles_entete_sticky(True)
+
+    assert "background: rgba(255, 255, 255, 0.94)" in clair
+    assert "backdrop-filter: blur(12px)" in clair
+    assert "background: rgba(14, 17, 23, 0.94)" in sombre
+    assert "backdrop-filter: blur(12px)" in sombre
 
 
 def test_raccourcir_intitules_causes_nettoie_les_noms_bruts():
@@ -61,4 +84,5 @@ def test_graphique_causes_isole_une_ligne_avec_double_clic():
 
     assert figure.layout.legend.itemclick == "toggle"
     assert figure.layout.legend.itemdoubleclick == "toggleothers"
+    assert figure.layout.title.text is None
     assert list(figure.data[0].y) == [0.2, 0.3]

@@ -12,7 +12,6 @@ def run_app() -> None:
 		],
 		"Analyses": [
 			st.Page(pages_dir / "analyses_trajets.py", title="Analyse des perturbations"),
-			st.Page(pages_dir / "clustering_lignes.py", title="Clustering des modèles"),
 		],
 		"Prévisions": [
 			st.Page(pages_dir / "prediction_retard.py", title="Simulation de retard"),
@@ -20,6 +19,7 @@ def run_app() -> None:
 				pages_dir / "prevision_perturbations.py",
 				title="Prévision des perturbations",
 			),
+			st.Page(pages_dir / "clustering_lignes.py", title="Clustering des modèles"),
 		],
 		"Réseau": [
 			st.Page(pages_dir / "reliability_map.py", title="Carte de fiabilité"),
