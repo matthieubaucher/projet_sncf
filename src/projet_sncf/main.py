@@ -1,10 +1,31 @@
+from pathlib import Path
+
 import streamlit as st
 
-st.title("Assurance SNCF")
 
-st.write("""
-Démonstrateur d'analyse des retards, annulations et coûts des liaisons SNCF pour l'assurance.
-""")
+def run_app() -> None:
+	"""Lance l'application avec une liste explicite de pages."""
+	pages_dir = Path(__file__).resolve().parent / "pages"
+	pages = {
+		"RailInsight": [
+			st.Page(pages_dir / "home.py", title="Accueil", default=True),
+		],
+		"Analyses": [
+			st.Page(pages_dir / "analyses_trajets.py", title="Analyse des perturbations"),
+			st.Page(pages_dir / "clustering_lignes.py", title="Clustering des modèles"),
+		],
+		"Prévisions": [
+			st.Page(pages_dir / "prediction_retard.py", title="Simulation de retard"),
+			st.Page(
+				pages_dir / "prevision_perturbations.py",
+				title="Prévision des perturbations",
+			),
+		],
+		"Réseau": [
+			st.Page(pages_dir / "reliability_map.py", title="Carte de fiabilité"),
+		],
+	}
+	st.navigation(pages, position="sidebar").run()
 
-st.page_link("pages/prediction_retard.py", label="Prévision des retards")
-st.page_link("pages/clustering_lignes.py", label="clustering des modèles")
+if __name__ == "__main__":
+	run_app()

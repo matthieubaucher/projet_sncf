@@ -85,8 +85,9 @@ class TestPlotMonthlyLateness:
     @patch('matplotlib.pyplot.subplots')
     def test_mois_valide(self, mock_subplots, mock_show, sample_df):
         mock_subplots.return_value = (MagicMock(), MagicMock())
-        plotMonthlyLateness(sample_df, 'Paris', 'Lyon', mois=6)
-        mock_show.assert_called_once()
+        fig = plotMonthlyLateness(sample_df, 'Paris', 'Lyon', mois=6)
+        assert fig is mock_subplots.return_value[0]
+        mock_show.assert_not_called()
 
     @patch('matplotlib.pyplot.show')
     @patch('matplotlib.pyplot.subplots')
@@ -114,8 +115,9 @@ class TestPlotMonthlyLatenessAll:
             for j in range(3):
                 axes[i, j] = MagicMock()
         mock_subplots.return_value = (fig, axes)
-        plotMonthlyLatenessAll(sample_df, 'Paris', 'Lyon')
-        mock_show.assert_called_once()
+        result = plotMonthlyLatenessAll(sample_df, 'Paris', 'Lyon')
+        assert result is fig
+        mock_show.assert_not_called()
         fig.tight_layout.assert_called_with(rect=[0, 0, 1, 0.95])
 
     @patch('matplotlib.pyplot.show')
@@ -177,8 +179,9 @@ class TestPlo_Month_Annulations:
     @patch('matplotlib.pyplot.subplots')
     def test_mois_valide(self, mock_subplots, mock_show, sample_df_annul):
         mock_subplots.return_value = (MagicMock(), MagicMock())
-        plotMonthAnnulations(sample_df_annul, 'Paris', 'Lyon', mois=6)
-        mock_show.assert_called_once()
+        fig = plotMonthAnnulations(sample_df_annul, 'Paris', 'Lyon', mois=6)
+        assert fig is mock_subplots.return_value[0]
+        mock_show.assert_not_called()
 
     @patch('matplotlib.pyplot.show')
     @patch('matplotlib.pyplot.subplots')
@@ -205,8 +208,9 @@ class TestPlotMonthAnnulationsAll:
             for j in range(3):
                 axes[i, j] = MagicMock()
         mock_subplots.return_value = (fig, axes)
-        plotMonthAnnulationsAll(sample_df_annul, 'Paris', 'Lyon')
-        mock_show.assert_called_once()
+        result = plotMonthAnnulationsAll(sample_df_annul, 'Paris', 'Lyon')
+        assert result is fig
+        mock_show.assert_not_called()
         fig.tight_layout.assert_called_with(rect=[0, 0, 1, 0.95])
 
     @patch('matplotlib.pyplot.show')

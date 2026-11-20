@@ -58,7 +58,7 @@ def plotMonthlyLateness(df, gare_depart, gare_arrive, mois,
                 col_retard_dep, col_retard_arr)
     ax.set_title(f'{gare_depart} -> {gare_arrive} - Mois {mois}')
     plt.tight_layout()
-    plt.show()
+    return fig
 
 
 def plotMonthlyLatenessAll(df, gare_depart, gare_arrive,
@@ -79,7 +79,7 @@ def plotMonthlyLatenessAll(df, gare_depart, gare_arrive,
                     col_retard_dep, col_retard_arr)
 
     fig.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.show()
+    return fig
 
 def plot_month_annulations(ax, d, mois, gare_depart, gare_arrive,
                            col_annules="Nombre de trains annulés",
@@ -130,7 +130,7 @@ def plotMonthAnnulations(df, gare_depart, gare_arrive, mois,
                            col_annules, col_prevues)
     ax.set_title(f'{gare_depart} -> {gare_arrive} - Mois {mois} - Annulations')
     plt.tight_layout()
-    plt.show()
+    return fig
 
 
 def plotMonthAnnulationsAll(df, gare_depart, gare_arrive,
@@ -151,4 +151,4 @@ def plotMonthAnnulationsAll(df, gare_depart, gare_arrive,
                                col_annules, col_prevues)
 
     fig.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.show()
+    return fig
