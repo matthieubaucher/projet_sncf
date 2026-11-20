@@ -243,7 +243,16 @@ def part_perturbee_selon_seuil(
 # Variables explicatives
 # ---------------------------------------------------------------------------
 def _variables_liaison(groupe: pd.DataFrame) -> pd.DataFrame:
-    """Calcule les variables d'une liaison (cf. :func:`calculer_variables`)."""
+    """Calcule les variables d'une liaison (cf. :func:`calculer_variables`).
+
+    Args:
+        groupe (pandas.DataFrame): Lignes d'une seule liaison, avec une colonne
+            ``Date``.
+
+    Returns:
+        pandas.DataFrame: Une ligne par mois (calendrier complet, prolongé
+        d'un mois), avec les six taux, ``taux_perturbation`` et ``perturbe``.
+    """
     groupe = groupe.set_index("Date").sort_index()
     calendrier = pd.date_range(
         groupe.index.min(),
@@ -262,7 +271,15 @@ def _variables_liaison(groupe: pd.DataFrame) -> pd.DataFrame:
     v["annulation_mois_dernier"] = taux_annulation.shift(1)
 
     def somme_12(col: str) -> pd.Series:
-        """Somme glissante sur les 12 mois précédents (au moins 6)."""
+        """Somme glissante sur les 12 mois précédents (au moins 6).
+
+        Args:
+            col (str): Colonne à additionner.
+
+        Returns:
+            pandas.Series: La somme des 12 mois avant chaque mois, ou NaN
+            s'il y a moins de 6 mois connus.
+        """
         return g[col].rolling(12, min_periods=6).sum().shift(1)
 
     v["retard_12_mois"] = somme_12(COL_RETARDS) / somme_12(
