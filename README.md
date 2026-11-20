@@ -1,23 +1,34 @@
-==== Projet SCNF ===
+# Projet SNCF
 
-Pour accéder au streamlit de notre projet, veuillez cliquer sur ce lien : 
+[![Python](https://img.shields.io/badge/python-3.14-blue)](https://www.python.org/)
+[![GitHub](https://img.shields.io/badge/GitHub-projet__sncf-181717?logo=github)](https://github.com/projectSNCF-2026/projet_sncf)
+[![Tests](https://github.com/projectSNCF-2026/projet_sncf/actions/workflows/tests.yml/badge.svg)](https://github.com/projectSNCF-2026/projet_sncf/actions/workflows/tests.yml)
+[![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://projetsncf-e6kkjdxhkpfr4wctupym6q.streamlit.app/)
 
-Production :
+RailInsight : application Streamlit qui note la fiabilité des liaisons TGV, pour aider un assureur à évaluer le risque.
 
-https://share.streamlit.io/matthieubaucher/projet_sncf/master/src/projet_sncf/streamlit_app.py
+## Application en ligne
 
-Test :
+https://projetsncf-e6kkjdxhkpfr4wctupym6q.streamlit.app/
 
-https://share.streamlit.io/matthieubaucher/projet_sncf/develop/src/projet_sncf/streamlit_app.py
+L'application se met à jour automatiquement à chaque modification de la branche `develop`.
 
+## Lancer en local
 
-Déploiement automatique.
-Mais pour déployer la première fois ou manuellement c'est ici : 
+```
+uv run streamlit run src/projet_sncf/app.py
+```
 
-[![Deploy to Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/)
+## Tests
 
-Repo a coller dans  create app > deploy a public app from github > paste github url =
-Prod :
-https://github.com/matthieubaucher/projet_sncf/blob/master/src/projet_sncf/streamlit_app.py
-Test :
-https://github.com/matthieubaucher/projet_sncf/blob/develop/src/projet_sncf/streamlit_app.py
+```
+uv run pytest
+```
+
+## Déployer sur Streamlit Cloud
+
+Sur [share.streamlit.io](https://share.streamlit.io/) : Create app, puis Deploy a public app from GitHub.
+
+- Repository : `projectSNCF-2026/projet_sncf`
+- Branch : `develop`
+- Main file path : `src/projet_sncf/app.py`
