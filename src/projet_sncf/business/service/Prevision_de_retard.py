@@ -50,5 +50,26 @@ def clusterise(axes, cible):
         random_state=42
     )
     Y_2d = tsne.fit_transform(Y)
+<<<<<<< HEAD
     logger.info(f"Clustering effectuée")
     return Y_2d
+=======
+    return Y_2d
+
+
+def get_cibles_disponibles():
+    """
+        cibles autorisées pour la simulation
+    """
+    return ["Retard moyen de tous les trains à l'arrivée", "Nombre trains en retard > 30min", "Nombre de trains annulés"]
+
+
+def get_parameters_disponibles():
+    """
+        parametres autorisées à la saisie utilisateur pour la simulation
+    """
+    return["Temps", "Nombre de circulations prévues", "Prct retard pour causes externes", "Prct retard pour cause infrastructure", 
+           "Prct retard pour cause gestion trafic", "Prct retard pour cause matériel roulant", 
+           "Prct retard pour cause gestion en gare et réutilisation de matériel", 
+           "Prct retard pour cause prise en compte voyageurs (affluence, gestions PSH, correspondances)"]
+>>>>>>> 3a36527 (Refactoring: Prevision de retard)
