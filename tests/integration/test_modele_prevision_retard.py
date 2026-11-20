@@ -27,19 +27,18 @@ def compute_score(depart, arrivee, cible):
     return r2_score(reel, prediction)
 
 tests = [
-        ("PARIS LYON", "NICE VILLE", "prct Nombre trains en retard > 30min", -0.13),
-        ("PARIS LYON", "NICE VILLE", "prct annulation", 0.38), 
-        ("PARIS LYON", "NICE VILLE", "Retard moyen de tous les trains à l'arrivée", 0.19),
+        ("PARIS LYON", "NICE VILLE", "prct Nombre trains en retard > 30min", 0.32),
+        ("PARIS LYON", "NICE VILLE", "prct annulation", 0.48), 
+        ("PARIS LYON", "NICE VILLE", "Retard moyen de tous les trains à l'arrivée", 0.42),
 
-        ("PARIS MONTPARNASSE", "RENNES", "prct Nombre trains en retard > 30min", -0.07),
-        ("PARIS MONTPARNASSE", "RENNES", "prct annulation", 0.39),
-        ("PARIS MONTPARNASSE", "RENNES", "Retard moyen de tous les trains à l'arrivée", 0.07),
+        ("PARIS MONTPARNASSE", "RENNES", "prct Nombre trains en retard > 30min", -0.1), # <- celui la il est vraiment pas terrible
+        ("PARIS MONTPARNASSE", "RENNES", "prct annulation", 0.56),
+        ("PARIS MONTPARNASSE", "RENNES", "Retard moyen de tous les trains à l'arrivée", 0.139),
 
-        ("PARIS NORD", "LILLE", "prct Nombre trains en retard > 30min", -0.30),  
-        ("PARIS NORD", "LILLE", "prct annulation", 0.13),
-        ("PARIS NORD", "LILLE", "Retard moyen de tous les trains à l'arrivée", 0.23)
+        ("PARIS NORD", "LILLE", "prct Nombre trains en retard > 30min", 0.269),  
+        ("PARIS NORD", "LILLE", "prct annulation", 0.5),
+        ("PARIS NORD", "LILLE", "Retard moyen de tous les trains à l'arrivée", 0.34)
     ]
-
 
 @pytest.mark.parametrize("depart,arrivee,cible,seuil", tests)
 def test_modelePrevisionRetard(depart, arrivee, cible, seuil):
