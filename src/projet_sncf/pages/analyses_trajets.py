@@ -16,6 +16,11 @@ VUE_SAISONNALITE = "Saisonnalité"
 VUE_CLASSEMENT = "Classement des pires trajets"
 VUE_CAUSES = "Évolution des causes"
 TOUTES_LES_LIGNES = "Toutes les lignes"
+TITRES_VUES = {
+    VUE_SAISONNALITE: "Variations mensuelles et saisonnalité",
+    VUE_CLASSEMENT: "Classement des trajets les plus perturbés",
+    VUE_CAUSES: "Évolution des causes de perturbation",
+}
 NOMS_MOIS = [
     "janvier", "février", "mars", "avril", "mai", "juin",
     "juillet", "août", "septembre", "octobre", "novembre", "décembre",
@@ -36,10 +41,7 @@ def raccourcir_intitules_causes(evolution: pd.DataFrame) -> pd.DataFrame:
     return resultat
 
 
-def construire_graphique_causes(
-    evolution: pd.DataFrame,
-    titre: str = "Évolution des causes de retard",
-) -> go.Figure:
+def construire_graphique_causes(evolution: pd.DataFrame) -> go.Figure:
     """Construit un graphique dont la légende isole une cause au double-clic."""
     figure = go.Figure()
     for cause, serie in evolution.groupby("cause", sort=False):
@@ -57,7 +59,6 @@ def construire_graphique_causes(
 
     figure.update_layout(
         height=420,
-        title=titre,
         xaxis_title="Mois",
         yaxis_title="Part des retards à l'arrivée",
         yaxis={"tickformat": ".0%", "range": [0, 1]},
@@ -71,8 +72,40 @@ def construire_graphique_causes(
     return figure
 
 
-def afficher_evolution_causes(donnees: pd.DataFrame | None = None) -> None:
+def styles_entete_sticky(mode_sombre: bool) -> str:
+    """Construit les styles opaques et floutés de l'en-tête sticky."""
+    couleur_fond = "rgba(14, 17, 23, 0.94)" if mode_sombre else "rgba(255, 255, 255, 0.94)"
+    couleur_bordure = (
+        "rgba(255, 255, 255, 0.16)"
+        if mode_sombre
+        else "rgba(32, 36, 43, 0.16)"
+    )
+    return f"""
+    <style>
+    [data-testid="stLayoutWrapper"]:has(> .stVerticalBlock.st-key-entete_analyses) {{
+        position: sticky;
+        top: 60px;
+        z-index: 1000;
+        background: {couleur_fond};
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        padding: 0.5rem 0 0.75rem;
+        border-bottom: 1px solid {couleur_bordure};
+    }}
+    .st-key-entete_analyses {{
+        position: static;
+    }}
+    </style>
+    """
+
+
+def afficher_evolution_causes(
+    donnees: pd.DataFrame | None = None,
+    afficher_titre: bool = True,
+) -> None:
     """Affiche l'évolution mensuelle pondérée des causes sur la période choisie."""
+    if afficher_titre:
+        st.subheader(TITRES_VUES[VUE_CAUSES])
     if donnees is None:
         donnees = charger_donnees_causes()
 
@@ -103,10 +136,8 @@ def afficher_evolution_causes(donnees: pd.DataFrame | None = None) -> None:
     trajet_choisi = st.selectbox("Trajet", options_trajets, key="trajet_causes")
     if trajet_choisi == TOUTES_LES_LIGNES:
         gare_depart = gare_arrivee = None
-        titre = "Évolution des causes de retard - Toutes les lignes"
     else:
         gare_depart, gare_arrivee = trajet_choisi.split(" -> ", maxsplit=1)
-        titre = f"Évolution des causes de retard - {trajet_choisi}"
 
     evolution = calculer_evolution_causes(
         donnees,
@@ -119,29 +150,37 @@ def afficher_evolution_causes(donnees: pd.DataFrame | None = None) -> None:
         return
     evolution = raccourcir_intitules_causes(evolution)
 
-    chart = construire_graphique_causes(evolution, titre)
+    chart = construire_graphique_causes(evolution)
     st.plotly_chart(chart, width="stretch")
 
 
-def afficher_vue(vue: str) -> None:
+def afficher_vue(vue: str, afficher_titre: bool = True) -> None:
     """Affiche la vue d'analyse sélectionnée."""
     if vue == VUE_SAISONNALITE:
-        saisonnalite.main()
+        saisonnalite.main(afficher_titre=afficher_titre)
     elif vue == VUE_CLASSEMENT:
-        classement_pire_trajets.main()
+        classement_pire_trajets.main(afficher_titre=afficher_titre)
     elif vue == VUE_CAUSES:
-        afficher_evolution_causes()
+        afficher_evolution_causes(afficher_titre=afficher_titre)
 
 
 def main() -> None:
     """Permet de passer de la saisonnalité au classement des trajets."""
-    vue = st.segmented_control(
-        "Analyse",
-        options=[VUE_SAISONNALITE, VUE_CLASSEMENT, VUE_CAUSES],
-        default=VUE_SAISONNALITE,
-    )
+    try:
+        mode_sombre = st.context.theme.type == "dark"
+    except Exception:
+        mode_sombre = False
+    st.markdown(styles_entete_sticky(mode_sombre), unsafe_allow_html=True)
+    with st.container(key="entete_analyses"):
+        vue = st.segmented_control(
+            "Analyse",
+            options=[VUE_SAISONNALITE, VUE_CLASSEMENT, VUE_CAUSES],
+            default=VUE_SAISONNALITE,
+        )
+        if vue is not None:
+            st.subheader(TITRES_VUES[vue])
     if vue is not None:
-        afficher_vue(vue)
+        afficher_vue(vue, afficher_titre=False)
 
 
 if __name__ == "__main__":
