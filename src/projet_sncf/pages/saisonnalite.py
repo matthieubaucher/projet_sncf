@@ -18,11 +18,20 @@ from projet_sncf.utils.saisonality_view import (
     plot_heatmap_global,
 )
 
-
 ALL_ROUTES = "Tous les trajets"
 MONTH_NAMES = [
-    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+    "Janvier",
+    "Février",
+    "Mars",
+    "Avril",
+    "Mai",
+    "Juin",
+    "Juillet",
+    "Août",
+    "Septembre",
+    "Octobre",
+    "Novembre",
+    "Décembre",
 ]
 COLUMN_RENAMES = {
     "Gare de départ": "gare_depart",
@@ -36,7 +45,7 @@ COLUMN_RENAMES = {
 
 @st.cache_data
 def load_monthly_data() -> pd.DataFrame:
-    """Load SNCF data with the column names expected by the plotting helpers."""
+    """Load SNCF data with the column names expected by plotting helpers."""
     return get_dataframe().rename(columns=COLUMN_RENAMES)
 
 
@@ -50,7 +59,9 @@ def build_plot(
     """Choose and build the plot matching the selected options."""
     if analysis == "Évolution mensuelle":
         if route is None:
-            raise ValueError("Un trajet doit être sélectionné pour l'évolution mensuelle.")
+            raise ValueError(
+                "Un trajet doit être sélectionné pour l'évolution mensuelle."
+            )
         if metric == "Retards":
             return (
                 plotMonthlyLatenessAll(data, *route)
@@ -64,7 +75,11 @@ def build_plot(
         )
 
     if metric == "Retards":
-        return plot_heatmap_global(data) if route is None else plot_heatmap_delay(data, *route)
+        return (
+            plot_heatmap_global(data)
+            if route is None
+            else plot_heatmap_delay(data, *route)
+        )
     return (
         plot_heatmap_annulations_global(data)
         if route is None
@@ -84,7 +99,12 @@ def main(afficher_titre: bool = True) -> None:
         return
 
     routes = sorted(
-        set(zip(data["gare_depart"].astype(str), data["gare_arrive"].astype(str)))
+        set(
+            zip(
+                data["gare_depart"].astype(str),
+                data["gare_arrive"].astype(str),
+            )
+        )
     )
     if not routes:
         st.info("Aucun trajet disponible dans les données.")
@@ -92,11 +112,15 @@ def main(afficher_titre: bool = True) -> None:
 
     col_analysis, col_metric, col_route = st.columns([1, 1, 2])
     with col_analysis:
-        analysis = st.selectbox("Analyse", ["Évolution mensuelle", "Heatmap saisonnière"])
+        analysis = st.selectbox(
+            "Analyse", ["Évolution mensuelle", "Heatmap saisonnière"]
+        )
     with col_metric:
         metric = st.selectbox("Indicateur", ["Retards", "Annulations"])
     with col_route:
-        route_labels = [ALL_ROUTES] + [f"{departure} -> {arrival}" for departure, arrival in routes]
+        route_labels = [ALL_ROUTES] + [
+            f"{departure} -> {arrival}" for departure, arrival in routes
+        ]
         selected_route = st.selectbox("Trajet", route_labels)
 
     route = None
@@ -108,10 +132,14 @@ def main(afficher_titre: bool = True) -> None:
         month = st.selectbox(
             "Mois",
             [None, *range(1, 13)],
-            format_func=lambda value: "Tous les mois" if value is None else MONTH_NAMES[value - 1],
+            format_func=lambda value: (
+                "Tous les mois" if value is None else MONTH_NAMES[value - 1]
+            ),
         )
         if route is None:
-            st.info("Sélectionnez un trajet pour afficher son évolution mensuelle.")
+            st.info(
+                "Sélectionnez un trajet pour afficher son évolution mensuelle."
+            )
             return
     else:
         month = None
