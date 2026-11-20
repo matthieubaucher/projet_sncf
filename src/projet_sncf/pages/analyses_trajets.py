@@ -1,4 +1,4 @@
-"""Page regroupant l'analyse saisonnière et le classement des trajets perturbés."""
+"""Page d'analyse saisonnière et de classement des trajets perturbés."""
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -11,7 +11,6 @@ from projet_sncf.utils.evolution_causes import (
     calculer_evolution_causes,
 )
 
-
 VUE_SAISONNALITE = "Saisonnalité"
 VUE_CLASSEMENT = "Classement des pires trajets"
 VUE_CAUSES = "Évolution des causes"
@@ -22,27 +21,39 @@ TITRES_VUES = {
     VUE_CAUSES: "Évolution des causes de perturbation",
 }
 NOMS_MOIS = [
-    "janvier", "février", "mars", "avril", "mai", "juin",
-    "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+    "janvier",
+    "février",
+    "mars",
+    "avril",
+    "mai",
+    "juin",
+    "juillet",
+    "août",
+    "septembre",
+    "octobre",
+    "novembre",
+    "décembre",
 ]
 
 
 @st.cache_data
 def charger_donnees_causes() -> pd.DataFrame:
-    """Charge les données mensuelles nettoyées de la SNCF pour l'analyse des causes."""
+    """Charge les données mensuelles nettoyées de la SNCF pour les causes."""
     return get_dataframe()
 
 
 def raccourcir_intitules_causes(evolution: pd.DataFrame) -> pd.DataFrame:
-    """Remplace les noms bruts des colonnes de causes par des libellés courts."""
+    """Remplace les noms bruts des causes par des libellés courts."""
     resultat = evolution.copy()
     intitules = resultat["cause"].replace(CAUSES_PERTURBATION)
-    resultat["cause"] = intitules.str.replace("Prct retard pour ", "", regex=False)
+    resultat["cause"] = intitules.str.replace(
+        "Prct retard pour ", "", regex=False
+    )
     return resultat
 
 
 def construire_graphique_causes(evolution: pd.DataFrame) -> go.Figure:
-    """Construit un graphique dont la légende isole une cause au double-clic."""
+    """Construit un graphique où le double-clic isole une cause."""
     figure = go.Figure()
     for cause, serie in evolution.groupby("cause", sort=False):
         figure.add_trace(
@@ -74,7 +85,11 @@ def construire_graphique_causes(evolution: pd.DataFrame) -> go.Figure:
 
 def styles_entete_sticky(mode_sombre: bool) -> str:
     """Construit les styles opaques et floutés de l'en-tête sticky."""
-    couleur_fond = "rgba(14, 17, 23, 0.94)" if mode_sombre else "rgba(255, 255, 255, 0.94)"
+    couleur_fond = (
+        "rgba(14, 17, 23, 0.94)"
+        if mode_sombre
+        else "rgba(255, 255, 255, 0.94)"
+    )
     couleur_bordure = (
         "rgba(255, 255, 255, 0.16)"
         if mode_sombre
@@ -82,7 +97,9 @@ def styles_entete_sticky(mode_sombre: bool) -> str:
     )
     return f"""
     <style>
-    [data-testid="stLayoutWrapper"]:has(> .stVerticalBlock.st-key-entete_analyses) {{
+    [data-testid="stLayoutWrapper"]:has(
+        > .stVerticalBlock.st-key-entete_analyses
+    ) {{
         position: sticky;
         top: 60px;
         z-index: 1000;
@@ -103,7 +120,7 @@ def afficher_evolution_causes(
     donnees: pd.DataFrame | None = None,
     afficher_titre: bool = True,
 ) -> None:
-    """Affiche l'évolution mensuelle pondérée des causes sur la période choisie."""
+    """Affiche l'évolution mensuelle pondérée des causes sur la période."""
     if afficher_titre:
         st.subheader(TITRES_VUES[VUE_CAUSES])
     if donnees is None:
@@ -116,7 +133,9 @@ def afficher_evolution_causes(
 
     premier_mois = dates.min().to_period("M").to_timestamp().date()
     dernier_mois = dates.max().to_period("M").to_timestamp().date()
-    options_mois = pd.date_range(premier_mois, dernier_mois, freq="MS").date.tolist()
+    options_mois = pd.date_range(
+        premier_mois, dernier_mois, freq="MS"
+    ).date.tolist()
     periode = st.select_slider(
         "Période des causes",
         options=options_mois,
@@ -125,15 +144,19 @@ def afficher_evolution_causes(
         key="periode_causes",
     )
     trajets = sorted(
-        set(zip(
-            donnees["Gare de départ"].astype(str),
-            donnees["Gare d'arrivée"].astype(str),
-        ))
+        set(
+            zip(
+                donnees["Gare de départ"].astype(str),
+                donnees["Gare d'arrivée"].astype(str),
+            )
+        )
     )
     options_trajets = [TOUTES_LES_LIGNES] + [
         f"{depart} -> {arrivee}" for depart, arrivee in trajets
     ]
-    trajet_choisi = st.selectbox("Trajet", options_trajets, key="trajet_causes")
+    trajet_choisi = st.selectbox(
+        "Trajet", options_trajets, key="trajet_causes"
+    )
     if trajet_choisi == TOUTES_LES_LIGNES:
         gare_depart = gare_arrivee = None
     else:
