@@ -1,7 +1,8 @@
-"""Score de fiabilité de chaque liaison, son niveau de confiance et son tier."""
+"""Score de fiabilité, confiance et niveau de chaque liaison."""
 
 # Imports
 import logging
+
 import numpy as np
 import pandas as pd
 
@@ -25,8 +26,8 @@ def dominant_cause(profile: pd.DataFrame) -> pd.Series:
         profile (pd.DataFrame): Résultat de `compute_cause_profile`.
 
     Returns:
-        pd.Series: `cause_dominante`, le nom de la cause qui a la plus grande part.
-        Les liaisons sans aucun retard (tout NaN) sont écartées.
+        pd.Series: `cause_dominante`, le nom de la cause majoritaire.
+        Les liaisons sans retard (tout NaN) sont écartées.
     """
     return profile.dropna(how="all").idxmax(axis=1).rename("cause_dominante")
 
@@ -38,27 +39,31 @@ def compute_tier_bounds(scores: pd.Series) -> tuple[float, float]:
         scores (pd.Series): Scores des liaisons de référence (assez de mois).
 
     Returns:
-        tuple[float, float]: Les quantiles 1/3 et 2/3 de `scores`. NaN si `scores`
-        est vide.
+        tuple[float, float]: Les quantiles 1/3 et 2/3 de `scores`.
+        NaN si `scores` est vide.
     """
     lower, upper = scores.quantile([1 / 3, 2 / 3])
     return lower, upper
 
 
-def compute_score(table: pd.DataFrame, min_months: int = MIN_MONTHS) -> pd.DataFrame:
+def compute_score(
+    table: pd.DataFrame, min_months: int = MIN_MONTHS
+) -> pd.DataFrame:
     """Ajoute le score, la confiance et le tier à un tableau de liaisons.
 
-    Le score vaut 100 * (1 - taux de perturbation). Les bornes des tiers sont les
-    quantiles 1/3 et 2/3 du score, calculés sur les liaisons qui ont assez de mois.
+    Le score vaut 100 * (1 - taux de perturbation). Les bornes des tiers sont
+    les quantiles 1/3 et 2/3 du score, calculés sur les liaisons qui ont assez
+    de mois.
 
     Args:
-        table (pd.DataFrame): Une ligne par liaison, avec les colonnes `mois` et
-            `taux_perturbation` (voir `compute_indicators`).
+        table (pd.DataFrame): Une ligne par liaison, avec les colonnes
+            `mois` et `taux_perturbation` (voir `compute_indicators`).
         min_months (int): Nombre minimal de mois pour un score fiable.
 
     Returns:
-        pd.DataFrame: Une copie de `table` avec les colonnes `score` (de 0 à 100),
-        `confiance` et `tiers`. Le tier vaut NaN si aucune liaison n'a assez de mois.
+        pd.DataFrame: Une copie de `table` avec les colonnes `score` (de 0 à
+        100), `confiance` et `tiers`. Le tiers vaut NaN si aucune liaison n'a
+        assez de mois.
 
     Raises:
         KeyError: Si une colonne nécessaire manque.
@@ -78,6 +83,8 @@ def compute_score(table: pd.DataFrame, min_months: int = MIN_MONTHS) -> pd.DataF
     tiers = pd.Series(tier, index=result.index).where(
         result["score"].notna() & ~np.isnan(lower)
     )
-    result["tiers"] = pd.Categorical(tiers, categories=TIER_LABELS, ordered=True)
+    result["tiers"] = pd.Categorical(
+        tiers, categories=TIER_LABELS, ordered=True
+    )
     logger.info("Bornes des tiers : %.1f et %.1f", lower, upper)
     return result
