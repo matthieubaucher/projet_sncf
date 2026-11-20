@@ -1,7 +1,7 @@
 """Page de la carte de fiabilité."""
 
 # Imports
-import json
+import logging
 import math
 from pathlib import Path
 
@@ -31,8 +31,11 @@ from projet_sncf.business.map.map_sncf import (
     summary_metrics,
 )
 from projet_sncf.business.analysis.reliability import get_reliability_table
+from projet_sncf.business.map.map_data import read_json
 
 # Constants
+logger = logging.getLogger(__name__)
+
 DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "map"
 STATIONS_FILE = DATA_DIR / "stations_coordonnees.csv"
 NETWORK_FILE = DATA_DIR / "reseau_ferre_simplifie.json"
@@ -108,15 +111,12 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame, list, dict]:
 
     Raises:
         FileNotFoundError: Si le CSV des gares ou le JSON du réseau manque.
+        ValueError: Si un JSON est illisible.
     """
     scores = get_reliability_table()
     stations = pd.read_csv(STATIONS_FILE, sep=";")
-    with open(NETWORK_FILE, encoding="utf-8") as file:
-        network = json.load(file)
-    routes = {}
-    if ROUTES_FILE.exists():
-        with open(ROUTES_FILE, encoding="utf-8") as file:
-            routes = json.load(file)
+    network = read_json(NETWORK_FILE)
+    routes = read_json(ROUTES_FILE, default={})
     return scores, stations, network, routes
 
 
@@ -390,7 +390,12 @@ def main() -> None:
         st.error(f"Fichiers manquants dans {DATA_DIR} : {', '.join(missing)}")
         st.stop()
 
-    scores, stations, network, routes = load_data()
+    try:
+        scores, stations, network, routes = load_data()
+    except (FileNotFoundError, ValueError, KeyError) as error:
+        logger.error("Chargement de la carte impossible : %s", error)
+        st.error(f"Impossible de charger les données de la carte : {error}")
+        st.stop()
 
     with st.sidebar:
         st.header("Filtres")
