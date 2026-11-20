@@ -1,12 +1,11 @@
 import numpy as np
 from projet_sncf.database import dataloader as dl
-from projet_sncf.business.service.Prevision_de_retard import simulation
+from projet_sncf.business.service.Prevision_de_retard import simulation, clusterise
 
 def simulation_scenario_utilisateur(parameters:dict, axe:str, cible:str):
     if cible not in get_cibles():
         raise ValueError("Cible non disponible pour la simulation")
 
-    print(axe, "  ", get_axes())
     if axe not in get_axes():
         raise ValueError("Axe non disponible pour la simulation")
 
@@ -16,15 +15,18 @@ def simulation_scenario_utilisateur(parameters:dict, axe:str, cible:str):
     
     return simulation(parameters, axe, cible)
 
-def clusterise_ligne_et_axe(axes, cible):
-    dummy_array= np.array([
-        [ 0.12,  1.45], [-0.87,  0.32],
-        [ 1.91, -0.54], [ 0.75,  2.18],
-        [-1.43, -0.92], [ 2.34,  0.17],
-        [-0.21,  1.03], [ 1.12, -1.76],
-        [-2.01,  0.84], [ 0.48, -0.37],
-    ])
-    return dummy_array
+def clusterise_ligne_et_axe(axes:list, cible:str):
+    if cible not in get_cibles():
+        raise ValueError("Cible non disponible pour la simulation")
+
+    if len(axes)<4:
+        raise ValueError("Choisissez au moins 4 axes")
+    
+    for axe in axes:
+        if axe not in get_axes():            
+            raise ValueError(f"Axe {axe} non disponible pour la simulation")
+    
+    return clusterise(axes, cible)
 
 def get_axes():
     """
