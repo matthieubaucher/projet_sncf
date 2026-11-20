@@ -4,7 +4,9 @@ from projet_sncf.business.model.Modele_prevision_retard_manager import get_model
 import pandas as pd
 import numpy as np
 from sklearn.manifold import TSNE
+import logging
 
+logger = logging.getLogger(__name__)
 
 def simulation(parameters:dict, axe:list, cible:str):
     """
@@ -12,12 +14,14 @@ def simulation(parameters:dict, axe:list, cible:str):
         Utilisation du previsionneur (avec ces data, et les vecteurs de paramètre) : méthode get_inferance_retard
         on renvoie un vecteur [1000] affichable dans une boxplot
     """
+    logger.info(f"L'utilisateur demande une prévision de retard sur  : {'<->'.join(axe)} {cible}");
     perturbe = lambda x: np.random.normal(loc=x, scale=0.05 * abs(x)) # TODO : normalisation des prct de causes a faire
     values = []
     for _ in range(1000):
         values.append([perturbe(parameter) for parameter in parameters.values()])
     X = pd.DataFrame(values, columns=parameters.keys())
     Y = get_modele_manager().get_inferance(X, axe, cible)
+    logger.info(f"Prévision de retard effectuée")
     return Y
 
 
@@ -29,6 +33,7 @@ def clusterise(axes, cible):
         utiliser l'algo TSNE
         on renvoie la matrice [len(axes), 2] affichable coté streamlit
     """
+    logger.info(f"L'utilisateur demande un clustering sur  : {len(axes)} axes avec cible = {cible}");
     perplexity = min(len(axes)//2,5)
     if perplexity<=1:
         raise ValueError("Trop peu d'axes pour effectuer la projection t-SNE.")
@@ -45,4 +50,5 @@ def clusterise(axes, cible):
         random_state=42
     )
     Y_2d = tsne.fit_transform(Y)
+    logger.info(f"Clustering effectuée")
     return Y_2d
