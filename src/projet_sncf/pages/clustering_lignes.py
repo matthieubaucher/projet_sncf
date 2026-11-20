@@ -98,8 +98,9 @@ if st.button("Clusteriser"):
 
         st.pyplot(fig)
 
-        st.write("""
-                Vous pouvez voir si certains modèles ont tendance a être proches, voir à se regrouper
-                """)
+        st.write(
+            "Vous pouvez voir si certains modèles ont tendance a être "
+            "proches, voir à se regrouper"
+        )
     except Exception as e:
         st.error(str(e))
