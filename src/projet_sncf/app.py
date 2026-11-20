@@ -1,7 +1,6 @@
 """Point d'entrée de l'application : le menu qui regroupe les pages."""
 
 # Imports
-import re
 from pathlib import Path
 import streamlit as st
 
