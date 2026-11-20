@@ -3,7 +3,6 @@
 # Imports
 import logging
 from pathlib import Path
-
 import altair as alt
 import pandas as pd
 import streamlit as st
@@ -18,7 +17,13 @@ logger = logging.getLogger(__name__)
 INTRO_TEXT = (
     "**Cher assureur,** RailInsight note la fiabilité de chaque liaison TGV à partir "
     "de l'historique des retards et des annulations. "
-    "Vous voyez quelles liaisons assurer, lesquelles éviter, et vous simulez une prime."
+    "Visualisez les risques et les indicateurs de chaque liaison "
+    "pour calibrer au mieux la prime d'assurance."
+)
+
+MAP_HINT = (
+    "Ouvrez la page **Carte interactive** dans le menu pour explorer "
+    "les liaisons et simuler une prime."
 )
 
 
@@ -56,12 +61,12 @@ def main() -> None:
     try:
         st.set_page_config(page_title="Accueil", layout="wide")
     except st.errors.StreamlitAPIException:
-        # Déjà définie par l'application principale
         pass
 
     st.title("RailInsight")
     st.caption("Fiabilité des liaisons ferroviaires")
     st.markdown(INTRO_TEXT)
+    st.info(MAP_HINT)
 
     try:
         scores = load_scores()
@@ -97,9 +102,6 @@ def main() -> None:
     )
     st.altair_chart(chart.properties(height=280), use_container_width=True)
 
-    st.info(
-        "Ouvrez la page **Carte** dans le menu pour voir les liaisons et simuler une prime."
-    )
     st.caption("Données : SNCF Open Data. Réseau ferré : SNCF Réseau (ODbL).")
 
 

@@ -127,7 +127,7 @@ with center:
                 parameter,
                 min_value=0,
                 max_value=15000,
-                value=0,
+                value=1,
                 key=parameter
             )
     
@@ -137,10 +137,13 @@ with center:
     }
 
 if st.button("Evaluate"):
-    points = retard_api.simulation_scenario_utilisateur(st.session_state.parameters, st.session_state.axe, st.session_state.cible)
-    fig, ax = plt.subplots(figsize=(8, 2))
-    sns.boxplot(
-        x=points,
-        ax=ax
-    )
-    st.pyplot(fig)
+    try:
+        points = retard_api.simulation_scenario_utilisateur(st.session_state.parameters, st.session_state.axe, st.session_state.cible)
+        fig, ax = plt.subplots(figsize=(8, 2))
+        sns.boxplot(
+            x=points,
+            ax=ax
+        )
+        st.pyplot(fig)
+    except Exception as e:
+        st.error(str(e))
