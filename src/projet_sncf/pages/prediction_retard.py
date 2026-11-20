@@ -138,7 +138,9 @@ with center:
 
 if st.button("Evaluate"):
     try:
-        points = retard_api.simulation_scenario_utilisateur(st.session_state.parameters, st.session_state.axe, st.session_state.cible)
+        with st.spinner("Calcul en cours..."):
+            points = retard_api.simulation_scenario_utilisateur(st.session_state.parameters, st.session_state.axe, st.session_state.cible)
+
         fig, ax = plt.subplots(figsize=(8, 2))
         sns.boxplot(
             x=points,

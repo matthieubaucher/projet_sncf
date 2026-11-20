@@ -93,4 +93,15 @@ def test_clusterise_ligne_et_axe_axes_en_nombre_insuffisant(mock_get_axes):
             [["PARIS LYON", "NICE"]],
             "prct annulation"
         )
+
+@patch("projet_sncf.database.dataloader.get_axes")
+def test_clusterise_ligne_et_axes_en_nombre_trop_grand(mock_get_axes):
+    mock_get_axes.return_value = [["PARIS LYON", "NICE"], ["A", "B"], ["C", "D"], ["E", "F"],
+                                  ["G", "H"], ["I", "J"], ["K", "L"], ["M", "N"], ["O", "P"]]
+    with pytest.raises(ValueError, match="Choisissez maximum 7 axes"):
+        clusterise_ligne_et_axe(
+            [["PARIS LYON", "NICE"], ["A", "B"], ["C", "D"], ["E", "F"],
+                                  ["G", "H"], ["I", "J"], ["K", "L"], ["M", "N"], ["O", "P"]],
+            "prct annulation"
+        )        
         

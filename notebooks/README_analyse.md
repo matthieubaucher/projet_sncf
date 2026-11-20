@@ -1,6 +1,12 @@
-# Analyse des retards et score de fiabilité (POC Machoudi)
+# Analyse des retards et score de fiabilité
 
-Mon objectif est d'expliquuer les retards et annulations des liaisons TGV, de savoir si le risque d'une liaison est répétitif ou accidentel, et d'en déduire un score de fiabilité par liaison pour RailInsight. Tout le détail est dans `notebooks/01_analyse.ipynb`. Je vous invite à y jeter un œil, surtout les sections 4 à 6.
+Auteur : Machoudi ADEGOUNTE
+
+Mon objectif est d'expliquer les retards et annulations des liaisons TGV, de savoir si le risque d'une liaison est répétitif ou accidentel, et d'en déduire un score de fiabilité par liaison pour RailInsight. Tout le détail est dans `notebooks/01_analyse.ipynb`. Je vous invite à y jeter un œil, surtout les sections 4 à 6.
+
+## Utilisation
+
+Le notebook charge les données avec `get_dataframe()` (dossier `database`) et ne garde que la période de l'analyse, de janvier 2018 à juin 2026. Cette période est définie dans `src/projet_sncf/business/analysis/constants.py`. Le calcul du score est dans `src/projet_sncf/business/analysis/`, et l'application l'appelle avec `get_reliability_table()`.
 
 ## Démarche
 
@@ -35,7 +41,7 @@ Le dataset ne contient pas de prix, le seuil de retard est à vérifier (5, 10 o
 1. Prévision (une personne) : par exemple en comparant aux mêmes mois des années précédentes.
 2. Tests d'hypothèses : saisonnalité, cause selon le service, lien entre niveau de perturbation et régularité.
 3. Alignement avec le nettoyage : définition d'une liaison, doublons de l'été 2025.
-3. Prixx : une hypothse de coût par train annulé ou en retard permettrait de passer du score à un montant.
-5. Application : je n'ai pas fixé la façon d'exploiter le tableau final (score, tiers, confiance, régularité, causes). Mais je pense à une carte où on montre les liaison fiable colorée par score maisdemanderait un dataset externe pour les coordonnées des gares , et sur l'app on montre aussi  une estimation du coût attendu des perturbations d'une liaison, mais je pene demanderait une hypothèse de coût par train annulé ou en retard et la partie prévision.
+4. Prix : une hypothèse de coût par train annulé ou en retard permet de passer du score à un montant. L'application le fait avec une indemnité choisie par l'utilisateur.
+5. Application : la page « Carte interactive » montre les liaisons colorées selon leur niveau de fiabilité, avec une estimation du coût attendu des perturbations (la prime pure). Elle utilise un jeu de données externe pour les coordonnées des gares, et le coût dépend de l'indemnité choisie.
 
 Quelle que soit la forme retenue, je pense que l'interface doit rester simple pour un assureur : peu d'indicateurs, des mots plutôt que des mesures techniques, et un avertissement quand une liaison manque de recul.
