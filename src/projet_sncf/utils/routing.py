@@ -1,4 +1,4 @@
-"""Find the path of each liaison along the rail network (SNCF Réseau lines)."""
+"""Trouve le chemin de chaque liaison sur le réseau ferré (lignes de SNCF Réseau)."""
 
 # Imports
 import heapq
@@ -7,6 +7,7 @@ import logging
 import math
 import sys
 from dataclasses import dataclass, field
+
 import pandas as pd
 
 from projet_sncf.utils.rail_network import (
@@ -19,9 +20,9 @@ from projet_sncf.utils.rail_network import (
     simplify,
 )
 
+# Constants
 logger = logging.getLogger(__name__)
 
-# Constants
 MAX_SPACING_KM = 0.2
 JOIN_DISTANCE = 0.003
 STATION_DISTANCE = 0.06
@@ -38,7 +39,15 @@ COL_ARRIVAL = "Gare d'arrivée"
 
 # Functions
 def distance_km(a: tuple[float, float], b: tuple[float, float]) -> float:
-    """Rough distance in km between two points (longitude, latitude)."""
+    """Calcule une distance approximative en km entre deux points.
+
+    Args:
+        a (tuple[float, float]): Premier point, en (longitude, latitude).
+        b (tuple[float, float]): Deuxième point, en (longitude, latitude).
+
+    Returns:
+        float: La distance en kilomètres.
+    """
     mean_latitude = math.radians((a[1] + b[1]) / 2)
     dx = (b[0] - a[0]) * math.cos(mean_latitude) * 111.32
     dy = (b[1] - a[1]) * 110.57
@@ -46,14 +55,28 @@ def distance_km(a: tuple[float, float], b: tuple[float, float]) -> float:
 
 
 def route_key(station_a: str, station_b: str) -> str:
-    """Key of a pair of stations, the same in both directions."""
+    """Donne la clé d'une paire de gares, la même dans les deux sens.
+
+    Args:
+        station_a (str): Première gare.
+        station_b (str): Deuxième gare.
+
+    Returns:
+        str: Les deux noms triés par ordre alphabétique, séparés par `|`.
+    """
     first, second = sorted([station_a, station_b])
     return f"{first}|{second}"
 
 
 @dataclass
 class Network:
-    """Rail network as a graph."""
+    """Réseau ferré sous forme de graphe.
+
+    Attributes:
+        nodes: Les points du réseau, chacun en (longitude, latitude).
+        adjacency: Pour chaque nœud, ses voisins et la distance en km qui les sépare.
+        grid: Les nœuds rangés par cellule de grille, pour les retrouver vite.
+    """
 
     nodes: list = field(default_factory=list)
     adjacency: list = field(default_factory=list)
@@ -61,12 +84,27 @@ class Network:
 
 
 def _cell(point: tuple[float, float]) -> tuple[int, int]:
-    """Grid cell of a point."""
+    """Donne la cellule de la grille qui contient un point.
+
+    Args:
+        point (tuple[float, float]): Point en (longitude, latitude).
+
+    Returns:
+        tuple[int, int]: Les indices de la cellule.
+    """
     return math.floor(point[0] / CELL), math.floor(point[1] / CELL)
 
 
 def _densify(path: list[list[float]]) -> list[tuple[float, float]]:
-    """Add points on long segments."""
+    """Ajoute des points sur les segments longs.
+
+    Args:
+        path (list[list[float]]): Points du chemin, chacun en [longitude, latitude].
+
+    Returns:
+        list[tuple[float, float]]: Les points arrondis, espacés de `MAX_SPACING_KM`
+        au plus.
+    """
     points = [(round(path[0][0], DECIMALS), round(path[0][1], DECIMALS))]
     for (x0, y0), (x1, y1) in zip(path[:-1], path[1:]):
         parts = max(1, math.ceil(distance_km((x0, y0), (x1, y1)) / MAX_SPACING_KM))
@@ -80,7 +118,17 @@ def _densify(path: list[list[float]]) -> list[tuple[float, float]]:
 def nearest_node(
     network: Network, point: tuple[float, float], max_distance: float
 ) -> int | None:
-    """Closest node within max_distance degrees, or None."""
+    """Trouve le nœud le plus proche d'un point.
+
+    Args:
+        network (Network): Le réseau.
+        point (tuple[float, float]): Point en (longitude, latitude).
+        max_distance (float): Distance maximale, en degrés.
+
+    Returns:
+        int | None: L'indice du nœud le plus proche, ou `None` s'il n'y en a aucun
+        à moins de `max_distance`.
+    """
     reach = math.ceil(max_distance / CELL)
     cx, cy = _cell(point)
     best, best_distance = None, math.inf
@@ -97,7 +145,16 @@ def nearest_node(
 
 
 def _largest_component(network: Network) -> Network:
-    """Keep only the biggest connected part, small isolated pieces would block some stations."""
+    """Garde seulement la plus grande partie connectée du réseau.
+
+    Les petits morceaux isolés bloqueraient certaines gares.
+
+    Args:
+        network (Network): Le réseau complet.
+
+    Returns:
+        Network: Un nouveau réseau avec la plus grande partie, nœuds renumérotés.
+    """
     seen = [False] * len(network.nodes)
     best: list[int] = []
     for start in range(len(network.nodes)):
@@ -127,10 +184,17 @@ def _largest_component(network: Network) -> Network:
 
 
 def build_graph(paths: list[list[list[float]]]) -> Network:
-    """Build the graph from the paths.
+    """Construit le graphe du réseau à partir des chemins des lignes.
 
-    Points with the same rounded coordinates are one node. A line end that stops
-    next to another line is joined to it.
+    Les points qui ont les mêmes coordonnées arrondies forment un seul nœud. Le bout
+    d'une ligne qui s'arrête près d'une autre ligne est relié à elle.
+
+    Args:
+        paths (list[list[list[float]]]): Chemins des lignes, chacun étant une liste
+            de points [longitude, latitude].
+
+    Returns:
+        Network: Le graphe, réduit à sa plus grande partie connectée.
     """
     network = Network()
     index: dict[tuple[float, float], int] = {}
@@ -183,7 +247,17 @@ def build_graph(paths: list[list[list[float]]]) -> Network:
 def shortest_path(
     network: Network, source: int, target: int
 ) -> tuple[list[int], float] | None:
-    """A* shortest path between two nodes: the nodes and the length in km, or None."""
+    """Cherche le plus court chemin entre deux nœuds, avec l'algorithme A*.
+
+    Args:
+        network (Network): Le réseau.
+        source (int): Nœud de départ.
+        target (int): Nœud d'arrivée.
+
+    Returns:
+        tuple[list[int], float] | None: Les nœuds du chemin et sa longueur en km, ou
+        `None` s'il n'y a pas de chemin.
+    """
     goal = network.nodes[target]
     best = {source: 0.0}
     parent: dict[int, int] = {}
@@ -216,10 +290,22 @@ def route_pair(
     end: tuple[float, float],
     max_detour: float = MAX_DETOUR,
 ) -> list[list[float]] | None:
-    """Path of a liaison along the network, or None if it cannot be routed.
+    """Trouve le chemin d'une liaison sur le réseau.
 
-    It is rejected if a station is too far from the network, if the stations are not
-    connected, or if the path is much longer than the straight line.
+    Le chemin est refusé si une gare est trop loin du réseau, si les gares ne sont
+    pas reliées, si elles sont trop proches (moins de 1 km) ou si le chemin est bien
+    plus long que la ligne droite.
+
+    Args:
+        network (Network): Le réseau.
+        start (tuple[float, float]): Gare de départ, en (longitude, latitude).
+        end (tuple[float, float]): Gare d'arrivée, en (longitude, latitude).
+        max_detour (float): Rapport maximal entre la longueur du chemin et celle de
+            la ligne droite.
+
+    Returns:
+        list[list[float]] | None: Le chemin simplifié, de la gare de départ à la gare
+        d'arrivée, ou `None` si la liaison ne peut pas être tracée.
     """
     source = nearest_node(network, start, STATION_DISTANCE)
     target = nearest_node(network, end, STATION_DISTANCE)
@@ -243,10 +329,21 @@ def build_routes(
     pairs: list[tuple[str, str]],
     max_detour: float = MAX_DETOUR,
 ) -> tuple[dict[str, list[list[float]]], list[tuple[str, str]]]:
-    """Route several pairs of stations.
+    """Trouve le chemin de plusieurs paires de gares.
+
+    Les deux sens d'une même paire ne donnent qu'un seul chemin.
+
+    Args:
+        network (Network): Le réseau.
+        stations (pd.DataFrame): Coordonnées des gares, avec les colonnes `gare`,
+            `latitude` et `longitude`.
+        pairs (list[tuple[str, str]]): Paires (gare de départ, gare d'arrivée).
+        max_detour (float): Rapport maximal entre la longueur du chemin et celle de
+            la ligne droite.
 
     Returns:
-        The paths by route key, and the pairs that failed.
+        tuple[dict[str, list[list[float]]], list[tuple[str, str]]]: Les chemins par
+        clé de voie, et les paires sans chemin.
     """
     coordinates = stations.dropna(subset=[COL_LATITUDE, COL_LONGITUDE]).set_index(
         COL_STATION
@@ -280,10 +377,21 @@ def build_routes(
 
 
 def read_paths(lines: pd.DataFrame) -> list[list[list[float]]]:
-    """Read the lines in service inside metropolitan France.
+    """Lit les chemins des lignes en service, en France métropolitaine.
+
+    Si le jeu de données a une colonne de statut, on garde seulement les lignes en
+    service. Un chemin doit tenir dans la France métropolitaine et avoir au moins
+    deux points.
+
+    Args:
+        lines (pd.DataFrame): Lignes du réseau, avec la colonne `COL_SHAPE`.
+
+    Returns:
+        list[list[list[float]]]: Les chemins gardés, chacun étant une liste de points
+        [longitude, latitude].
 
     Raises:
-        KeyError: if the "Geo Shape" column is missing.
+        KeyError: Si la colonne `COL_SHAPE` manque.
     """
     if COL_SHAPE not in lines.columns:
         raise KeyError(
@@ -307,7 +415,20 @@ def read_paths(lines: pd.DataFrame) -> list[list[list[float]]]:
 def main(
     lines_path: str, stations_path: str, scores_path: str, output_path: str
 ) -> None:
-    """Route every liaison and write the paths as JSON."""
+    """Calcule le chemin de chaque liaison et l'écrit en JSON.
+
+    Affiche le nombre de trajets calculés, puis la liste des paires sans trajet.
+
+    Args:
+        lines_path (str): CSV des lignes du réseau, séparé par `;`.
+        stations_path (str): CSV des gares, séparé par `;`.
+        scores_path (str): CSV des liaisons, avec les colonnes de gare de départ et
+            de gare d'arrivée.
+        output_path (str): JSON à écrire.
+
+    Returns:
+        None: Les chemins sont écrits dans `output_path`.
+    """
     logging.basicConfig(level=logging.INFO)
     paths = read_paths(pd.read_csv(lines_path, sep=";"))
     network = build_graph(paths)

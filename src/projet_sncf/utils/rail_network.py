@@ -1,40 +1,43 @@
-"""Simplified drawing of the French rail network, used as the background of the map.
+"""Dessin simplifié du réseau ferré français, utilisé en fond de carte.
 
-Source: "Fichier de formes des lignes du Réseau Ferré National" (SNCF Réseau, ODbL).
-The CSV has one row per line segment, with its geometry as GeoJSON text in the
-``Geo Shape`` column. Only the lines in service are kept and their paths are
-simplified, so that the result is small enough to be versioned.
+Source : « Fichier de formes des lignes du Réseau Ferré National » (SNCF Réseau, ODbL).
 
-Usage,, from poc/analyse_machoudi/:
-    uv run python -m projet_sncf.utils.rail_network <lignes.csv> <output.json>
+Utilisation, depuis la racine du dépôt :
+    uv run python -m projet_sncf.utils.rail_network <lignes.csv> <sortie.json>
 """
 
+# Imports
 import json
 import logging
 import math
 import sys
+
 import pandas as pd
 
+# Constants
 logger = logging.getLogger(__name__)
 
 COL_SHAPE = "Geo Shape"
 COL_STATUS = "MNEMO"
 STATUS_IN_SERVICE = "EXPLOITE"
-TOLERANCE = 0.01  # degrees
+# Tolérance de simplification, en degrés
+TOLERANCE = 0.01
 DECIMALS = 3
 LATITUDE_RANGE = (41.0, 52.0)
 LONGITUDE_RANGE = (-5.5, 10.0)
 
 
+# Functions
 def parse_paths(shape: str) -> list[list[list[float]]]:
-    """Read the paths of a GeoJSON geometry given as text.
+    """Lit les chemins d'une géométrie GeoJSON donnée sous forme de texte.
 
     Args:
-        shape (str): GeoJSON geometry, of type LineString or MultiLineString.
+        shape (str): Géométrie GeoJSON, de type LineString ou MultiLineString.
 
     Returns:
-        list[list[list[float]]]: The paths, each a list of [longitude, latitude].
-        Empty if the text is missing, malformed or of another type.
+        list[list[list[float]]]: Les chemins, chacun étant une liste de points
+        [longitude, latitude]. Vide si le texte manque, est mal formé ou d'un autre
+        type.
     """
     try:
         geometry = json.loads(shape)
@@ -49,15 +52,15 @@ def parse_paths(shape: str) -> list[list[list[float]]]:
 
 
 def _distance_to_segment(point, start, end) -> float:
-    """Compute the distance from a point to a segment, in degrees.
+    """Calcule la distance d'un point à un segment, en degrés.
 
     Args:
-        point (list[float]): [longitude, latitude] of the point.
-        start (list[float]): First end of the segment.
-        end (list[float]): Second end of the segment.
+        point (list[float]): [longitude, latitude] du point.
+        start (list[float]): Première extrémité du segment.
+        end (list[float]): Deuxième extrémité du segment.
 
     Returns:
-        float: The distance, in the plane of the coordinates.
+        float: La distance, dans le plan des coordonnées.
     """
     (px, py), (sx, sy), (ex, ey) = point[:2], start[:2], end[:2]
     dx, dy = ex - sx, ey - sy
@@ -70,15 +73,16 @@ def _distance_to_segment(point, start, end) -> float:
 def simplify(
     path: list[list[float]], tolerance: float = TOLERANCE
 ) -> list[list[float]]:
-    """Simplify a path with the Douglas-Peucker algorithm.
+    """Simplifie un chemin avec l'algorithme de Douglas-Peucker.
 
     Args:
         path (list[list[float]]): Points [longitude, latitude].
-        tolerance (float): Largest distance, in degrees, between the path and its
-            simplification.
+        tolerance (float): Plus grande distance, en degrés, entre le chemin et sa
+            version simplifiée.
 
     Returns:
-        list[list[float]]: A path with fewer points, keeping both ends.
+        list[list[float]]: Un chemin avec moins de points, qui garde les deux
+        extrémités.
     """
     if len(path) < 3:
         return list(path)
@@ -101,19 +105,19 @@ def simplify(
 def build_network(
     lines: pd.DataFrame, tolerance: float = TOLERANCE
 ) -> list[list[list[float]]]:
-    """Build the simplified paths of the network.
+    """Construit les chemins simplifiés du réseau.
 
     Args:
-        lines (pd.DataFrame): The lines CSV, with the column ``Geo Shape`` and,
-            if present, ``MNEMO`` (only the value ``EXPLOITE`` is kept).
-        tolerance (float): Tolerance of the simplification, in degrees.
+        lines (pd.DataFrame): Le CSV des lignes, avec la colonne `Geo Shape` et,
+            si elle existe, `MNEMO` (seule la valeur `EXPLOITE` est gardée).
+        tolerance (float): Tolérance de la simplification, en degrés.
 
     Returns:
-        list[list[list[float]]]: The paths [longitude, latitude], rounded and limited
-        to metropolitan France.
+        list[list[list[float]]]: Les chemins [longitude, latitude], arrondis et
+        limités à la France métropolitaine.
 
     Raises:
-        KeyError: If the column ``Geo Shape`` is missing.
+        KeyError: Si la colonne `Geo Shape` manque.
     """
     if COL_SHAPE not in lines.columns:
         raise KeyError(
@@ -140,11 +144,14 @@ def build_network(
 
 
 def main(lines_path: str, output_path: str) -> None:
-    """Read the lines CSV and write the simplified network as JSON.
+    """Lit le CSV des lignes et écrit le réseau simplifié en JSON.
 
     Args:
-        lines_path (str): Lines CSV (separator ``;``).
-        output_path (str): Where to write the JSON list of paths.
+        lines_path (str): CSV des lignes, séparé par `;`.
+        output_path (str): Fichier où écrire la liste des chemins en JSON.
+
+    Returns:
+        None: Le réseau est écrit dans `output_path`.
     """
     lines = pd.read_csv(lines_path, sep=";")
     network = build_network(lines)
@@ -154,5 +161,6 @@ def main(lines_path: str, output_path: str) -> None:
     print(f"{len(network)} tracés, {points} points, écrit dans {output_path}")
 
 
+# Main program
 if __name__ == "__main__":
     main(*sys.argv[1:3])

@@ -1,5 +1,6 @@
-"""Regularity of the disruptions of each liaison."""
+"""Régularité des perturbations de chaque liaison."""
 
+# Imports
 import logging
 import math
 import numpy as np
@@ -16,29 +17,31 @@ from projet_sncf.business.analysis.constants import (
 )
 from projet_sncf.business.analysis.indicators import _check_columns, filter_valid_rows
 
+# Constants
 logger = logging.getLogger(__name__)
 
 
+# Functions
 def worst_months_share(
     disruptions: pd.Series,
     rates: pd.Series,
     min_months: int = MIN_MONTHS,
     share: float = WORST_MONTHS_SHARE,
 ) -> float:
-    """Compute the share of disruptions that falls in the worst months.
+    """Calcule la part des perturbations qui tombe dans les pires mois.
 
-    The worst months are the ``ceil(share * n)`` months with the highest
-    disruption rate.
+    Les pires mois sont les `ceil(share * n)` mois au taux de perturbation le plus
+    haut.
 
     Args:
-        disruptions (pd.Series): Cancelled plus delayed trains of each month.
-        rates (pd.Series): Disruption rate of each month, same index.
-        min_months (int): Minimum number of months required.
-        share (float): Share of months considered as the worst ones.
+        disruptions (pd.Series): Trains annulés plus trains en retard de chaque mois.
+        rates (pd.Series): Taux de perturbation de chaque mois, même index.
+        min_months (int): Nombre minimal de mois exigé.
+        share (float): Part de mois comptés comme les pires.
 
     Returns:
-        float: Share of the disruptions in the worst months, between 0 and 1. NaN if
-        there are fewer than ``min_months`` months or no disruption at all.
+        float: Part des perturbations dans les pires mois, entre 0 et 1. NaN s'il y
+        a moins de `min_months` mois ou aucune perturbation.
     """
     total = disruptions.sum()
     if len(disruptions) < min_months or total == 0:
@@ -54,22 +57,22 @@ def compute_regularity(
     min_months: int = MIN_MONTHS,
     share: float = WORST_MONTHS_SHARE,
 ) -> pd.DataFrame:
-    """Compute the regularity of each liaison, with and without the shock months.
+    """Calcule la régularité de chaque liaison, avec et sans les mois de choc.
 
     Args:
-        df (pd.DataFrame): Cleaned monthly data.
-        shock_months (pd.DatetimeIndex): Months excluded from the second column,
-            see ``detect_shock_months``.
-        min_months (int): Minimum number of months required for a liaison.
-        share (float): Share of months considered as the worst ones.
+        df (pd.DataFrame): Données mensuelles nettoyées.
+        shock_months (pd.DatetimeIndex): Mois exclus pour la deuxième colonne, voir
+            `detect_shock_months`.
+        min_months (int): Nombre minimal de mois exigé pour une liaison.
+        share (float): Part de mois comptés comme les pires.
 
     Returns:
-        pd.DataFrame: One row per liaison, indexed by ``LIAISON_KEY``, with the
-        columns ``pires_mois_tous`` (all months) and ``pires_mois_hors_chocs``
-        (shock months removed). NaN for liaisons without enough months.
+        pd.DataFrame: Une ligne par liaison, indexé par `LIAISON_KEY`. Colonnes :
+        `pires_mois_tous` (tous les mois) et `pires_mois_hors_chocs` (sans les mois
+        de choc). NaN pour les liaisons qui n'ont pas assez de mois.
 
     Raises:
-        KeyError: If a required column is missing.
+        KeyError: Si une colonne nécessaire manque.
     """
     _check_columns(df, LIAISON_KEY + [COL_DATE])
     valid = filter_valid_rows(df).reset_index(drop=True)
