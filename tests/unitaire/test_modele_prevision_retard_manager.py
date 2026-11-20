@@ -1,5 +1,6 @@
 from projet_sncf.business.model.Modele_prevision_retard_manager import ModelManager
 from unittest.mock import MagicMock, patch
+import pandas as pd
 
 def test_get_id_modele_inverse_les_gares():
     manager = ModelManager()
@@ -31,8 +32,7 @@ def test_get_trained_modele_utilise_le_cache_et_entraine_une_seule_fois(
 
     manager.dataframe = MagicMock(name="global_dataframe")
 
-    X = MagicMock()
-    X.columns = ["annee", "mois"]
+    X = pd.DataFrame(columns=["annee", "mois"])
 
     instance = mock_modele.return_value
 

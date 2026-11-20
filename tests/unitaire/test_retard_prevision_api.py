@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from unittest.mock import patch
 
-from projet_sncf.api.Retard_prevision_API import simulation_scenario_utilisateur
+from projet_sncf.api.Retard_prevision_API import simulation_scenario_utilisateur, clusterise_ligne_et_axe
 
 @patch("projet_sncf.database.dataloader.get_axes")
 @patch("projet_sncf.database.dataloader.get_temps")
@@ -56,3 +56,31 @@ def test_simulation_scenario_utilisateur_cible_inconnue(mock_get_axes):
             ["PARIS LYON", "NICE"],
             "CIBLE_KO"
         )            
+
+@patch("projet_sncf.database.dataloader.get_axes")
+def test_clusterise_ligne_et_axe_axe_inconnu(mock_get_axes):
+    mock_get_axes.return_value = [["PARIS LYON", "NICE"], ["A", "B"], ["C", "D"], ["E", "F"], ["G", "H"]]
+    with pytest.raises(ValueError, match="Axe.* non disponible.*"):
+        clusterise_ligne_et_axe(
+            [["FOO", "BAR"], ["A", "B"], ["C", "D"], ["E", "F"], ["G", "H"]],
+            "Nombre trains en retard > 30min"
+        )
+
+@patch("projet_sncf.database.dataloader.get_axes")
+def test_clusterise_ligne_et_axe_cible_inconnue(mock_get_axes):
+    mock_get_axes.return_value = [["PARIS LYON", "NICE"], ["A", "B"], ["C", "D"], ["E", "F"], ["G", "H"]]
+    with pytest.raises(ValueError, match="Cible.* non disponible.*"):
+        clusterise_ligne_et_axe(
+            [["PARIS LYON", "NICE"], ["A", "B"], ["C", "D"], ["E", "F"]],
+            "CIBLE_KO"
+        )                    
+
+@patch("projet_sncf.database.dataloader.get_axes")
+def test_clusterise_ligne_et_axe_axes_en_nombre_insuffisant(mock_get_axes):
+    mock_get_axes.return_value = [["PARIS LYON", "NICE"], ["A", "B"], ["C", "D"], ["E", "F"], ["G", "H"]]
+    with pytest.raises(ValueError, match="Choisissez au moins 4 axes"):
+        clusterise_ligne_et_axe(
+            [["PARIS LYON", "NICE"]],
+            "Nombre trains en retard > 30min"
+        )
+        
