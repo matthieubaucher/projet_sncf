@@ -1,4 +1,4 @@
-"""Data for the reliability map. No Streamlit in here."""
+"""Données de la carte de fiabilité, sans Streamlit."""
 
 # Imports
 import math
@@ -23,11 +23,12 @@ NO_TIER_COLOR = (150, 150, 150)
 ALPHA = 230
 WIDTH = 3
 
-BEND = 0.08  # how much the curve bends
+# Courbure des lignes tracées sur l'app
+BEND = 0.08
 CURVE_POINTS = 24
-# this variable help us to define gap between the two directions
+# Écart entre les deux sens d'une même voie
 OFFSET_DEGREES = 0.05
-# the gap shrinks near the stations
+# L'écart diminue près des gares
 OFFSET_TAPER_KM = 15.0
 KM_PER_DEGREE = 110.0
 
@@ -50,8 +51,9 @@ LABEL_SUFFIXES = (
     "(Ain)",
     "TGV",
 )
-LABEL_CHAR_WIDTH = 0.35  # width of a character
-LABEL_HEIGHT = 0.5  # height of a label
+# Largeur d'un caractère et hauteur d'une étiquette
+LABEL_CHAR_WIDTH = 0.35
+LABEL_HEIGHT = 0.5
 
 INSURER_READINGS = {
     TIER_MORE: (
@@ -80,7 +82,15 @@ LOWER_CASE_WORDS = {
 
 # Functions
 def display_name(station: str) -> str:
-    """Make an upper-case station name readable."""
+    """Rend lisible un nom de gare écrit en majuscules.
+
+    Args:
+        station (str): Nom de la gare, en majuscules.
+
+    Returns:
+        str: Le nom avec une majuscule à chaque mot, « TGV » gardé en majuscules et
+        les petits mots (en, de, la, le, des) en minuscules.
+    """
     name = station.title().replace(" Tgv", " TGV")
     for word, replacement in LOWER_CASE_WORDS.items():
         name = name.replace(word, replacement)
@@ -94,11 +104,18 @@ def build_curve(
     bend: float = BEND,
     points: int = CURVE_POINTS,
 ) -> list[list[float]]:
-    """Build a curved line between two points.
+    """Construit une ligne courbe entre deux points.
 
     Args:
-        side: 1 bends to the left, -1 to the right.
-        bend: how far the middle moves, as a share of the distance.
+        start (tuple[float, float]): Point de départ, en (longitude, latitude).
+        end (tuple[float, float]): Point d'arrivée, en (longitude, latitude).
+        side (int): 1 courbe vers la gauche, -1 vers la droite.
+        bend (float): Décalage du milieu, en part de la distance entre les points.
+        points (int): Nombre de points de la courbe.
+
+    Returns:
+        list[list[float]]: Les points de la courbe, chacun en [longitude, latitude].
+        Si les deux points sont identiques, le point de départ est répété.
     """
     stretch = math.cos(math.radians((start[1] + end[1]) / 2))
     x0, y0 = start[0] * stretch, start[1]
@@ -119,7 +136,15 @@ def build_curve(
 
 
 def route_key(station_a: str, station_b: str) -> str:
-    """Key of a pair of stations, the same in both directions."""
+    """Donne la clé d'une paire de gares, la même dans les deux sens.
+
+    Args:
+        station_a (str): Première gare.
+        station_b (str): Deuxième gare.
+
+    Returns:
+        str: Les deux noms triés par ordre alphabétique, séparés par `|`.
+    """
     first, second = sorted([station_a, station_b])
     return f"{first}|{second}"
 
@@ -127,7 +152,18 @@ def route_key(station_a: str, station_b: str) -> str:
 def offset_path(
     path: list[list[float]], distance: float = OFFSET_DEGREES
 ) -> list[list[float]]:
-    """Shift a path to the right, so both directions of a track do not overlap."""
+    """Décale un chemin vers la droite, pour que les deux sens d'une voie ne se chevauchent pas.
+
+    Le décalage diminue près des gares, sur `OFFSET_TAPER_KM` kilomètres.
+
+    Args:
+        path (list[list[float]]): Points du chemin, chacun en [longitude, latitude].
+        distance (float): Décalage maximal, en degrés.
+
+    Returns:
+        list[list[float]]: Le chemin décalé. Un chemin de moins de deux points est
+        simplement copié.
+    """
     count = len(path)
     if count < 2:
         return [list(point) for point in path]
@@ -166,14 +202,22 @@ def prepare_links(
     mode: str = MODE_EACH_DIRECTION,
     routes: dict[str, list[list[float]]] | None = None,
 ) -> tuple[pd.DataFrame, int]:
-    """Build the lines to draw, one per liaison.
+    """Construit les lignes à dessiner, une par liaison.
 
     Args:
-        mode: keep every liaison, or only the worst direction of each pair.
-        routes: paths along the rail network, by route key. Without one, a curve is drawn.
+        scores (pd.DataFrame): Tableau de fiabilité, une ligne par liaison.
+        stations (pd.DataFrame): Coordonnées des gares, avec les colonnes `gare`,
+            `latitude` et `longitude`.
+        mode (str): `MODE_EACH_DIRECTION` garde toutes les liaisons,
+            `MODE_WORST_DIRECTION` garde seulement le moins bon sens de chaque paire.
+        routes (dict[str, list[list[float]]] | None): Chemins le long du réseau
+            ferré, par clé de voie (voir `route_key`). Sans chemin, on trace une
+            courbe.
 
     Returns:
-        The liaisons (worst last, so they are drawn on top) and how many had no coordinates.
+        tuple[pd.DataFrame, int]: Les liaisons à tracer, les pires en dernier pour
+        qu'elles soient dessinées au-dessus, et le nombre de liaisons écartées
+        faute de coordonnées.
     """
     routes = routes or {}
     coordinates = stations.dropna(subset=["latitude", "longitude"]).set_index("gare")
@@ -263,7 +307,15 @@ def prepare_links(
 
 
 def station_options(links: pd.DataFrame) -> list[str]:
-    """Stations for the filter, the Paris group first."""
+    """Donne les gares proposées dans le filtre, le groupe Paris en premier.
+
+    Args:
+        links (pd.DataFrame): Liaisons à tracer, avec les colonnes `depart` et
+            `arrivee`.
+
+    Returns:
+        list[str]: `PARIS_GROUP`, puis les gares par ordre alphabétique.
+    """
     names = sorted(set(links["depart"]) | set(links["arrivee"]))
     return [PARIS_GROUP] + names
 
@@ -275,11 +327,18 @@ def filter_links(
     station: str | None = None,
     score_range: tuple[float, float] | None = None,
 ) -> pd.DataFrame:
-    """Keep the liaisons that match the filters.
+    """Garde les liaisons qui respectent les filtres.
 
     Args:
-        station: a station, or PARIS_GROUP for all Paris stations.
-        score_range: lowest and highest score to keep.
+        links (pd.DataFrame): Liaisons à tracer.
+        services (list[str]): Services à garder.
+        tiers (list[str]): Niveaux à garder.
+        station (str | None): Une gare (de départ ou d'arrivée), ou `PARIS_GROUP`
+            pour toutes les gares de Paris. Sans valeur, toutes les gares sont gardées.
+        score_range (tuple[float, float] | None): Score minimal et maximal à garder.
+
+    Returns:
+        pd.DataFrame: Les liaisons qui passent tous les filtres.
     """
     keep = links["service"].isin(services) & links["tiers"].isin(tiers)
     if station == PARIS_GROUP:
@@ -294,7 +353,15 @@ def filter_links(
 
 
 def label_name(station: str) -> str:
-    """Short name of a station for its map label."""
+    """Donne le nom court d'une gare pour son étiquette sur la carte.
+
+    Args:
+        station (str): Nom de la gare, en majuscules.
+
+    Returns:
+        str: « Paris » pour toutes les gares de Paris. Sinon le nom lisible, sans
+        le suffixe de `LABEL_SUFFIXES` s'il y en a un.
+    """
     if station.upper().startswith("PARIS"):
         return "Paris"
     name = display_name(station)
@@ -307,9 +374,18 @@ def label_name(station: str) -> str:
 def station_points(
     links: pd.DataFrame, stations: pd.DataFrame, min_links_for_label: int = 4
 ) -> pd.DataFrame:
-    """Stations to draw, with labels that do not overlap.
+    """Prépare les gares à dessiner, avec des étiquettes qui ne se chevauchent pas.
 
-    The busiest stations get their label first.
+    Les gares les plus desservies passent en premier et gardent leur étiquette.
+
+    Args:
+        links (pd.DataFrame): Liaisons à tracer.
+        stations (pd.DataFrame): Coordonnées des gares.
+        min_links_for_label (int): Nombre minimal de liaisons pour avoir une étiquette.
+
+    Returns:
+        pd.DataFrame: Une ligne par gare, avec les colonnes `gare`, `nom`, `label`,
+        `lon`, `lat` et `liaisons`. Le `label` est vide si la gare n'a pas d'étiquette.
     """
     counts = pd.concat([links["depart"], links["arrivee"]]).value_counts()
     points = stations[stations["gare"].isin(counts.index)].copy()
@@ -343,7 +419,14 @@ def station_points(
 
 
 def summary_metrics(links: pd.DataFrame) -> dict:
-    """Count the liaisons, and the best and worst ones."""
+    """Compte les liaisons, les plus fiables et les moins fiables.
+
+    Args:
+        links (pd.DataFrame): Liaisons à tracer, avec la colonne `tiers`.
+
+    Returns:
+        dict: Les clés `liaisons`, `plus_fiables` et `moins_fiables`.
+    """
     return {
         "liaisons": len(links),
         "plus_fiables": int((links["tiers"] == TIER_MORE).sum()),
@@ -352,7 +435,16 @@ def summary_metrics(links: pd.DataFrame) -> dict:
 
 
 def least_reliable(links: pd.DataFrame, count: int = 10) -> pd.DataFrame:
-    """The liaisons with the lowest scores, as a table."""
+    """Donne les liaisons qui ont les scores les plus bas, sous forme de tableau.
+
+    Args:
+        links (pd.DataFrame): Liaisons à tracer.
+        count (int): Nombre de liaisons à garder.
+
+    Returns:
+        pd.DataFrame: Les colonnes `Liaison`, `Service`, `Score`, `Niveau` et
+        `Historique`, triées par score croissant.
+    """
     table = links.sort_values("score").head(count)[
         ["titre", "service", "score", "tiers", "mois_txt"]
     ]
@@ -361,12 +453,29 @@ def least_reliable(links: pd.DataFrame, count: int = 10) -> pd.DataFrame:
 
 
 def insurer_reading(tier: str | None) -> tuple[str, str]:
-    """Message for the insurer, depending on the tier."""
+    """Donne le message pour l'assureur, selon le niveau de la liaison.
+
+    Args:
+        tier (str | None): Niveau de la liaison. Un niveau inconnu ou `None` donne
+            le message « non classé ».
+
+    Returns:
+        tuple[str, str]: Le type de message (`success`, `warning`, `error` ou
+        `info`) et le texte à afficher.
+    """
     return INSURER_READINGS.get(tier, INSURER_READINGS[None])
 
 
 def disruption_frequency(rate: float) -> str:
-    """Say how often a trip is disrupted, like "1 trip in 8"."""
+    """Dit à quelle fréquence un trajet est perturbé, par exemple « 1 trajet sur 8 ».
+
+    Args:
+        rate (float): Taux de perturbation, entre 0 et 1.
+
+    Returns:
+        str: Une phrase. Si le taux est nul, aucune perturbation. Si presque tous les
+        trajets sont perturbés, une phrase pour ce cas.
+    """
     if rate <= 0:
         return "Aucune perturbation observée."
     one_in = round(1 / rate)
@@ -378,14 +487,34 @@ def disruption_frequency(rate: float) -> str:
 
 
 def pure_premium(rate: float, indemnity: float) -> float:
-    """Expected cost per trip: disruption rate times indemnity."""
+    """Calcule le coût attendu par trajet : taux de perturbation fois indemnité.
+
+    Args:
+        rate (float): Taux de perturbation, entre 0 et 1.
+        indemnity (float): Indemnité versée en cas de perturbation.
+
+    Returns:
+        float: La prime pure par trajet.
+    """
     return rate * indemnity
 
 
 def link_details(
     scores: pd.DataFrame, departure: str, arrival: str, service: str
 ) -> tuple[pd.Series | None, pd.Series]:
-    """Find a liaison and its causes of delay. The row is None if not found."""
+    """Trouve une liaison et ses causes de retard.
+
+    Args:
+        scores (pd.DataFrame): Tableau de fiabilité, une ligne par liaison.
+        departure (str): Gare de départ.
+        arrival (str): Gare d'arrivée.
+        service (str): Service.
+
+    Returns:
+        tuple[pd.Series | None, pd.Series]: La ligne de la liaison, ou `None` si elle
+        n'existe pas, et ses causes de retard (une série vide si elle est introuvable
+        ou sans retard).
+    """
     found = scores[
         (scores[COL_DEPARTURE] == departure)
         & (scores[COL_ARRIVAL] == arrival)

@@ -1,9 +1,10 @@
-"""Reliability map page."""
+"""Page de la carte de fiabilité."""
 
 # Imports
 import json
 import math
 from pathlib import Path
+
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
@@ -43,7 +44,7 @@ DEFAULT_INDEMNITY = 30.0
 NETWORK_WIDTH = 1.5
 LABEL_SIZE = 14
 LABEL_OUTLINE = 5
-# colors for light and dark mode
+# Couleurs des modes clair et sombre
 THEME_COLORS = {
     "light": {
         "network": [105, 118, 135, 230],
@@ -98,7 +99,16 @@ TOOLTIP = {
 # Functions
 @st.cache_data
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame, list, dict]:
-    """Read the data files."""
+    """Charge les données de la carte, gardées en cache par Streamlit.
+
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame, list, dict]: Le tableau de fiabilité, les
+        coordonnées des gares, les chemins du réseau et les trajets des liaisons. Les
+        trajets forment un dictionnaire vide si leur JSON est absent.
+
+    Raises:
+        FileNotFoundError: Si le CSV des gares ou le JSON du réseau manque.
+    """
     scores = get_reliability_table()
     stations = pd.read_csv(STATIONS_FILE, sep=";")
     with open(NETWORK_FILE, encoding="utf-8") as file:
@@ -111,7 +121,11 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame, list, dict]:
 
 
 def legend() -> str:
-    """Color legend, as HTML."""
+    """Construit la légende des couleurs, en HTML.
+
+    Returns:
+        str: Une pastille de couleur et un texte pour chaque niveau.
+    """
     items = []
     for tier, text in [
         (TIER_MORE, "Plus fiable"),
@@ -126,23 +140,44 @@ def legend() -> str:
 
 
 def current_theme() -> str:
-    """Dark or light mode."""
+    """Donne le mode d'affichage de Streamlit, sombre ou clair.
+
+    Returns:
+        str: "dark" ou "light". Le mode clair est choisi si le thème est inconnu.
+    """
     try:
         theme = st.context.theme.type
-    except Exception:  # old Streamlit version
+    except Exception:
+        # Ancienne version de Streamlit
         theme = None
     return "dark" if theme == "dark" else "light"
 
 
 def percent(value: float | None, decimals: int = 1) -> str:
-    """Format a share between 0 and 1 as a percentage."""
+    """Met en forme une part entre 0 et 1 sous forme de pourcentage.
+
+    Args:
+        value (float | None): La part, entre 0 et 1.
+        decimals (int): Nombre de décimales.
+
+    Returns:
+        str: Le pourcentage, par exemple "12.3 %", ou "n.d." si la valeur est absente
+        ou NaN.
+    """
     if value is None or (isinstance(value, float) and math.isnan(value)):
         return "n.d."
     return f"{100 * value:.{decimals}f} %"
 
 
 def selected_link(state) -> dict | None:
-    """The liaison clicked on the map, or None."""
+    """Donne la liaison sur laquelle on a cliqué sur la carte.
+
+    Args:
+        state (dict | None): État de la carte dans `st.session_state`.
+
+    Returns:
+        dict | None: La liaison cliquée, ou `None` s'il n'y en a pas.
+    """
     try:
         objects = state["selection"]["objects"].get(LINKS_LAYER, [])
     except (KeyError, TypeError, AttributeError):
@@ -151,7 +186,19 @@ def selected_link(state) -> dict | None:
 
 
 def show_details(scores: pd.DataFrame, selected: dict | None, indemnity: float) -> None:
-    """Show the clicked liaison next to the map."""
+    """Affiche à côté de la carte la liaison sur laquelle on a cliqué.
+
+    Sans liaison sélectionnée, ou si elle est introuvable, la page invite à cliquer
+    sur une liaison.
+
+    Args:
+        scores (pd.DataFrame): Tableau de fiabilité, une ligne par liaison.
+        selected (dict | None): La liaison cliquée, ou `None`.
+        indemnity (float): Indemnité moyenne par trajet perturbé, en euros.
+
+    Returns:
+        None: Les détails sont affichés par Streamlit.
+    """
     hint = "Cliquez sur une liaison de la carte pour voir si elle est intéressante à assurer."
     if selected is None:
         st.info(hint)
@@ -232,10 +279,20 @@ def build_layers(
     selected: dict | None,
     theme: str = "light",
 ) -> list:
-    """Build the map layers, from bottom to top.
+    """Construit les couches de la carte, de bas en haut.
 
-    Every layer needs an id for the selection. Text values are quoted twice,
-    because pydeck reads them as JavaScript.
+    Chaque couche a besoin d'un identifiant pour la sélection. Les textes sont entre
+    deux guillemets, car pydeck les lit comme du JavaScript.
+
+    Args:
+        network (list): Chemins du réseau ferré, dessinés en fond.
+        shown (pd.DataFrame): Liaisons affichées.
+        points (pd.DataFrame): Gares à dessiner, avec leurs étiquettes.
+        selected (dict | None): Liaison sélectionnée, entourée d'un halo, ou `None`.
+        theme (str): "light" ou "dark".
+
+    Returns:
+        list: Les couches pydeck, dans l'ordre de dessin.
     """
     colors = THEME_COLORS[theme]
     layers = [
@@ -310,11 +367,18 @@ def build_layers(
 
 
 def main() -> None:
-    """Draw the page."""
+    """Dessine la page de la carte de fiabilité.
+
+    Si les données de la carte manquent, la page affiche une erreur et s'arrête.
+
+    Returns:
+        None: La page est affichée par Streamlit.
+    """
     try:
         st.set_page_config(page_title="Carte de fiabilité", layout="wide")
     except st.errors.StreamlitAPIException:
-        pass  # already set by the main app
+        # Déjà définie par l'application principale
+        pass
 
     st.title("Carte de fiabilité des liaisons TGV")
     st.markdown(INTRO_TEXT)
@@ -392,7 +456,8 @@ def main() -> None:
             & (shown["service"] == selected["service"])
         ).any()
     ):
-        selected = None  # filtered out
+        # La liaison est masquée par les filtres
+        selected = None
 
     map_col, detail_col = st.columns([7, 3])
     with map_col:

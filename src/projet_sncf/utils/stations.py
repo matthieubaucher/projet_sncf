@@ -1,19 +1,21 @@
-"""Coordinates of the stations of the liaisons dataset.
+"""Coordonnées des gares du jeu de données des liaisons.
 
-French stations are matched by name with the "Gares de voyageurs" dataset
-(SNCF Gares & Connexions, ODbL). Foreign stations and names that do not match are
-given by hand in ``MANUAL_COORDINATES`` and ``ALIASES``.
+Les gares françaises sont retrouvées par leur nom dans le jeu de données
+« Gares de voyageurs » (SNCF Gares & Connexions, ODbL).
 """
 
+# Imports
 import difflib
 import logging
 import re
 import unicodedata
+
 import pandas as pd
 
+# Constants
 logger = logging.getLogger(__name__)
 
-# Foreign stations, not in the French reference. Approximate coordinates (latitude, longitude)
+# Si des gares étrangères, absentes de la référence alors on définit des coordonnées approximatives (latitude, longitude)
 MANUAL_COORDINATES = {
     "BARCELONA": (41.3791, 2.1403),
     "FRANCFORT": (50.1071, 8.6628),
@@ -24,7 +26,7 @@ MANUAL_COORDINATES = {
     "ZURICH": (47.3779, 8.5403),
 }
 
-# Name of the dataset
+# Nom de la gare dans la référence, quand il diffère
 ALIASES = {
     "BELLEGARDE (AIN)": "Bellegarde-sur-Valserine",
     "DIJON VILLE": "Dijon",
@@ -38,7 +40,8 @@ ALIASES = {
     "NICE VILLE": "Nice",
     "PARIS LYON": "Paris Gare de Lyon",
     "PARIS NORD": "Paris Gare du Nord",
-    "PARIS VAUGIRARD": "Paris Montparnasse",  # annexe, absente de la référence
+    # Annexe, absente de la référence
+    "PARIS VAUGIRARD": "Paris Montparnasse",
     "VALENCE ALIXAN TGV": "Valence TGV Rhône-Alpes Sud",
 }
 
@@ -46,15 +49,17 @@ NUMBER_OF_CANDIDATES = 3
 MATCH_CUTOFF = 0.6
 
 
+# Functions
 def normalize_name(name: str) -> str:
-    """Put a station name in a form that does not depend on spelling.
+    """Met un nom de gare sous une forme qui ne dépend pas de l'écriture.
 
     Args:
-        name (str): Station name, in any case, with or without accents and hyphens.
+        name (str): Nom de la gare, en majuscules ou non, avec ou sans accents et
+            tirets.
 
     Returns:
-        str: Upper case, without accents, hyphens or apostrophes, with ``ST`` and
-        ``STE`` written ``SAINT`` and ``SAINTE``.
+        str: Le nom en majuscules, sans accents, tirets ni apostrophes, avec `ST` et
+        `STE` écrits `SAINT` et `SAINTE`.
     """
     text = unicodedata.normalize("NFKD", name)
     text = "".join(c for c in text if not unicodedata.combining(c)).upper()
@@ -65,14 +70,15 @@ def normalize_name(name: str) -> str:
 
 
 def parse_position(position: str) -> tuple[float, float]:
-    """Read a "latitude, longitude" string.
+    """Lit un texte de la forme « latitude, longitude ».
 
     Args:
-        position (str): Position as written in the reference, e.g. "49.68, 1.77".
+        position (str): Position écrite comme dans la référence, par exemple
+            "49.68, 1.77".
 
     Returns:
-        tuple[float, float]: Latitude and longitude. (NaN, NaN) if the text is empty
-        or malformed.
+        tuple[float, float]: La latitude et la longitude. (NaN, NaN) si le texte est
+        vide ou mal formé.
     """
     try:
         latitude, longitude = str(position).split(",")
@@ -84,19 +90,20 @@ def parse_position(position: str) -> tuple[float, float]:
 def match_stations(
     names: list[str], reference: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Find the coordinates of each station.
+    """Trouve les coordonnées de chaque gare.
 
-    Order of the rules: manual coordinates, alias, then equal normalized name.
+    Les règles s'appliquent dans cet ordre : coordonnées manuelles, alias, puis nom
+    normalisé identique.
 
     Args:
-        names (list[str]): Station names of the liaisons dataset.
-        reference (pd.DataFrame): The "Gares de voyageurs" dataset, with the columns
-            ``Nom_Gare`` and ``Position géographique``.
+        names (list[str]): Noms des gares du jeu de données des liaisons.
+        reference (pd.DataFrame): Le jeu de données « Gares de voyageurs », avec les
+            colonnes `Nom_Gare` et `Position géographique`.
 
     Returns:
-        tuple[pd.DataFrame, pd.DataFrame]: The matched stations, with the columns
-        ``gare``, ``latitude``, ``longitude``, ``source``, ``nom_reference``; and the
-        stations without match, with the columns ``gare`` and ``candidats``.
+        tuple[pd.DataFrame, pd.DataFrame]: Les gares trouvées, avec les colonnes
+        `gare`, `latitude`, `longitude`, `source` et `nom_reference`, puis les gares
+        sans correspondance, avec les colonnes `gare` et `candidats`.
     """
     reference = reference.copy()
     reference["cle"] = reference["Nom_Gare"].map(normalize_name)

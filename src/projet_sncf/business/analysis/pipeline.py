@@ -1,38 +1,46 @@
-"""Full pipeline: from the cleaned monthly dataset to the table of liaisons."""
+"""Chaîne complète : du jeu de données mensuel nettoyé au tableau de fiabilité."""
 
+# Imports
 import logging
-
 import pandas as pd
 
 from projet_sncf.business.analysis.constants import FINAL_COLUMNS, MIN_MONTHS
-from projet_sncf.business.analysis.indicators import compute_cause_profile, compute_indicators
+from projet_sncf.business.analysis.indicators import (
+    compute_cause_profile,
+    compute_indicators,
+)
 from projet_sncf.business.analysis.regularity import compute_regularity
 from projet_sncf.business.analysis.score import compute_score, dominant_cause
 from projet_sncf.business.analysis.seasonality import compute_seasonality
-from projet_sncf.business.analysis.shocks import compute_national_rates, detect_shock_months
+from projet_sncf.business.analysis.shocks import (
+    compute_national_rates,
+    detect_shock_months,
+)
 
+# Constants
 logger = logging.getLogger(__name__)
 
 
+# Functions
 def build_reliability_table(
     df: pd.DataFrame, min_months: int = MIN_MONTHS
 ) -> pd.DataFrame:
-    """Build the reliability table, one row per liaison.
+    """Construit le tableau de fiabilité, une ligne par liaison.
 
-    Steps: indicators, delay causes, national shock months, seasonality,
-    regularity, then score, confidence and tier.
+    Les étapes : indicateurs, causes de retard, mois de choc nationaux,
+    saisonnalité, régularité, puis score, confiance et tier.
 
     Args:
-        df (pd.DataFrame): Cleaned monthly data, one row per liaison and per month.
-            The ``Service`` column must be kept, it is part of the liaison key.
-        min_months (int): Minimum number of months for a reliable score.
+        df (pd.DataFrame): Données mensuelles nettoyées, une ligne par liaison et par
+            mois. La colonne `Service` doit rester, elle fait partie de la clé.
+        min_months (int): Nombre minimal de mois pour un score fiable.
 
     Returns:
-        pd.DataFrame: One row per liaison, indexed by (departure, arrival, service),
-        sorted by increasing score, with the columns of ``FINAL_COLUMNS``.
+        pd.DataFrame: Une ligne par liaison, indexé par (départ, arrivée, service),
+        trié par score croissant. Colonnes de `FINAL_COLUMNS`.
 
     Raises:
-        KeyError: If a required column is missing.
+        KeyError: Si une colonne nécessaire manque.
     """
     indicators = compute_indicators(df)
     causes = compute_cause_profile(df)

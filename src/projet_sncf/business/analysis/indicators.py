@@ -1,9 +1,6 @@
-"""Per-liaison indicators computed from the monthly regularity dataset.
+"""Indicateurs par liaison, calculés à partir de la régularité mensuelle."""
 
-A liaison is a (departure, arrival, service) triplet. Rates are computed on sums,
-never on averages of monthly rates.
-"""
-
+# Imports
 import logging
 import pandas as pd
 
@@ -16,18 +13,20 @@ from projet_sncf.business.analysis.constants import (
     LIAISON_KEY,
 )
 
+# Constants
 logger = logging.getLogger(__name__)
 
 
+# Functions
 def _check_columns(df: pd.DataFrame, columns: list[str]) -> None:
-    """Check that a DataFrame contains the given columns.
+    """Vérifie que le DataFrame contient bien les colonnes demandées.
 
     Args:
-        df (pd.DataFrame): Data to check.
-        columns (list[str]): Names of the columns that must be present.
+        df (pd.DataFrame): Données à vérifier.
+        columns (list[str]): Colonnes qui doivent être présentes.
 
     Raises:
-        KeyError: If at least one column is missing. The message lists them.
+        KeyError: Si au moins une colonne manque. Le message les liste toutes.
     """
     missing = [c for c in columns if c not in df.columns]
     if missing:
@@ -35,16 +34,19 @@ def _check_columns(df: pd.DataFrame, columns: list[str]) -> None:
 
 
 def filter_valid_rows(df: pd.DataFrame) -> pd.DataFrame:
-    """Drop rows with no scheduled train, a negative count or a missing count.
+    """Retire les lignes inutilisables du jeu de données.
+
+    Une ligne est écartée si aucun train n'était prévu, si un des
+    comptes est négatif ou si un des comptes est manquant.
 
     Args:
-        df (pd.DataFrame): Monthly data, one row per liaison and per month.
+        df (pd.DataFrame): Données mensuelles, une ligne par liaison et par mois.
 
     Returns:
-        pd.DataFrame: A copy of ``df`` without the invalid rows.
+        pd.DataFrame: Une copie de `df` sans les lignes invalides.
 
     Raises:
-        KeyError: If a count column is missing.
+        KeyError: Si une colonne de comptage manque.
     """
     counts = [COL_SCHEDULED, COL_CANCELLED, COL_DELAYED]
     _check_columns(df, counts)
@@ -58,21 +60,23 @@ def filter_valid_rows(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute the cancellation, delay and disruption rates of each liaison.
+    """Calcule les taux d'annulation, de retard et de perturbation de chaque liaison.
 
-    The delay rate is taken over the trains that ran (scheduled minus cancelled).
-    The disruption rate is cancelled plus delayed trains over scheduled trains.
+    Le taux de retard se calcule sur les trains qui ont circulé (prévus moins
+    annulés). Le taux de perturbation compte les trains annulés et en retard,
+    rapportés aux trains prévus.
 
     Args:
-        df (pd.DataFrame): Cleaned monthly data.
+        df (pd.DataFrame): Données mensuelles nettoyées.
 
     Returns:
-        pd.DataFrame: One row per liaison, indexed by ``LIAISON_KEY``, with the
-        columns ``mois``, ``prevues``, ``annules``, ``reelles``, ``retards``,
-        ``taux_annulation``, ``taux_retard`` and ``taux_perturbation``.
+        pd.DataFrame: Une ligne par liaison, indexé par `LIAISON_KEY`. Colonnes :
+        `mois`, `prevues`, `annules`, `reelles`, `retards`, `taux_annulation`,
+        `taux_retard` et `taux_perturbation`. Le taux de retard vaut NaN si aucun
+        train n'a circulé.
 
     Raises:
-        KeyError: If a required column is missing.
+        KeyError: Si une colonne nécessaire manque.
     """
     _check_columns(df, LIAISON_KEY + [COL_DATE])
     valid = filter_valid_rows(df)
@@ -97,20 +101,22 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_cause_profile(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute the share of each delay cause for each liaison, in percent.
+    """Calcule la part de chaque cause de retard pour chaque liaison, en pourcentage.
 
-    Monthly percentages are converted into trains (percentage times delayed trains),
-    summed over the period, then divided by the total.
+    Chaque pourcentage mensuel est converti en nombre de trains (pourcentage
+    multiplié par les trains en retard). On additionne sur la période, puis on
+    divise par le total.
 
     Args:
-        df (pd.DataFrame): Cleaned monthly data with the six cause columns.
+        df (pd.DataFrame): Données mensuelles nettoyées, avec les six colonnes de causes.
 
     Returns:
-        pd.DataFrame: One row per liaison, one column per cause (short names of
-        ``CAUSE_COLUMNS``). Rows sum to 100, or are NaN for a liaison without delay.
+        pd.DataFrame: Une ligne par liaison et une colonne par cause (les noms
+        courts de `CAUSE_COLUMNS`). Chaque ligne somme à 100. Elle vaut NaN si la
+        liaison n'a aucun retard.
 
     Raises:
-        KeyError: If a required column is missing.
+        KeyError: Si une colonne nécessaire manque.
     """
     _check_columns(df, LIAISON_KEY + list(CAUSE_COLUMNS))
     valid = filter_valid_rows(df)

@@ -1,23 +1,33 @@
+"""Chemin du CSV brut de la régularité SNCF."""
+
+# Imports
 import os
 import glob
 import logging
 
 from projet_sncf.business.analysis.constants import DATA_DIR, DEFAULT_PATTERN
 
+# Constants
 logger = logging.getLogger(__name__)
 
 
+# Functions
 def get_data_path(data_dir: str = DATA_DIR, pattern: str = DEFAULT_PATTERN) -> str:
-    """Return the path of the raw SNCF regularity CSV file
+    """Renvoie le chemin du CSV brut de la régularité SNCF.
+
+    Si plusieurs CSV correspondent au motif, on prend le premier trouvé.
 
     Args:
-        data_dir (str, optional): _description_. Defaults to DATA_DIR.
-        pattern (str, optional): _description_. Defaults to DEFAULT_PATTERN.
+        data_dir (str): Dossier des données. Par défaut `DATA_DIR`.
+        pattern (str): Motif du nom du CSV. Par défaut `DEFAULT_PATTERN`.
 
     Returns:
-        str: _description_
-    """
+        str: Le chemin du CSV trouvé.
 
+    Raises:
+        FileNotFoundError: Si le dossier n'existe pas, ou s'il ne contient aucun CSV
+            qui correspond au motif.
+    """
     if not os.path.isdir(data_dir):
         raise FileNotFoundError(f"Data folder not found: {data_dir}")
     files = glob.glob(os.path.join(data_dir, pattern))
