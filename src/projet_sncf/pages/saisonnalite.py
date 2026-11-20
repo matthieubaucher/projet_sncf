@@ -72,9 +72,10 @@ def build_plot(
     )
 
 
-def main() -> None:
+def main(afficher_titre: bool = True) -> None:
     """Display monthly and seasonal plots."""
-    st.subheader("Variations mensuelles et saisonnalité")
+    if afficher_titre:
+        st.subheader("Variations mensuelles et saisonnalité")
 
     try:
         data = load_monthly_data()

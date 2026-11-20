@@ -208,9 +208,10 @@ requestAnimationFrame(adapterGraphique);
     )
 
 
-def render_page(data: pd.DataFrame) -> None:
+def render_page(data: pd.DataFrame, afficher_titre: bool = True) -> None:
     """Affiche les contrôles du classement et le graphique associé aux données."""
-    st.subheader("Classement des trajets les plus perturbés")
+    if afficher_titre:
+        st.subheader("Classement des trajets les plus perturbés")
 
     dates = pd.to_datetime(data["Date"], errors="coerce").dropna()
     if dates.empty:
@@ -265,10 +266,10 @@ def render_page(data: pd.DataFrame) -> None:
     )
 
 
-def main() -> None:
+def main(afficher_titre: bool = True) -> None:
     """Charge les données et affiche la page."""
     try:
-        render_page(load_data())
+        render_page(load_data(), afficher_titre=afficher_titre)
     except (FileNotFoundError, KeyError, ValueError) as error:
         st.error(f"Impossible de calculer le classement : {error}")
 
