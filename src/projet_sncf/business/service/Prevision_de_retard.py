@@ -40,6 +40,7 @@ def clusterise(axes, cible):
     df = get_dataframe()
     X = df.sample(n=1000)
     Y = []
+    X = X[get_parameters_disponibles()]
     for axe in axes:
         y = get_modele_manager().get_inferance(X, axe, cible)
         Y += [y]
@@ -50,10 +51,8 @@ def clusterise(axes, cible):
         random_state=42
     )
     Y_2d = tsne.fit_transform(Y)
-<<<<<<< HEAD
+
     logger.info(f"Clustering effectuée")
-    return Y_2d
-=======
     return Y_2d
 
 
@@ -72,4 +71,3 @@ def get_parameters_disponibles():
            "Prct retard pour cause gestion trafic", "Prct retard pour cause matériel roulant", 
            "Prct retard pour cause gestion en gare et réutilisation de matériel", 
            "Prct retard pour cause prise en compte voyageurs (affluence, gestions PSH, correspondances)"]
->>>>>>> 3a36527 (Refactoring: Prevision de retard)
