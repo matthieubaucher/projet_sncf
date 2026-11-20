@@ -262,6 +262,7 @@ def _variables_liaison(groupe: pd.DataFrame) -> pd.DataFrame:
     v["annulation_mois_dernier"] = taux_annulation.shift(1)
 
     def somme_12(col: str) -> pd.Series:
+        """Somme glissante sur les 12 mois précédents (au moins 6)."""
         return g[col].rolling(12, min_periods=6).sum().shift(1)
 
     v["retard_12_mois"] = somme_12(COL_RETARDS) / somme_12(

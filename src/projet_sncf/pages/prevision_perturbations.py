@@ -178,6 +178,7 @@ def historique_liaisons(df: pd.DataFrame) -> pd.DataFrame:
 def _filtrer_liaison(
     historique: pd.DataFrame, depart: str, arrivee: str, service: str
 ) -> pd.DataFrame:
+    """Garde les lignes d'une liaison (départ, arrivée, service)."""
     return historique[
         (historique["Gare de départ"] == depart)
         & (historique["Gare d'arrivée"] == arrivee)
@@ -361,6 +362,7 @@ def phrase_prevision(liaison: str, mois: pd.Timestamp, proba: float) -> str:
 
 
 def _position_seuil(taux: float) -> str:
+    """Situe un taux par rapport au seuil de 20 %, en Markdown."""
     return (
         "**au-dessus** du seuil de 20 %"
         if taux > SEUIL_PERTURBATION
@@ -369,6 +371,7 @@ def _position_seuil(taux: float) -> str:
 
 
 def _part(taux: float) -> str:
+    """Écrit un taux en pourcentage, par exemple ``"24 %"``."""
     return f"{taux:.0%}".replace("%", " %")
 
 
@@ -521,6 +524,7 @@ def _md(texte: str) -> None:
 
 
 def _libelle_mois(mois: pd.Timestamp, premier: bool) -> str:
+    """Libellé d'un mois, par exemple « 10/2026 : mois prochain »."""
     texte = pd.Timestamp(mois).strftime("%m/%Y")
     return (
         f"{texte} : mois prochain"
@@ -534,6 +538,7 @@ def _libelle_mois(mois: pd.Timestamp, premier: bool) -> str:
 
 
 def _graphique_classement(vue: pd.DataFrame, nombre: int = 15) -> go.Figure:
+    """Barres des liaisons les plus à risque, colorées par niveau."""
     top = vue.head(nombre).iloc[::-1]
     couleurs = [niveau_risque(p)[1] for p in top["proba_perturbation"]]
     textes = [f"{p:.0%}" for p in top["proba_perturbation"]]
@@ -572,6 +577,7 @@ def _graphique_classement(vue: pd.DataFrame, nombre: int = 15) -> go.Figure:
 def _graphique_historique(
     historique: pd.DataFrame, mois_prevu: pd.Timestamp
 ) -> go.Figure:
+    """Courbe du taux de perturbation d'une liaison, avec le seuil de 20 %."""
     fig = go.Figure(
         go.Scatter(
             x=historique.index,
@@ -613,6 +619,7 @@ def _graphique_historique(
 
 
 def _afficher_causes(titre: str, etat: str, parts: pd.Series | None) -> None:
+    """Affiche la part de chaque cause, ou pourquoi elle manque."""
     st.markdown(f"**{titre}**")
     if etat == "ok" and parts is not None:
         st.markdown(
@@ -813,11 +820,13 @@ def afficher_page(previsions: pd.DataFrame, historique: pd.DataFrame) -> None:
 
 @st.cache_data
 def _previsions_en_cache() -> pd.DataFrame:
+    """Charge les prévisions une seule fois (cache Streamlit)."""
     return charger_previsions()
 
 
 @st.cache_data
 def _historique_en_cache() -> pd.DataFrame:
+    """Calcule l'historique des liaisons une seule fois (cache Streamlit)."""
     from projet_sncf.database.dataloader import get_dataframe
 
     return historique_liaisons(get_dataframe())
