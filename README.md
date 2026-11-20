@@ -3,12 +3,19 @@
 [![Dépôt GitHub](https://img.shields.io/badge/GitHub-projet__sncf-181717?logo=github)](https://github.com/projectSNCF-2026/projet_sncf)
 [![Tests](https://github.com/projectSNCF-2026/projet_sncf/actions/workflows/tests.yml/badge.svg)](https://github.com/projectSNCF-2026/projet_sncf/actions/workflows/tests.yml)
 [![Application Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://projetsncf-whqbqrwhzyyhbvwydecqri.streamlit.app/)
+[![Documentation](https://img.shields.io/badge/Documentation-Sphinx-0b7285)](https://projectsncf-2026.github.io/projet_sncf/)
 
 RailInsight est une application Streamlit d'analyse des retards et des
 annulations sur les liaisons TGV. Elle transforme les données mensuelles de
 régularité publiées par la SNCF en indicateurs et visualisations pour aider à
 comprendre les risques de perturbation et leurs conséquences potentielles
 pour l'assurance des voyageurs.
+
+## Liens
+
+- **Application en ligne** : https://projetsncf-whqbqrwhzyyhbvwydecqri.streamlit.app/
+- **Documentation du code** : https://projectsncf-2026.github.io/projet_sncf/
+- **Dépôt GitHub** : https://github.com/projectSNCF-2026/projet_sncf
 
 ## Démarche et objectif
 
@@ -48,6 +55,10 @@ L'application est accessible en ligne :
 Elle se met à jour automatiquement à chaque modification de la branche
 `develop`.
 
+La documentation du code est publiée sur
+[GitHub Pages](https://projectsncf-2026.github.io/projet_sncf/) et se met à jour
+de la même façon.
+
 À partir de ces travaux, l'application s'articule autour des axes suivants,
 accessibles depuis le menu latéral :
 
@@ -56,7 +67,6 @@ accessibles depuis le menu latéral :
 - **Analyse des perturbations** : saisonnalité, classement des trajets et évolution des causes de retard 
 - **Simulation de retard** : Une fonctionnalité de simulation permet d'explorer l'impact des différentes causes de retard sur plusieurs indicateurs ferroviaires. Des modèles de machine learning spécialisés par axe permettent d'estimer le nombre de trains en retard, le nombre de retards importants (> 60 min) ou le taux d'annulation
 - **Prévision des perturbations** : Une visualisation des prévisions et de leurs résultats de test 
-- **Clustering des modèles** : Une visualisation exploratoire permet de comparer les axes ferroviaires et de suggérer des similarités entre lignes présentant des comportements comparables face aux perturbations. Pour des raisons de performance, le nombre d'axes affichés simultanément est limité
 
 
 Le score de fiabilité est calculé à partir de l'historique d'une liaison :
@@ -148,6 +158,7 @@ src/projet_sncf/
 └── utils/                 # fonctions utilitaires et journalisation
 data/                      # données source et fichiers auxiliaires
 notebooks/                 # exploration et travaux d'analyse
+docs/                      # documentation Sphinx (publiée sur GitHub Pages) et datasheet
 tests/                     # l'ensemble de nos tests (essentiellement unitaires)
 ├── unitaire/               
 └── integration/
@@ -168,5 +179,3 @@ https://ressources.data.sncf.com/explore/dataset/regularite-mensuelle-tgv-aqst/i
 ## Bug tracking : comment signaler un bug, un problème ou un biais.
 
 Les anomalies, erreurs ou biais identifiés peuvent être signalés via les issues GitHub du projet ou directement à l'équipe de développement.
-
-
