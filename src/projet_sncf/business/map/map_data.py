@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 def read_json(path: Path, default: dict | list | None = None) -> dict | list:
     """Lit un JSON de la carte.
 
-    Si le JSON est absent et qu'une valeur par défaut est donnée, on journalise un
-    avertissement et on renvoie cette valeur. Sans valeur par défaut, l'absence est
-    une erreur.
+    Si le JSON est absent et qu'une valeur par défaut est donnée, un
+    avertissement est journalisé et cette valeur est renvoyée. Sans valeur
+    par défaut, l'absence est une erreur.
 
     Args:
         path (Path): Chemin du JSON.
@@ -25,7 +25,7 @@ def read_json(path: Path, default: dict | list | None = None) -> dict | list:
         dict | list: Le contenu du JSON, ou `default` s'il est absent.
 
     Raises:
-        FileNotFoundError: Si le JSON est absent et qu'il n'y a pas de valeur par défaut.
+        FileNotFoundError: Si le JSON est absent sans valeur par défaut.
         ValueError: Si le JSON est illisible.
     """
     if not path.exists():
