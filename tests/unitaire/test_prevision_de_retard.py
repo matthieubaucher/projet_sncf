@@ -45,23 +45,15 @@ def test_simulation(mock_get_inferance):
 
     assert ecart_moyen < 5
 
-
+@patch("projet_sncf.business.service.Prevision_de_retard.get_parameters_disponibles")
 @patch("projet_sncf.business.model.Modele_prevision_retard_manager.ModelManager.get_inferance")
 @patch("projet_sncf.business.service.Prevision_de_retard.get_dataframe")
-def test_clusterise(mock_get_dataframe, mock_get_inferance):
+def test_clusterise(mock_get_dataframe, mock_get_inferance, mock_get_parameters_disponibles):
     # Given
-    axes = [
-        "PARIS-LYON",
-        "PARIS-NICE",
-        "PARIS-LILLE",
-        "PARIS-RENNES",
-        "PARIS-BORDEAUX",
-        "PARIS-NANTES"
-    ]
-    mock_get_dataframe.return_value = pd.DataFrame({"A": np.random.rand(1500)})
+    axes = [["NICE VILLE", "PARIS LYON"], ["NANTES", "PARIS MONTPARNASSE"], ["LILLE", "LYON PART DIEU"], ["LAUSANE", "PARIS LYON"]]
+    mock_get_parameters_disponibles.return_value = ["Prct retard pour causes externes"]
+    mock_get_dataframe.return_value = pd.DataFrame({"Prct retard pour causes externes": np.random.rand(1500)})
     mock_get_inferance.side_effect = [
-        np.random.rand(1000),
-        np.random.rand(1000),
         np.random.rand(1000),
         np.random.rand(1000),
         np.random.rand(1000),
@@ -69,7 +61,7 @@ def test_clusterise(mock_get_dataframe, mock_get_inferance):
     ]
 
     # When
-    result = clusterise(axes, cible="prct annulation")
+    result = clusterise(axes, cible="Nombre de trains annulés")
 
     # Then
     mock_get_dataframe.assert_called_once()
