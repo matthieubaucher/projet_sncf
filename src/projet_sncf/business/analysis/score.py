@@ -1,5 +1,6 @@
-"""Reliability score of each liaison, its confidence level and its tier."""
+"""Score de fiabilité de chaque liaison, son niveau de confiance et son tier."""
 
+# Imports
 import logging
 import numpy as np
 import pandas as pd
@@ -12,52 +13,55 @@ from projet_sncf.business.analysis.constants import (
 )
 from projet_sncf.business.analysis.indicators import _check_columns
 
+# Constants
 logger = logging.getLogger(__name__)
 
 
+# Functions
 def dominant_cause(profile: pd.DataFrame) -> pd.Series:
-    """Return the main delay cause of each liaison.
+    """Renvoie la cause de retard principale de chaque liaison.
 
     Args:
-        profile (pd.DataFrame): Output of ``compute_cause_profile``.
+        profile (pd.DataFrame): Résultat de `compute_cause_profile`.
 
     Returns:
-        pd.Series: ``cause_dominante``, the name of the cause with the largest
-        share. Liaisons without any delay (all NaN) are left out.
+        pd.Series: `cause_dominante`, le nom de la cause qui a la plus grande part.
+        Les liaisons sans aucun retard (tout NaN) sont écartées.
     """
     return profile.dropna(how="all").idxmax(axis=1).rename("cause_dominante")
 
 
 def compute_tier_bounds(scores: pd.Series) -> tuple[float, float]:
-    """Compute the bounds between the three tiers of the score.
+    """Calcule les bornes qui séparent les trois tiers du score.
 
     Args:
-        scores (pd.Series): Scores of the reference liaisons (enough months).
+        scores (pd.Series): Scores des liaisons de référence (assez de mois).
 
     Returns:
-        tuple[float, float]: The 1/3 and 2/3 quantiles of ``scores``. NaN if
-        ``scores`` is empty.
+        tuple[float, float]: Les quantiles 1/3 et 2/3 de `scores`. NaN si `scores`
+        est vide.
     """
     lower, upper = scores.quantile([1 / 3, 2 / 3])
     return lower, upper
 
 
 def compute_score(table: pd.DataFrame, min_months: int = MIN_MONTHS) -> pd.DataFrame:
-    """Add the score, the confidence level and the tier to a table of liaisons.
+    """Ajoute le score, la confiance et le tier à un tableau de liaisons.
+
+    Le score vaut 100 * (1 - taux de perturbation). Les bornes des tiers sont les
+    quantiles 1/3 et 2/3 du score, calculés sur les liaisons qui ont assez de mois.
 
     Args:
-        table (pd.DataFrame): One row per liaison, with the columns ``mois`` and
-            ``taux_perturbation`` (see ``compute_indicators``).
-        min_months (int): Minimum number of months for a reliable score.
+        table (pd.DataFrame): Une ligne par liaison, avec les colonnes `mois` et
+            `taux_perturbation` (voir `compute_indicators`).
+        min_months (int): Nombre minimal de mois pour un score fiable.
 
     Returns:
-        pd.DataFrame: A copy of ``table`` with the columns ``score`` (0 to 100),
-        ``confiance`` and ``tiers``. The tier bounds are the 1/3 and 2/3 quantiles
-        of the score among the liaisons with enough months. The tier is NaN if no
-        liaison has enough months.
+        pd.DataFrame: Une copie de `table` avec les colonnes `score` (de 0 à 100),
+        `confiance` et `tiers`. Le tier vaut NaN si aucune liaison n'a assez de mois.
 
     Raises:
-        KeyError: If a required column is missing.
+        KeyError: Si une colonne nécessaire manque.
     """
     _check_columns(table, ["mois", "taux_perturbation"])
     result = table.copy()

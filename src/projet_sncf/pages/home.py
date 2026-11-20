@@ -1,4 +1,4 @@
-"""Home page."""
+"""Page d'accueil."""
 
 # Imports
 from pathlib import Path
@@ -22,21 +22,37 @@ INTRO_TEXT = (
 # Functions
 @st.cache_data
 def load_scores() -> pd.DataFrame:
-    """Read the scores."""
+    """Charge le tableau de fiabilité, gardé en cache par Streamlit.
+
+    Returns:
+        pd.DataFrame: Une ligne par liaison, voir `get_reliability_table`.
+    """
     return get_reliability_table()
 
 
 def hex_color(tier: str) -> str:
-    """Color of a tier, as hex."""
+    """Donne la couleur d'un niveau au format hexadécimal.
+
+    Args:
+        tier (str): Niveau de fiabilité, une clé de `TIER_COLORS`.
+
+    Returns:
+        str: La couleur, par exemple "#d63031".
+    """
     return "#{:02x}{:02x}{:02x}".format(*TIER_COLORS[tier])
 
 
 def main() -> None:
-    """Draw the page."""
+    """Dessine la page d'accueil.
+
+    Returns:
+        None: La page est affichée par Streamlit.
+    """
     try:
         st.set_page_config(page_title="Accueil", layout="wide")
     except st.errors.StreamlitAPIException:
-        pass  # already set by the main app
+        # Déjà définie par l'application principale
+        pass
 
     st.title("RailInsight")
     st.caption("Fiabilité des liaisons ferroviaires")

@@ -1,5 +1,6 @@
-"""Detection of the months when the whole network is hit by a shock."""
+"""Détection des mois où tout le réseau subit un choc."""
 
+# Imports
 import logging
 import pandas as pd
 
@@ -13,25 +14,27 @@ from projet_sncf.business.analysis.constants import (
 )
 from projet_sncf.business.analysis.indicators import filter_valid_rows
 
+# Constants
 logger = logging.getLogger(__name__)
 
 
+# Functions
 def compute_national_rates(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute the monthly rates of the whole network.
+    """Calcule les taux mensuels de l'ensemble du réseau.
 
-    Counts of all liaisons are summed before dividing, so that each train weighs the
-    same.
+    On additionne d'abord les trains de toutes les liaisons, puis on divise.
+    Chaque train pèse donc le même poids.
 
     Args:
-        df (pd.DataFrame): Cleaned monthly data.
+        df (pd.DataFrame): Données mensuelles nettoyées.
 
     Returns:
-        pd.DataFrame: One row per month, indexed by date, with the columns
-        ``prevues``, ``annules``, ``reelles``, ``retards``, ``taux_annulation``,
-        ``taux_retard`` and ``taux_perturbation``.
+        pd.DataFrame: Une ligne par mois, indexé par la date. Colonnes : `prevues`,
+        `annules`, `reelles`, `retards`, `taux_annulation`, `taux_retard` et
+        `taux_perturbation`.
 
     Raises:
-        KeyError: If a required column is missing.
+        KeyError: Si une colonne nécessaire manque.
     """
     if COL_DATE not in df.columns:
         raise KeyError(f"Colonnes manquantes : {[COL_DATE]}")
@@ -56,20 +59,20 @@ def compute_national_rates(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_shock_threshold(monthly: pd.DataFrame, sigma: float = SHOCK_SIGMA) -> float:
-    """Compute the disruption rate above which a month is a national shock.
+    """Calcule le taux de perturbation à partir duquel un mois est un choc national.
 
-    The threshold is ``median + sigma * s``, where ``s`` is the median absolute
-    deviation multiplied by 1.4826.
+    Le seuil vaut `médiane + sigma * s`, où `s` est la déviation absolue médiane
+    (MAD) multipliée par 1,4826.
 
     Args:
-        monthly (pd.DataFrame): Output of ``compute_national_rates``.
-        sigma (float): Number of robust standard deviations above the median.
+        monthly (pd.DataFrame): Résultat de `compute_national_rates`.
+        sigma (float): Nombre d'écarts-types robustes au-dessus de la médiane.
 
     Returns:
-        float: The threshold on ``taux_perturbation``.
+        float: Le seuil, exprimé sur `taux_perturbation`.
 
     Raises:
-        KeyError: If ``taux_perturbation`` is missing.
+        KeyError: Si `taux_perturbation` manque.
     """
     if "taux_perturbation" not in monthly.columns:
         raise KeyError("Colonnes manquantes : ['taux_perturbation']")
@@ -82,20 +85,20 @@ def compute_shock_threshold(monthly: pd.DataFrame, sigma: float = SHOCK_SIGMA) -
 def detect_shock_months(
     monthly: pd.DataFrame, sigma: float = SHOCK_SIGMA
 ) -> pd.DatetimeIndex:
-    """Return the months whose national disruption rate is abnormally high.
+    """Renvoie les mois dont le taux de perturbation national est anormalement haut.
 
-    A month is a shock when its rate is strictly above the threshold of
-    ``compute_shock_threshold``.
+    Un mois est un choc quand son taux dépasse strictement le seuil de
+    `compute_shock_threshold`.
 
     Args:
-        monthly (pd.DataFrame): Output of ``compute_national_rates``.
-        sigma (float): Number of robust standard deviations above the median.
+        monthly (pd.DataFrame): Résultat de `compute_national_rates`.
+        sigma (float): Nombre d'écarts-types robustes au-dessus de la médiane.
 
     Returns:
-        pd.DatetimeIndex: The shock months, in chronological order.
+        pd.DatetimeIndex: Les mois de choc, dans l'ordre chronologique.
 
     Raises:
-        KeyError: If ``taux_perturbation`` is missing.
+        KeyError: Si `taux_perturbation` manque.
     """
     threshold = compute_shock_threshold(monthly, sigma)
     rate = monthly["taux_perturbation"]
