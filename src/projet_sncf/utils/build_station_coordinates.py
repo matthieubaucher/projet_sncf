@@ -1,7 +1,7 @@
 """Construit le tableau des coordonnées des gares utilisées par la carte.
 
-Utilisation, depuis la racine du dépôt :
-    uv run python -m projet_sncf.utils.build_station_coordinates <gares_voyageurs.csv> <dataset.csv> <sortie.csv>
+Depuis la racine du dépôt, exécuter le module en lui passant les chemins des
+fichiers de référence, de données et de sortie.
 """
 
 # Imports
@@ -17,8 +17,8 @@ def main(reference_path: str, dataset_path: str, output_path: str) -> None:
     """Associe les gares du jeu de données à leurs coordonnées et les écrit.
 
     Les gares sont lues dans les colonnes de départ et d'arrivée (les 3e et 4e
-    colonnes). Le programme affiche le nombre de gares localisées, la source de leurs
-    coordonnées, puis les gares sans correspondance.
+    colonnes). Le programme affiche le nombre de gares localisées, la source
+    de leurs coordonnées, puis les gares sans correspondance.
 
     Args:
         reference_path (str): CSV « Gares de voyageurs », séparé par `;`.
