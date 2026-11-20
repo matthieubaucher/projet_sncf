@@ -1,12 +1,16 @@
 
 from projet_sncf.business.model.Modele_prevision_retard import ModelePrevisionRetard
 from projet_sncf.database.dataloader import get_dataframe
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ModelManager:
 
     def __init__(self):
         self.dataframe = get_dataframe()
         self.modeles = {} # stockage des modèles entrainés
+        logger.info("ModelManager créé");
 
     def get_id_axe(self, colonnes_X, axe, cible:str):
         id_axe = "<->".join(sorted(axe))
