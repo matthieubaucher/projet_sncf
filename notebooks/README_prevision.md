@@ -31,7 +31,7 @@ Principe : **on garde les lignes et on remplace une valeur impossible par une va
 |---|---|
 | Colonnes de commentaires | supprimées (texte libre, inutilisé) |
 | `Nombre de circulations prévues` = 0 | ligne supprimée (73 lignes) |
-| `Nombre trains en retard > 30min` négatif, ou inférieur à `> 60min` | les deux colonnes mises à NaN |
+| `Nombre trains en retard > 30min` négatif, ou inférieur à `> 60min` | seule la case `> 30min` mise à NaN (354 cases) |
 | Retards moyens négatifs | valeur mise à NaN |
 
 Résultat (données jusqu'à septembre 2026) : 12 907 → 12 834 lignes, 656 cases mises à NaN.
