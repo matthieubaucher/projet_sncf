@@ -1,4 +1,4 @@
-"""Page ranking routes with the highest delay or cancellation rates."""
+"""Page de classement des trajets selon leurs retards ou leurs annulations."""
 
 import altair as alt
 import pandas as pd
@@ -21,12 +21,12 @@ NOMS_MOIS = [
 
 @st.cache_data
 def load_data() -> pd.DataFrame:
-    """Load cleaned SNCF monthly data."""
+    """Charge les données mensuelles nettoyées de la SNCF."""
     return get_dataframe()
 
 
 def render_page(data: pd.DataFrame) -> None:
-    """Render route ranking controls and chart for the supplied data."""
+    """Affiche les contrôles du classement et le graphique associé aux données."""
     st.title("Classement des trajets les plus perturbés")
 
     dates = pd.to_datetime(data["Date"], errors="coerce").dropna()
@@ -86,7 +86,7 @@ def render_page(data: pd.DataFrame) -> None:
 
 
 def main() -> None:
-    """Load the data and display the page."""
+    """Charge les données et affiche la page."""
     try:
         render_page(load_data())
     except (FileNotFoundError, KeyError, ValueError) as error:
