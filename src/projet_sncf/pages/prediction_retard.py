@@ -149,5 +149,9 @@ if st.button("Evaluate"):
         fig, ax = plt.subplots(figsize=(8, 2))
         sns.boxplot(x=points, ax=ax)
         st.pyplot(fig)
+
+        st.write("""
+                    Ce boxplot montre l'estimation du modèle et sa capacité à travers 1000 petites perturbations des données transmisent
+                """)
     except Exception as e:
         st.error(str(e))

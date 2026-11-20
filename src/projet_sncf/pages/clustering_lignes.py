@@ -94,8 +94,12 @@ if st.button("Clusteriser"):
 
         ax.set_xlabel("Dimension 1")
         ax.set_ylabel("Dimension 2")
-        ax.set_title("Clustering des axes suivant une cible")
+        ax.set_title("Clustering de modèle")
 
         st.pyplot(fig)
+
+        st.write("""
+                Vous pouvez voir si certains modèles ont tendance a être proches, voir à se regrouper
+                """)
     except Exception as e:
         st.error(str(e))
