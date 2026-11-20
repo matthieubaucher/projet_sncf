@@ -25,6 +25,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from projet_sncf.database.dataloader import get_dataframe
+
 RACINE = Path(__file__).resolve().parents[3]
 DOSSIER_RESULTATS = RACINE / "data" / "predictions"
 
@@ -902,8 +904,6 @@ def _historique_en_cache() -> pd.DataFrame:
         pandas.DataFrame: L'historique, renvoyé
         par :func:`historique_liaisons`.
     """
-    from projet_sncf.database.dataloader import get_dataframe
-
     return historique_liaisons(get_dataframe())
 
 
