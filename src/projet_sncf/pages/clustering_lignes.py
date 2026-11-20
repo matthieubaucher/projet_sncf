@@ -85,15 +85,9 @@ with center:
 
 if st.button("Clusteriser"):
     try:
-<<<<<<< HEAD
-        with st.spinner("Calcul du clustering en cours..."):
-            points = retard_api.clusterise_ligne_et_axe(st.session_state.axes, st.session_state.cible)
-            
-=======
         points = retard_api.clusterise_ligne_et_axe(
             st.session_state.axes, st.session_state.cible
         )
->>>>>>> 5bd974f (test(CI): refactor du fichier clustering_lignes.py pour PEP8)
         fig, ax = plt.subplots(figsize=(8, 6))
 
         ax.scatter(points[:, 0], points[:, 1])

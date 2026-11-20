@@ -2,11 +2,14 @@ import pytest
 import numpy as np
 from unittest.mock import patch
 
-from projet_sncf.api.Retard_prevision_API import simulation_scenario_utilisateur, clusterise_ligne_et_axe
+from projet_sncf.api.retard_prevision_api import (
+    clusterise_ligne_et_axe,
+    simulation_scenario_utilisateur,
+)
 
 @patch("projet_sncf.database.dataloader.get_axes")
 @patch("projet_sncf.database.dataloader.get_temps")
-@patch("projet_sncf.api.Retard_prevision_API.simulation")
+@patch("projet_sncf.api.retard_prevision_api.simulation")
 def test_simulation_scenario_utilisateur_nominal(
     mock_simulation,
     mock_get_temps,

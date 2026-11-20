@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from projet_sncf.api import Retard_prevision_API as retard_api
+from projet_sncf.api import retard_prevision_api as retard_api
 
 st.markdown(
     """
