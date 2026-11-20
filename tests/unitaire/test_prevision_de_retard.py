@@ -8,7 +8,7 @@ from projet_sncf.business.service.Prevision_de_retard import clusterise
 @patch("projet_sncf.business.model.Modele_prevision_retard_manager.ModelManager.get_inferance")
 def test_simulation(mock_get_inferance):
     # Given
-    parameters = pd.Series([10.0, 20.0, 30.0])
+    parameters = {"Temps": 10.0, "TOTO": 20.0, "Michou": 30.0}
 
     mock_get_inferance.return_value = np.arange(1000)
 
@@ -31,7 +31,7 @@ def test_simulation(mock_get_inferance):
     assert len(X) == 1000
 
     # perturbation effective
-    origine = parameters.values
+    origine = np.array(list(parameters.values()))
 
     assert not np.allclose(
         X.iloc[0].values,
